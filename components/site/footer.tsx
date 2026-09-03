@@ -4,21 +4,39 @@ import Link from "next/link";
 import type { Profile, SiteSettings } from "@/lib/types";
 import { whatsappGeneralMessage, whatsappLink } from "@/lib/whatsapp";
 import { Reveal } from "@/components/motion/reveal";
-import { useEditableSettings } from "@/components/editor/use-editable";
+import { EditableText } from "@/components/editor/editable-text";
+import {
+  useEditableProfile,
+  useEditableSettings,
+  useEditorMode,
+} from "@/components/editor/use-editable";
+import { FOOTER_LEGAL_DEFAULT, FOOTER_OWNER_DEFAULT } from "@/lib/content/defaults/footer";
 
 export function Footer({
   settings: base,
-  profile,
+  profile: baseProfile,
 }: {
   settings: SiteSettings;
   profile: Profile;
 }) {
+  const editing = useEditorMode() === "edit";
   const settings: SiteSettings = {
     ...base,
     nav: useEditableSettings("nav", base.nav),
     brand: useEditableSettings("brand", base.brand),
     brandLine: useEditableSettings("brandLine", base.brandLine),
     footerNote: useEditableSettings("footerNote", base.footerNote),
+    footerLegal: useEditableSettings("footerLegal", base.footerLegal ?? FOOTER_LEGAL_DEFAULT),
+    footerOwner: useEditableSettings("footerOwner", base.footerOwner ?? FOOTER_OWNER_DEFAULT),
+  };
+  const profile: Profile = {
+    ...baseProfile,
+    name: useEditableProfile("name", baseProfile.name),
+    roles: useEditableProfile("roles", baseProfile.roles),
+    email: useEditableProfile("email", baseProfile.email),
+    location: useEditableProfile("location", baseProfile.location),
+    social: useEditableProfile("social", baseProfile.social),
+    whatsapp: useEditableProfile("whatsapp", baseProfile.whatsapp),
   };
   const year = new Date().getFullYear();
   const wa = whatsappLink(whatsappGeneralMessage(settings.brand), profile.whatsapp);
@@ -82,14 +100,24 @@ export function Footer({
           </p>
         </div>
 
-        <div className="mt-8 border-t border-line/60 pt-6 text-center">
-          <p className="mx-auto max-w-3xl text-[0.72rem] leading-relaxed text-ink-mute">
-            <strong className="font-semibold text-ink">Disclaimer:</strong> This website is a sample/demo created solely for presentation and demonstration purposes for the client. It is not intended for reuse or deployment as a production-level website. All designs, visuals, and creative elements presented on this website are copyrighted by Nexus Solutions and may not be reproduced, reused, or distributed without prior written permission.
-          </p>
-          <p className="mt-2 text-[0.72rem] font-bold tracking-[0.1em] text-ink">
-            Owned by Nexus Solutions
-          </p>
-        </div>
+        {(settings.footerLegal || settings.footerOwner || editing) && (
+          <div className="mt-8 border-t border-line/60 pt-6 text-center">
+            {(settings.footerLegal || editing) && (
+              <p className="mx-auto max-w-3xl text-[0.72rem] leading-relaxed text-ink-mute">
+                <EditableText bind="@settings.footerLegal" multiline>
+                  {settings.footerLegal ?? ""}
+                </EditableText>
+              </p>
+            )}
+            {(settings.footerOwner || editing) && (
+              <p className="mt-2 text-[0.72rem] font-bold tracking-[0.1em] text-ink">
+                <EditableText bind="@settings.footerOwner">
+                  {settings.footerOwner ?? ""}
+                </EditableText>
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </footer>
   );

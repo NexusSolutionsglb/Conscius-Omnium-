@@ -59,6 +59,7 @@ export const homeDefaults: HomeContent = {
     heading: "Built at the scale\nof a table.",
     body: "Plaster of Paris, box board, a piece of mirror for water, fern for a forest — then photographed at eye level until the model becomes a world. And sometimes, built at full scale.",
     linkLabel: "Enter the studio",
+    image: null,
   },
 
   collections: {

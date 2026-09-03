@@ -10,8 +10,9 @@ import { Reveal } from "@/components/motion/reveal";
 import { Eyebrow } from "@/components/ui/primitives";
 import { EditableText } from "@/components/editor/editable-text";
 import { EditableHeading } from "@/components/editor/editable-heading";
+import { EditableImage } from "@/components/editor/editable-image";
 import { RepeatableList } from "@/components/editor/repeatable-list";
-import { useEditable } from "@/components/editor/use-editable";
+import { useEditable, useEditorMode } from "@/components/editor/use-editable";
 
 const NEW_SECTION = () => ({
   id: `studio-${Date.now()}`,
@@ -24,6 +25,7 @@ const NEW_SECTION = () => ({
 });
 
 export function StudioView({ serverContent }: { serverContent: StudioContent }) {
+  const editing = useEditorMode() === "edit";
   const hero = useEditable("studio", "hero", serverContent.hero);
   const intro = useEditable("studio", "intro", serverContent.intro);
   const body = useEditable("studio", "body", serverContent.body);
@@ -86,22 +88,30 @@ export function StudioView({ serverContent }: { serverContent: StudioContent }) 
                     </div>
                   </Reveal>
 
-                  {section.image && (
+                  {(section.image || editing) && (
                     <Parallax amount={24} className={cn(imageLeft ? "md:order-1" : "md:order-2")}>
                       <figure>
-                        <ArtImage
-                          src={section.image}
-                          alt={section.caption ?? section.heading ?? "Studio process"}
-                          ratio={i % 2 === 0 ? "4 / 3" : "3 / 4"}
-                          fill
-                          sizes="(min-width:768px) 45vw, 100vw"
-                          placeholder={blurFor(section.image) ? "blur" : "empty"}
-                          blurDataURL={blurFor(section.image)}
-                        />
-                        {section.caption && (
+                        <EditableImage bind={`studio.body.${i}.image`} folder="studio">
+                          {section.image ? (
+                            <ArtImage
+                              src={section.image}
+                              alt={section.caption ?? section.heading ?? "Studio process"}
+                              ratio={i % 2 === 0 ? "4 / 3" : "3 / 4"}
+                              fill
+                              sizes="(min-width:768px) 45vw, 100vw"
+                              placeholder={blurFor(section.image) ? "blur" : "empty"}
+                              blurDataURL={blurFor(section.image)}
+                            />
+                          ) : (
+                            <div className="grid aspect-[4/3] place-items-center bg-neutral-100 text-[12px] text-neutral-400">
+                              Click to add an image
+                            </div>
+                          )}
+                        </EditableImage>
+                        {(section.caption || editing) && (
                           <figcaption className="mt-3 text-[0.75rem] leading-relaxed text-ink-mute">
                             <EditableText bind={`studio.body.${i}.caption`}>
-                              {section.caption}
+                              {section.caption ?? ""}
                             </EditableText>
                           </figcaption>
                         )}

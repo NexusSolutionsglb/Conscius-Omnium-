@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { PageContentMap } from "@/lib/types";
 import type { EditablePageSlug } from "@/lib/content/defaults";
-import type { EditorSettings } from "@/lib/editor/types";
+import type { EditorSnapshot } from "@/lib/editor/types";
 import { publishSite } from "@/lib/admin/actions";
 import { EditorStoreProvider, useEditorStore, useEditorStoreApi } from "./editor-store-context";
 import { EditorTopbar } from "./editor-topbar";
@@ -14,16 +13,13 @@ import { DEVICE_WIDTH } from "@/lib/editor/types";
 
 export function EditorShell({
   slug,
-  pages,
-  settings,
+  snapshot,
 }: {
   slug: EditablePageSlug;
-  pages: PageContentMap;
-  settings: EditorSettings;
+  snapshot: EditorSnapshot;
 }) {
-  const initial = useMemo(() => ({ pages, settings }), [pages, settings]);
   return (
-    <EditorStoreProvider initial={initial}>
+    <EditorStoreProvider initial={snapshot}>
       <ShellInner slug={slug} />
     </EditorStoreProvider>
   );
@@ -55,10 +51,21 @@ function ShellInner({ slug }: { slug: EditablePageSlug }) {
 
   const publish = useCallback(async () => {
     setPublishing(true);
-    const { pages, settings } = api.getState();
+    const st = api.getState();
     const res = await publishSite({
-      pages: pages as unknown as Record<string, unknown>,
-      settings,
+      pages: st.pages as unknown as Record<string, unknown>,
+      settings: st.settings as unknown as Record<string, unknown>,
+      profile: st.profile,
+      collections: st.collections,
+      exhibitions: st.exhibitions,
+      timeline: st.timeline,
+      works: st.works,
+      baseline: {
+        collections: st.baseline.collections,
+        exhibitions: st.baseline.exhibitions,
+        timeline: st.baseline.timeline,
+        works: st.baseline.works,
+      },
     });
     setPublishing(false);
     if (res.ok) {

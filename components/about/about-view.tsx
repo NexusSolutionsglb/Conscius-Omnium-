@@ -5,19 +5,24 @@ import Link from "next/link";
 import type { AboutContent, Profile, TimelineEntry } from "@/lib/types";
 import { blurFor } from "@/lib/content/blur";
 import { Reveal } from "@/components/motion/reveal";
-import { TextReveal } from "@/components/motion/text-reveal";
 import { Eyebrow, Rule } from "@/components/ui/primitives";
 import { Timeline } from "@/components/timeline/timeline";
 import { ArtImage } from "@/components/motion/image-reveal";
 import { EditableText } from "@/components/editor/editable-text";
+import { EditableHeading } from "@/components/editor/editable-heading";
+import { EditableImage } from "@/components/editor/editable-image";
 import { RepeatableList } from "@/components/editor/repeatable-list";
-import { useEditable } from "@/components/editor/use-editable";
+import { useEditable, useEditableProfile, useEditorMode } from "@/components/editor/use-editable";
 
 const NEW_SECTION = () => ({
   id: `about-${Date.now()}`,
   eyebrow: "New section",
   heading: "Heading",
   body: ["Write this section."],
+});
+const NEW_EDU = (): Profile["education"][number] => ({
+  qualification: "Qualification",
+  institution: "Institution",
 });
 
 export function AboutView({
@@ -31,6 +36,17 @@ export function AboutView({
   portraitFallback: string;
   serverContent: AboutContent;
 }) {
+  const editing = useEditorMode() === "edit";
+  const p = {
+    name: useEditableProfile("name", profile.name),
+    roles: useEditableProfile("roles", profile.roles),
+    statement: useEditableProfile("statement", profile.statement),
+    education: useEditableProfile("education", profile.education),
+    email: useEditableProfile("email", profile.email),
+    phone: useEditableProfile("phone", profile.phone),
+    location: useEditableProfile("location", profile.location),
+    portrait: useEditableProfile<string | null | undefined>("portrait", profile.portrait),
+  };
   const heroEyebrow = useEditable("about", "heroEyebrow", serverContent.heroEyebrow);
   const intro = useEditable("about", "intro", serverContent.intro);
   const portraitCaption = useEditable(
@@ -51,17 +67,18 @@ export function AboutView({
           <Eyebrow>
             <EditableText bind="about.heroEyebrow">{heroEyebrow}</EditableText>
           </Eyebrow>
-          <TextReveal
-            as="h1"
-            text={profile.name}
+          <EditableHeading
+            bind="@profile.name"
             className="mt-5 font-display text-[clamp(2.6rem,1.5rem+4.6vw,5.6rem)] font-light leading-[0.98]"
-          />
+          >
+            {p.name}
+          </EditableHeading>
           <Reveal delay={0.1}>
             <p className="mt-6 flex flex-wrap gap-x-3 gap-y-1 text-[0.8rem] uppercase tracking-[0.14em] text-ink-mute">
-              {profile.roles.map((role, i) => (
-                <span key={role}>
-                  {role}
-                  {i < profile.roles.length - 1 && <span className="ml-3 text-ink-faint">/</span>}
+              {p.roles.map((role, i) => (
+                <span key={i}>
+                  <EditableText bind={`@profile.roles.${i}`}>{role}</EditableText>
+                  {i < p.roles.length - 1 && <span className="ml-3 text-ink-faint">/</span>}
                 </span>
               ))}
             </p>
@@ -75,34 +92,36 @@ export function AboutView({
 
         <div className="md:col-span-5">
           <Reveal>
-            {profile.portrait ? (
-              <Image
-                src={profile.portrait}
-                alt={`${profile.name} — portrait`}
-                width={900}
-                height={1125}
-                sizes="(min-width:768px) 40vw, 100vw"
-                className="w-full object-cover"
-                priority
-              />
-            ) : (
-              <div className="relative">
-                <ArtImage
-                  src={portraitFallback}
-                  alt="A work from Shivjeet Potdar's practice"
-                  ratio="4 / 5"
-                  fill
+            <EditableImage bind="@profile.portrait" folder="profile">
+              {p.portrait ? (
+                <Image
+                  src={p.portrait}
+                  alt={`${p.name} — portrait`}
+                  width={900}
+                  height={1125}
                   sizes="(min-width:768px) 40vw, 100vw"
-                  placeholder={blurFor(portraitFallback) ? "blur" : "empty"}
-                  blurDataURL={blurFor(portraitFallback)}
+                  className="w-full object-cover"
+                  priority
                 />
-                <p className="u-eyebrow mt-3 text-ink-faint">
-                  <EditableText bind="about.portraitFallbackCaption">
-                    {portraitCaption}
-                  </EditableText>
-                </p>
-              </div>
-            )}
+              ) : (
+                <div className="relative">
+                  <ArtImage
+                    src={portraitFallback}
+                    alt="A work from Shivjeet Potdar's practice"
+                    ratio="4 / 5"
+                    fill
+                    sizes="(min-width:768px) 40vw, 100vw"
+                    placeholder={blurFor(portraitFallback) ? "blur" : "empty"}
+                    blurDataURL={blurFor(portraitFallback)}
+                  />
+                  <p className="u-eyebrow mt-3 text-ink-faint">
+                    <EditableText bind="about.portraitFallbackCaption">
+                      {portraitCaption}
+                    </EditableText>
+                  </p>
+                </div>
+              )}
+            </EditableImage>
           </Reveal>
         </div>
       </section>
@@ -115,9 +134,13 @@ export function AboutView({
               className="font-display text-[clamp(1.5rem,1rem+2.4vw,2.8rem)] font-light italic leading-[1.32] text-ink"
               style={{ fontStyle: "italic" }}
             >
-              &ldquo;{profile.statement}&rdquo;
+              &ldquo;
+              <EditableText bind="@profile.statement" multiline>
+                {p.statement}
+              </EditableText>
+              &rdquo;
             </p>
-            <p className="u-eyebrow mt-6">{profile.name}</p>
+            <p className="u-eyebrow mt-6">{p.name}</p>
           </Reveal>
         </div>
       </section>
@@ -169,20 +192,48 @@ export function AboutView({
           <Rule className="mt-5" />
         </Reveal>
         <div className="mt-8 grid gap-8 sm:grid-cols-2">
-          {profile.education.map((ed) => (
-            <Reveal key={ed.qualification} as="div">
-              <h3 className="font-display text-[1.3rem] font-normal text-ink">{ed.qualification}</h3>
-              <p className="mt-1 text-[0.88rem] text-ink-soft">{ed.institution}</p>
-              {ed.detail && <p className="mt-1 text-[0.8rem] text-ink-mute">{ed.detail}</p>}
-            </Reveal>
-          ))}
+          <RepeatableList
+            slug="about"
+            path="__profile_education"
+            items={p.education}
+            makeItem={NEW_EDU}
+            addLabel="Add education"
+            addClassName="py-2"
+            listBind="@profile.education"
+          >
+            {(ed, i) => (
+              <Reveal as="div">
+                <h3 className="font-display text-[1.3rem] font-normal text-ink">
+                  <EditableText bind={`@profile.education.${i}.qualification`}>
+                    {ed.qualification}
+                  </EditableText>
+                </h3>
+                <p className="mt-1 text-[0.88rem] text-ink-soft">
+                  <EditableText bind={`@profile.education.${i}.institution`}>
+                    {ed.institution}
+                  </EditableText>
+                </p>
+                {(ed.detail || editing) && (
+                  <p className="mt-1 text-[0.8rem] text-ink-mute">
+                    <EditableText bind={`@profile.education.${i}.detail`}>
+                      {ed.detail ?? ""}
+                    </EditableText>
+                  </p>
+                )}
+              </Reveal>
+            )}
+          </RepeatableList>
         </div>
         <div className="mt-10 flex flex-wrap gap-x-10 gap-y-2 text-[0.85rem] text-ink-soft">
-          <a href={`mailto:${profile.email}`} className="u-link">
-            {profile.email}
+          <a href={`mailto:${p.email}`} className="u-link">
+            <EditableText bind="@profile.email">{p.email}</EditableText>
           </a>
-          <span>{profile.phone}</span>
-          <span className="text-ink-mute">{profile.location}</span>
+          <span>
+            <EditableText bind="@profile.phone">{p.phone}</EditableText>
+          </span>
+          <span className="text-ink-mute">
+            <EditableText bind="@profile.location">{p.location}</EditableText>
+          </span>
         </div>
       </section>
 

@@ -5,6 +5,7 @@ import { themeToCss } from "@/lib/editor/theme";
 import { useEditorStore, useEditorStoreApi } from "./editor-store-context";
 import { EDITOR_CSS } from "./editor-css";
 import { SectionOverlay } from "./section-overlay";
+import { ImageOverlay } from "./image-overlay";
 
 /**
  * Mounted inside the `?__edit=1` iframe. Adds the editing affordances on top of
@@ -58,6 +59,7 @@ export function EditBridge() {
         <style dangerouslySetInnerHTML={{ __html: themeCss }} data-editor-theme="" />
       )}
       <SectionOverlay />
+      <ImageOverlay />
     </>
   );
 }

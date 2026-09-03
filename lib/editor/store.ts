@@ -8,19 +8,12 @@ import {
   type EditablePageSlug,
 } from "@/lib/content/defaults";
 import { getPath, setPath, reorderPath } from "./paths";
-import type {
-  Device,
-  EditorMode,
-  EditorSelection,
-  EditorSettings,
-  EditorSnapshot,
-} from "./types";
+import type { Device, EditorMode, EditorSelection, EditorSnapshot } from "./types";
 
-const DRAFT_KEY = "co-editor-draft-v1";
+const DRAFT_KEY = "co-editor-draft-v2";
 const HISTORY_LIMIT = 50;
 
 export interface EditorStore extends EditorSnapshot {
-  /** Server truth at load — used for dirty checks and "discard". */
   baseline: EditorSnapshot;
   device: Device;
   mode: EditorMode;
@@ -29,47 +22,70 @@ export interface EditorStore extends EditorSnapshot {
   past: EditorSnapshot[];
   future: EditorSnapshot[];
 
-  // lifecycle
   seed: (snapshot: EditorSnapshot) => void;
 
-  // edits
+  /* ── generic content ops (path is a full snapshot path) ── */
+  patch: (path: string, value: unknown) => void;
+  reorderList: (path: string, from: number, to: number) => void;
+  insertItem: (path: string, item: unknown, at?: number) => void;
+  removeAt: (path: string, index: number) => void;
+  duplicateAt: (path: string, index: number) => void;
+
+  /* ── page-content convenience wrappers (kept for existing callers) ── */
   setValue: (slug: EditablePageSlug, path: string, value: unknown) => void;
   setSettings: (path: string, value: unknown) => void;
+  setProfile: (path: string, value: unknown) => void;
   reorder: (slug: EditablePageSlug, path: string, from: number, to: number) => void;
   addItem: (slug: EditablePageSlug, path: string, item: unknown, at?: number) => void;
   removeItem: (slug: EditablePageSlug, path: string, index: number) => void;
   duplicateItem: (slug: EditablePageSlug, path: string, index: number) => void;
   toggleHidden: (slug: EditablePageSlug, key: string) => void;
   restoreSection: (slug: EditablePageSlug, key: string) => void;
+
   restoreAll: () => void;
   discardDraft: () => void;
 
-  // ui
   setDevice: (d: Device) => void;
   setMode: (m: EditorMode) => void;
   select: (sel: EditorSelection | null) => void;
 
-  // history
   undo: () => void;
   redo: () => void;
   canUndo: () => boolean;
   canRedo: () => boolean;
 
-  // publish
   markPublished: () => void;
 }
 
-const clone = <T>(v: T): T => (typeof structuredClone === "function"
-  ? structuredClone(v)
-  : JSON.parse(JSON.stringify(v))) as T;
+const clone = <T>(v: T): T =>
+  (typeof structuredClone === "function"
+    ? structuredClone(v)
+    : JSON.parse(JSON.stringify(v))) as T;
+
+const SNAPSHOT_KEYS = [
+  "pages",
+  "settings",
+  "profile",
+  "collections",
+  "exhibitions",
+  "timeline",
+  "works",
+] as const;
 
 function snapshot(s: EditorSnapshot): EditorSnapshot {
-  return { pages: clone(s.pages), settings: clone(s.settings) };
+  const out = {} as EditorSnapshot;
+  for (const k of SNAPSHOT_KEYS) (out as unknown as Record<string, unknown>)[k] = clone(s[k]);
+  return out;
+}
+
+function pick(s: EditorSnapshot): EditorSnapshot {
+  const out = {} as EditorSnapshot;
+  for (const k of SNAPSHOT_KEYS) (out as unknown as Record<string, unknown>)[k] = s[k];
+  return out;
 }
 
 function isDirty(cur: EditorSnapshot, base: EditorSnapshot): boolean {
-  return JSON.stringify({ p: cur.pages, s: cur.settings }) !==
-    JSON.stringify({ p: base.pages, s: base.settings });
+  return JSON.stringify(pick(cur)) !== JSON.stringify(pick(base));
 }
 
 function readDraft(): EditorSnapshot | null {
@@ -81,15 +97,13 @@ function readDraft(): EditorSnapshot | null {
     return null;
   }
 }
-
 function writeDraft(s: EditorSnapshot) {
   try {
-    window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ pages: s.pages, settings: s.settings }));
+    window.localStorage.setItem(DRAFT_KEY, JSON.stringify(pick(s)));
   } catch {
-    /* private mode / quota — non-fatal */
+    /* quota / private mode */
   }
 }
-
 function clearDraft() {
   try {
     window.localStorage.removeItem(DRAFT_KEY);
@@ -101,30 +115,29 @@ function clearDraft() {
 export function createEditorStore(initial: EditorSnapshot) {
   const base = snapshot(initial);
   const draft = readDraft();
-  const startDirty = !!draft && isDirty(draft, base);
-  const start: EditorSnapshot = startDirty ? draft! : base;
+  const startDirty = !!draft && draftShapeOk(draft) && isDirty(draft, base);
+  const start = startDirty ? (draft as EditorSnapshot) : base;
 
   return createStore<EditorStore>((set, get) => {
-    /** Push current content onto the undo stack, then apply `mutate`. */
-    const commit = (mutate: (draft: EditorSnapshot) => EditorSnapshot) => {
+    const apply = (next: EditorSnapshot) => {
       const state = get();
-      const before = snapshot(state);
-      const after = mutate(before);
-      const past = [...state.past, snapshot(state)].slice(-HISTORY_LIMIT);
-      const next: EditorSnapshot = { pages: after.pages, settings: after.settings };
+      const past = [...state.past, snapshot(pick(state))].slice(-HISTORY_LIMIT);
       writeDraft(next);
       set({
-        pages: next.pages,
-        settings: next.settings,
+        ...pick(next),
         past,
         future: [],
         dirty: isDirty(next, state.baseline),
       });
     };
+    const commit = (mutate: (d: EditorSnapshot) => EditorSnapshot) =>
+      apply(mutate(snapshot(pick(get()))));
+
+    const listAt = (d: EditorSnapshot, path: string): unknown[] =>
+      (getPath<unknown[]>(d, path) ?? []).slice();
 
     return {
-      pages: clone(start.pages),
-      settings: clone(start.settings),
+      ...pick(snapshot(start)),
       baseline: base,
       device: "desktop",
       mode: "edit",
@@ -134,55 +147,50 @@ export function createEditorStore(initial: EditorSnapshot) {
       future: [],
 
       seed: (snap) => {
-        const draft = readDraft();
-        const base = snapshot(snap);
-        const useDraft = draft && isDirty(draft, base);
+        const b = snapshot(snap);
+        const d = readDraft();
+        const useDraft = d && draftShapeOk(d) && isDirty(d, b);
         set({
-          pages: useDraft ? draft!.pages : base.pages,
-          settings: useDraft ? draft!.settings : base.settings,
-          baseline: base,
+          ...pick(useDraft ? (d as EditorSnapshot) : b),
+          baseline: b,
           past: [],
           future: [],
           dirty: !!useDraft,
         });
       },
 
-      setValue: (slug, path, value) =>
-        commit((d) => ({
-          ...d,
-          pages: { ...d.pages, [slug]: setPath(d.pages[slug], path, value) },
-        })),
-
-      setSettings: (path, value) =>
-        commit((d) => ({ ...d, settings: setPath(d.settings, path, value) })),
-
-      reorder: (slug, path, from, to) =>
-        commit((d) => ({
-          ...d,
-          pages: { ...d.pages, [slug]: reorderPath(d.pages[slug], path, from, to) },
-        })),
-
-      addItem: (slug, path, item, at) =>
+      patch: (path, value) => commit((d) => setPath(d, path, value)),
+      reorderList: (path, from, to) => commit((d) => reorderPath(d, path, from, to)),
+      insertItem: (path, item, at) =>
         commit((d) => {
-          const arr = (getPath<unknown[]>(d.pages[slug], path) ?? []).slice();
+          const arr = listAt(d, path);
           arr.splice(at ?? arr.length, 0, item);
-          return { ...d, pages: { ...d.pages, [slug]: setPath(d.pages[slug], path, arr) } };
+          return setPath(d, path, arr);
         }),
-
-      removeItem: (slug, path, index) =>
+      removeAt: (path, index) =>
         commit((d) => {
-          const arr = (getPath<unknown[]>(d.pages[slug], path) ?? []).slice();
+          const arr = listAt(d, path);
           arr.splice(index, 1);
-          return { ...d, pages: { ...d.pages, [slug]: setPath(d.pages[slug], path, arr) } };
+          return setPath(d, path, arr);
         }),
-
-      duplicateItem: (slug, path, index) =>
+      duplicateAt: (path, index) =>
         commit((d) => {
-          const arr = (getPath<unknown[]>(d.pages[slug], path) ?? []).slice();
+          const arr = listAt(d, path);
           if (index < 0 || index >= arr.length) return d;
           arr.splice(index + 1, 0, clone(arr[index]));
-          return { ...d, pages: { ...d.pages, [slug]: setPath(d.pages[slug], path, arr) } };
+          return setPath(d, path, arr);
         }),
+
+      /* wrappers */
+      setValue: (slug, path, value) => get().patch(`pages.${slug}.${path}`, value),
+      setSettings: (path, value) => get().patch(`settings.${path}`, value),
+      setProfile: (path, value) => get().patch(`profile.${path}`, value),
+      reorder: (slug, path, from, to) =>
+        get().reorderList(`pages.${slug}.${path}`, from, to),
+      addItem: (slug, path, item, at) => get().insertItem(`pages.${slug}.${path}`, item, at),
+      removeItem: (slug, path, index) => get().removeAt(`pages.${slug}.${path}`, index),
+      duplicateItem: (slug, path, index) =>
+        get().duplicateAt(`pages.${slug}.${path}`, index),
 
       toggleHidden: (slug, key) =>
         commit((d) => {
@@ -190,33 +198,26 @@ export function createEditorStore(initial: EditorSnapshot) {
           const hidden = new Set(page.hidden ?? []);
           if (hidden.has(key)) hidden.delete(key);
           else hidden.add(key);
-          return {
-            ...d,
-            pages: { ...d.pages, [slug]: setPath(d.pages[slug], "hidden", [...hidden]) },
-          };
+          return setPath(d, `pages.${slug}.hidden`, [...hidden]);
         }),
 
       restoreSection: (slug, key) =>
         commit((d) => {
           const def = (pageContentDefaults[slug] as unknown as Record<string, unknown>)[key];
-          return {
-            ...d,
-            pages: { ...d.pages, [slug]: setPath(d.pages[slug], key, clone(def)) },
-          };
+          return setPath(d, `pages.${slug}.${key}`, clone(def));
         }),
 
       restoreAll: () =>
-        commit(() => ({
+        commit((d) => ({
+          ...d,
           pages: clone(pageContentDefaults),
-          settings: { ...get().baseline.settings, theme: {} },
+          settings: { ...d.settings, theme: {} },
         })),
 
       discardDraft: () => {
-        const base = get().baseline;
         clearDraft();
         set({
-          pages: clone(base.pages),
-          settings: clone(base.settings),
+          ...pick(snapshot(get().baseline)),
           past: [],
           future: [],
           dirty: false,
@@ -224,33 +225,30 @@ export function createEditorStore(initial: EditorSnapshot) {
       },
 
       setDevice: (device) => set({ device }),
-      setMode: (mode) => set({ mode, selection: mode === "preview" ? null : get().selection }),
+      setMode: (mode) =>
+        set({ mode, selection: mode === "preview" ? null : get().selection }),
       select: (selection) => set({ selection }),
 
       undo: () => {
-        const { past, future } = get();
+        const { past } = get();
         if (!past.length) return;
         const prev = past[past.length - 1];
-        const cur = snapshot(get());
         writeDraft(prev);
         set({
-          pages: prev.pages,
-          settings: prev.settings,
+          ...pick(prev),
           past: past.slice(0, -1),
-          future: [cur, ...future].slice(0, HISTORY_LIMIT),
+          future: [snapshot(pick(get())), ...get().future].slice(0, HISTORY_LIMIT),
           dirty: isDirty(prev, get().baseline),
         });
       },
       redo: () => {
-        const { past, future } = get();
+        const { future } = get();
         if (!future.length) return;
         const nextSnap = future[0];
-        const cur = snapshot(get());
         writeDraft(nextSnap);
         set({
-          pages: nextSnap.pages,
-          settings: nextSnap.settings,
-          past: [...past, cur].slice(-HISTORY_LIMIT),
+          ...pick(nextSnap),
+          past: [...get().past, snapshot(pick(get()))].slice(-HISTORY_LIMIT),
           future: future.slice(1),
           dirty: isDirty(nextSnap, get().baseline),
         });
@@ -259,7 +257,7 @@ export function createEditorStore(initial: EditorSnapshot) {
       canRedo: () => get().future.length > 0,
 
       markPublished: () => {
-        const cur = snapshot(get());
+        const cur = snapshot(pick(get()));
         clearDraft();
         set({ baseline: cur, dirty: false, past: [], future: [] });
       },
@@ -267,17 +265,23 @@ export function createEditorStore(initial: EditorSnapshot) {
   });
 }
 
+/** A draft from an older schema (missing keys) is discarded rather than merged. */
+function draftShapeOk(d: unknown): d is EditorSnapshot {
+  if (!d || typeof d !== "object") return false;
+  const o = d as Record<string, unknown>;
+  return SNAPSHOT_KEYS.every((k) => k in o);
+}
+
 export type EditorStoreApi = ReturnType<typeof createEditorStore>;
 
-/** Build a full working copy from whatever is in the DB right now. */
 export function buildSnapshot(
   pages: Partial<Record<EditablePageSlug, unknown>>,
-  settings: EditorSettings,
+  rest: Omit<EditorSnapshot, "pages">,
 ): EditorSnapshot {
   const merged = {} as PageContentMap;
   (Object.keys(pageContentDefaults) as EditablePageSlug[]).forEach((slug) => {
     // @ts-expect-error indexed assignment across the union is safe here
     merged[slug] = mergePageContent(slug, pages[slug] ?? {});
   });
-  return { pages: merged, settings };
+  return { pages: merged, ...rest };
 }

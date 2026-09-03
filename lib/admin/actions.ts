@@ -16,6 +16,14 @@ import {
 import { inquiryStatusSchema } from "@/lib/validations/inquiry";
 import { slugify, toParagraphs, normalizeImageUrl } from "@/lib/utils";
 import type { WorkImage } from "@/lib/types";
+import {
+  isRealId,
+  workRow,
+  collectionRow,
+  exhibitionRow,
+  timelineRow,
+  profileRow,
+} from "./entity-rows";
 
 export type ActionResult =
   | { ok: true; message?: string; id?: string }
@@ -582,17 +590,56 @@ function isMissingColumn(
   );
 }
 
+type IdRow = { id: string };
+
+/** Upsert an editable DB collection: update existing rows by id, insert new
+ *  ones (temp ids stripped), delete rows removed since the baseline. */
+async function syncCollection<T extends IdRow>(
+  supabase: Awaited<ReturnType<typeof db>>,
+  table: string,
+  rows: T[] | undefined,
+  baseline: T[] | undefined,
+  toRow: (r: T) => Record<string, unknown>,
+): Promise<string | null> {
+  if (!rows) return null;
+  const curIds = new Set(rows.filter((r) => isRealId(r.id)).map((r) => r.id));
+
+  const toDelete = (baseline ?? [])
+    .map((b) => b.id)
+    .filter((id) => isRealId(id) && !curIds.has(id));
+  if (toDelete.length) {
+    const { error } = await supabase.from(table).delete().in("id", toDelete);
+    if (error) return `${table} delete: ${error.message}`;
+  }
+
+  const baseIds = new Set((baseline ?? []).map((b) => b.id));
+  for (const r of rows) {
+    const row = toRow(r);
+    if (isRealId(r.id) && baseIds.has(r.id)) {
+      const { error } = await supabase.from(table).update(row as never).eq("id", r.id);
+      if (error) return `${table} update: ${error.message}`;
+    } else {
+      delete row.id;
+      const { error } = await supabase.from(table).insert(row as never);
+      if (error) return `${table} insert: ${error.message}`;
+    }
+  }
+  return null;
+}
+
 export async function publishSite(payload: {
   pages: Record<string, unknown>;
-  settings: {
-    hero?: unknown;
-    contactCopy?: unknown;
-    theme?: unknown;
-    nav?: unknown;
-    brand?: unknown;
-    brandLine?: unknown;
-    tagline?: unknown;
-    footerNote?: unknown;
+  settings: Record<string, unknown>;
+  profile?: unknown;
+  collections?: IdRow[];
+  exhibitions?: IdRow[];
+  timeline?: IdRow[];
+  works?: IdRow[];
+  baseline?: {
+    collections?: IdRow[];
+    exhibitions?: IdRow[];
+    timeline?: IdRow[];
+    works?: IdRow[];
   };
 }): Promise<ActionResult> {
   const supabase = await db();
@@ -608,9 +655,7 @@ export async function publishSite(payload: {
     if (error) return { ok: false, error: `pages/${slug}: ${error.message}` };
   }
 
-  const s = payload.settings ?? {};
-
-  // Columns that exist since 0001.
+  const s = (payload.settings ?? {}) as Record<string, unknown>;
   const core: Record<string, unknown> = {};
   if (s.hero !== undefined) core.hero = s.hero;
   if (s.contactCopy !== undefined) core.contact_copy = s.contactCopy;
@@ -629,26 +674,52 @@ export async function publishSite(payload: {
     if (error) return { ok: false, error: `settings: ${error.message}` };
   }
 
-  // `theme` needs migration 0003 — best-effort so publish still works without it.
-  let themeSkipped = false;
-  if (s.theme !== undefined) {
+  // theme + footer legal need migration 0003 — best-effort.
+  let chromeSkipped = false;
+  const extra: Record<string, unknown> = { id: "default", updated_at: new Date().toISOString() };
+  if (s.theme !== undefined) extra.theme = s.theme;
+  if (s.footerLegal !== undefined || s.footerOwner !== undefined) {
+    extra.footer = { legal: s.footerLegal ?? "", owner: s.footerOwner ?? "" };
+  }
+  if (Object.keys(extra).length > 2) {
     const { error } = await supabase
       .from("site_settings")
-      .upsert(
-        { id: "default", theme: s.theme, updated_at: new Date().toISOString() } as never,
-        { onConflict: "id" },
-      );
+      .upsert(extra as never, { onConflict: "id" });
     if (error) {
-      if (isMissingColumn(error, "theme")) themeSkipped = true;
+      if (isMissingColumn(error, "theme") || isMissingColumn(error, "footer")) chromeSkipped = true;
       else return { ok: false, error: `theme: ${error.message}` };
     }
+  }
+
+  if (payload.profile) {
+    const { error } = await supabase
+      .from("profile")
+      .upsert(profileRow(payload.profile as never) as never, { onConflict: "id" });
+    if (error) return { ok: false, error: `profile: ${error.message}` };
+  }
+
+  const syncs = [
+    ["collections", payload.collections, payload.baseline?.collections, collectionRow],
+    ["exhibitions", payload.exhibitions, payload.baseline?.exhibitions, exhibitionRow],
+    ["timeline_entries", payload.timeline, payload.baseline?.timeline, timelineRow],
+    ["works", payload.works, payload.baseline?.works, workRow],
+  ] as const;
+  for (const [table, cur, base, toRow] of syncs) {
+    const err = await syncCollection(
+      supabase,
+      table,
+      cur as IdRow[] | undefined,
+      base as IdRow[] | undefined,
+      toRow as (r: IdRow) => Record<string, unknown>,
+    );
+    if (err) return { ok: false, error: err };
   }
 
   revalidateSite("/contact");
   return {
     ok: true,
-    message: themeSkipped
-      ? "Published (theme skipped — run migration 0003 to save theme changes)"
+    message: chromeSkipped
+      ? "Published (theme/footer skipped — run migration 0003)"
       : "Published to the live site",
   };
 }

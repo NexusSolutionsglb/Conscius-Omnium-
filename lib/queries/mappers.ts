@@ -181,5 +181,14 @@ export function mapSettings(row: SiteSettingsRow): SiteSettings {
     theme: asObject<NonNullable<SiteSettings["theme"]>>(
       (row as { theme?: unknown }).theme,
     ),
+    ...(() => {
+      const footer = asObject<{ legal?: string; owner?: string }>(
+        (row as { footer?: unknown }).footer,
+      );
+      return {
+        footerLegal: footer.legal,
+        footerOwner: footer.owner,
+      };
+    })(),
   };
 }

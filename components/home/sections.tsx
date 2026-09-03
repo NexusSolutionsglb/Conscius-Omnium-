@@ -21,6 +21,7 @@ import { TextReveal } from "@/components/motion/text-reveal";
 import { Eyebrow, Rule, TextLink } from "@/components/ui/primitives";
 import { useCursor } from "@/components/site/cursor";
 import { EditableText } from "@/components/editor/editable-text";
+import { EditableImage } from "@/components/editor/editable-image";
 
 /* ── 02 · Artist introduction ─────────────────────────────── */
 
@@ -186,15 +187,17 @@ export function StudioPreview({
           </p>
         </Reveal>
         <Parallax amount={28} className="order-1 md:order-2">
-          <ArtImage
-            src={image}
-            alt="A plaster miniature landscape from the studio, photographed to read as a full-scale world"
-            ratio="4 / 5"
-            fill
-            sizes="(min-width:768px) 45vw, 100vw"
-            placeholder={blurFor(image) ? "blur" : "empty"}
-            blurDataURL={blurFor(image)}
-          />
+          <EditableImage bind="home.studioPreview.image" folder="studio">
+            <ArtImage
+              src={copy.image || image}
+              alt="A plaster miniature landscape from the studio, photographed to read as a full-scale world"
+              ratio="4 / 5"
+              fill
+              sizes="(min-width:768px) 45vw, 100vw"
+              placeholder={blurFor(copy.image || image) ? "blur" : "empty"}
+              blurDataURL={blurFor(copy.image || image)}
+            />
+          </EditableImage>
         </Parallax>
       </div>
     </section>

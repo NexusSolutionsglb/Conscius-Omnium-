@@ -1,12 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useEditorStore, useEditorStoreApi } from "./editor-store-context";
+import { useDragReorder } from "@/lib/editor/use-drag-reorder";
 import { pageContentDefaults, type EditablePageSlug } from "@/lib/content/defaults";
 
 type Target =
   | { kind: "section"; slug: EditablePageSlug; key: string; el: HTMLElement }
-  | { kind: "item"; slug: EditablePageSlug; path: string; index: number; el: HTMLElement };
+  | {
+      kind: "item";
+      slug: EditablePageSlug;
+      path: string;
+      index: number;
+      /** full snapshot path of the array this item lives in */
+      listPath: string;
+      el: HTMLElement;
+    };
 
 const TOOLBAR_H = 34;
 
@@ -35,6 +44,7 @@ function parse(el: HTMLElement | null): Target | null {
       slug: slug as EditablePageSlug,
       path,
       index: Number(idx),
+      listPath: el.dataset.editList ?? `pages.${slug}.${path}`,
       el: measurable(el),
     };
   }
@@ -75,6 +85,7 @@ export function SectionOverlay() {
       : null;
   const active = sticky ?? hover;
   activeRef.current = active;
+  const draggingRef = useRef(false);
 
   // Follow the active element every frame (it may be animating / scrolling).
   useEffect(() => {
@@ -100,6 +111,7 @@ export function SectionOverlay() {
       n instanceof HTMLElement ? n : null;
 
     const onMove = (e: MouseEvent) => {
+      if (draggingRef.current) return;
       const target = asEl(e.target);
       window.clearTimeout(clearTimer.current);
       if (target?.closest("[data-editor-ui]")) return; // over the toolbar — keep
@@ -112,6 +124,7 @@ export function SectionOverlay() {
     };
     const onClick = (e: MouseEvent) => {
       const target = asEl(e.target);
+      if (draggingRef.current) return;
       if (!target || target.closest("[data-editor-ui]")) return;
       if (target.closest(".co-editable")) return; // editing text — leave it
       const el = target.closest<HTMLElement>("[data-edit-section],[data-edit-item]");
@@ -136,9 +149,51 @@ export function SectionOverlay() {
     };
   }, [mode, api]);
 
-  if (mode !== "edit" || !rect || !api || !active) return null;
+  // ── drag reorder ──────────────────────────────────────────────
+  const onDrop = useCallback(
+    (fromEl: HTMLElement, targetEl: HTMLElement, before: boolean) => {
+      if (!api) return;
+      const from = parse(fromEl);
+      const target = parse(targetEl);
+      if (!from || !target) return;
+
+      if (from.kind === "section" && target.kind === "section" && from.slug === target.slug) {
+        const page = api.getState().pages[from.slug] as { order?: string[] };
+        const order = [...(page.order ?? [])];
+        const fi = order.indexOf(from.key);
+        let ti = order.indexOf(target.key);
+        if (fi < 0 || ti < 0) return;
+        order.splice(fi, 1);
+        if (fi < ti) ti -= 1;
+        order.splice(before ? ti : ti + 1, 0, from.key);
+        api.getState().setValue(from.slug, "order", order);
+      } else if (
+        from.kind === "item" &&
+        target.kind === "item" &&
+        from.listPath === target.listPath
+      ) {
+        let insertAt = before ? target.index : target.index + 1;
+        if (from.index < insertAt) insertAt -= 1;
+        if (insertAt !== from.index) {
+          api.getState().reorderList(from.listPath, from.index, insertAt);
+        }
+      }
+    },
+    [api],
+  );
+  const { start: startDrag, drag, hint } = useDragReorder(onDrop);
+  draggingRef.current = !!drag;
+
+  if (mode !== "edit" || !rect || !api || !active) {
+    return drag ? <DragChrome drag={drag} hint={hint} /> : null;
+  }
   const t = active;
   const isSelected = !!sticky;
+  const wrapEl = findEl(t.slug, selectionId(t));
+  const dragSelector =
+    t.kind === "section"
+      ? `[data-edit-section^="${t.slug}:"]`
+      : `[data-edit-item^="${t.slug}:${t.path}:"]`;
 
   const st = api.getState();
   const pad = 2;
@@ -175,7 +230,7 @@ export function SectionOverlay() {
       if (i < 0 || j < 0 || j >= order.length) return;
       api.getState().reorder(t.slug, "order", i, j);
     } else {
-      api.getState().reorder(t.slug, t.path, t.index, t.index + dir);
+      api.getState().reorderList(t.listPath, t.index, t.index + dir);
     }
   };
 
@@ -188,7 +243,26 @@ export function SectionOverlay() {
   return (
     <div data-editor-ui="">
       <div className="co-section-frame" style={frameStyle} data-selected={isSelected || undefined} />
+      <DragChrome drag={drag} hint={hint} />
       <div className="co-section-toolbar" style={toolbarStyle}>
+        <button
+          title="Drag to reorder"
+          className="co-drag"
+          disabled={!canMove}
+          onPointerDown={(e) => {
+            if (!canMove || !wrapEl) return;
+            startDrag(e, {
+              label:
+                t.kind === "section"
+                  ? sectionLabel(t.key)
+                  : `Block ${t.index + 1}`,
+              selector: dragSelector,
+              fromEl: wrapEl,
+            });
+          }}
+        >
+          ⠿
+        </button>
         <button title="Move up" disabled={!canMove} onClick={() => move(-1)}>
           ↑
         </button>
@@ -201,7 +275,7 @@ export function SectionOverlay() {
         {t.kind === "item" && (
           <button
             title="Duplicate"
-            onClick={() => api.getState().duplicateItem(t.slug, t.path, t.index)}
+            onClick={() => api.getState().duplicateAt(t.listPath, t.index)}
           >
             ⧉
           </button>
@@ -224,12 +298,53 @@ export function SectionOverlay() {
             className="co-danger"
             title="Delete"
             onClick={() => {
-              if (confirm("Delete this block?")) api.getState().removeItem(t.slug, t.path, t.index);
+              if (confirm("Delete this block?")) api.getState().removeAt(t.listPath, t.index);
             }}
           >
             🗑
           </button>
         )}
+      </div>
+    </div>
+  );
+}
+
+const SECTION_LABELS: Record<string, string> = {
+  intro: "Intro",
+  featured: "Featured work",
+  disciplines: "Disciplines",
+  timeline: "Timeline strip",
+  studioPreview: "Studio preview",
+  collections: "Collections rail",
+  contactCta: "Contact CTA",
+};
+function sectionLabel(key: string) {
+  return SECTION_LABELS[key] ?? key;
+}
+
+/** The floating "Moving: X" chip and the blue drop-indicator line. */
+function DragChrome({
+  drag,
+  hint,
+}: {
+  drag: { label: string; x: number; y: number } | null;
+  hint: { rect: DOMRect; before: boolean } | null;
+}) {
+  if (!drag) return null;
+  return (
+    <div data-editor-ui="">
+      {hint && (
+        <div
+          className="co-drop-line"
+          style={{
+            top: (hint.before ? hint.rect.top : hint.rect.bottom) - 1.5,
+            left: hint.rect.left,
+            width: hint.rect.width,
+          }}
+        />
+      )}
+      <div className="co-drag-chip" style={{ top: drag.y + 14, left: drag.x + 14 }}>
+        ⠿ {drag.label}
       </div>
     </div>
   );

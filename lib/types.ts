@@ -231,6 +231,9 @@ export interface SiteSettings {
   };
   /** Editable theme overrides — empty object means "use the stylesheet defaults". */
   theme?: ThemeTokens;
+  /** Footer legal / attribution text (editable; blank ⇒ hidden). */
+  footerLegal?: string;
+  footerOwner?: string;
 }
 
 export type InquiryType =
@@ -346,6 +349,8 @@ export interface HomeContent {
     heading: string;
     body: string;
     linkLabel: string;
+    /** Explicit image; when empty the home page falls back to a studio work's cover. */
+    image: string | null;
   };
   collections: { eyebrow: string; heading: string; linkLabel: string };
   contactCta: { eyebrow: string; ctaLabel: string };

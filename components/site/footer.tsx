@@ -71,6 +71,15 @@ export function Footer({
             {profile.name} — {profile.roles.slice(0, 3).join(" · ")}
           </p>
         </div>
+
+        <div className="mt-8 border-t border-line/60 pt-6 text-center">
+          <p className="mx-auto max-w-3xl text-[0.72rem] leading-relaxed text-ink-mute">
+            <strong className="font-semibold text-ink">Disclaimer:</strong> This website is a sample/demo created solely for presentation and demonstration purposes for the client. It is not intended for reuse or deployment as a production-level website. All designs, visuals, and creative elements presented on this website are copyrighted by Nexus Solutions and may not be reproduced, reused, or distributed without prior written permission.
+          </p>
+          <p className="mt-2 text-[0.72rem] font-bold tracking-[0.1em] text-ink">
+            Owned by Nexus Solutions
+          </p>
+        </div>
       </div>
     </footer>
   );

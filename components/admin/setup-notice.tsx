@@ -49,6 +49,15 @@ export function SetupNotice() {
         The site keeps working throughout — Supabase only takes over once its
         tables contain rows.
       </p>
+
+      <div className="mt-12 border-t border-neutral-200 pt-6 text-center text-xs text-neutral-500">
+        <p className="leading-relaxed">
+          <strong className="font-semibold text-neutral-700">Disclaimer:</strong> This website is a sample/demo created solely for presentation and demonstration purposes for the client. It is not intended for reuse or deployment as a production-level website. All designs, visuals, and creative elements presented on this website are copyrighted by Nexus Solutions and may not be reproduced, reused, or distributed without prior written permission.
+        </p>
+        <p className="mt-2 font-bold tracking-[0.1em] text-neutral-800">
+          Owned by Nexus Solutions
+        </p>
+      </div>
     </div>
   );
 }

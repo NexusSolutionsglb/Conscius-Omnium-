@@ -7,18 +7,15 @@ import {
 } from "@/lib/queries/works";
 import { getCollections } from "@/lib/queries/collections";
 import { getTimeline } from "@/lib/queries/timeline";
-import { DISCIPLINE_LABELS, type Discipline, type Work } from "@/lib/types";
-import { buildMetadata } from "@/lib/seo";
-import { Hero } from "@/components/home/hero";
-import { FeaturedWork } from "@/components/home/featured-work";
+import { getHomeContent } from "@/lib/queries/pages";
 import {
-  CollectionsRail,
-  ContactCta,
-  Disciplines,
-  Intro,
-  StudioPreview,
-} from "@/components/home/sections";
-import { TimelineStrip } from "@/components/timeline/timeline";
+  DISCIPLINE_LABELS,
+  type Discipline,
+  type HomeContent,
+  type Work,
+} from "@/lib/types";
+import { buildMetadata } from "@/lib/seo";
+import { HomeSections } from "@/components/home/home-sections";
 
 export const revalidate = 3600;
 
@@ -26,20 +23,10 @@ export function generateMetadata() {
   return buildMetadata({ path: "/" });
 }
 
-const DISCIPLINE_BLURBS: Partial<Record<Discipline, string>> = {
-  architecture:
-    "Built and speculative — a house that breathes, a tower over a ruin, a black marble monument to love.",
-  "production-design":
-    "Title cards, first-look posters and character design for Kannada cinema and a Prime Original.",
-  photography:
-    "Miniatures and conservation workers, shot until the seam between model and world disappears.",
-  experimental:
-    "Plaster cities, a pierced tin can as architecture, an infotech flush plate that pays you back.",
-  art: "An abstract Shiva from a blue cosmos; an entire seascape in four lines.",
-  graphic: "Marks and identities folded back into Indian myth.",
-};
-
-function pickDisciplineCards(works: Work[]) {
+function pickDisciplineCards(
+  works: Work[],
+  blurbs: HomeContent["disciplines"]["blurbs"],
+) {
   const order: Discipline[] = [
     "architecture",
     "production-design",
@@ -52,14 +39,11 @@ function pickDisciplineCards(works: Work[]) {
   const cards: { discipline: Discipline; work: Work; blurb: string }[] = [];
   for (const d of order) {
     if (seen.has(d)) continue;
-    const work = works.find((w) => w.discipline === d && w.featured) ??
+    const work =
+      works.find((w) => w.discipline === d && w.featured) ??
       works.find((w) => w.discipline === d);
     if (work) {
-      cards.push({
-        discipline: d,
-        work,
-        blurb: DISCIPLINE_BLURBS[d] ?? DISCIPLINE_LABELS[d],
-      });
+      cards.push({ discipline: d, work, blurb: blurbs[d] ?? DISCIPLINE_LABELS[d] });
       seen.add(d);
     }
     if (cards.length === 3) break;
@@ -68,7 +52,7 @@ function pickDisciplineCards(works: Work[]) {
 }
 
 export default async function HomePage() {
-  const [settings, profile, featured, allWorks, collections, timeline] =
+  const [settings, profile, featured, allWorks, collections, timeline, content] =
     await Promise.all([
       getSettings(),
       getProfile(),
@@ -76,30 +60,29 @@ export default async function HomePage() {
       getPublishedWorks(),
       getCollections(),
       getTimeline(),
+      getHomeContent(),
     ]);
 
   const heroWork = settings.hero.workSlug
     ? await getWorkBySlug(settings.hero.workSlug)
     : (featured[0] ?? null);
 
-  const disciplineCards = pickDisciplineCards(allWorks);
+  const disciplineCards = pickDisciplineCards(allWorks, content.disciplines.blurbs);
   const studioImage =
     allWorks.find((w) => w.slug === "the-shapeshifting-landscape")?.coverImage ??
     "/work/the-shapeshifting-landscape.jpg";
 
   return (
-    <>
-      <Hero hero={settings.hero} work={heroWork ?? featured[0] ?? null} />
-      <Intro profile={profile} settings={settings} />
-      <FeaturedWork works={featured.slice(0, 5)} />
-      <Disciplines cards={disciplineCards} />
-      <TimelineStrip entries={timeline} />
-      <StudioPreview image={studioImage} />
-      <CollectionsRail collections={collections} />
-      <ContactCta
-        heading={settings.contactCopy.heading}
-        supporting={settings.contactCopy.supporting}
-      />
-    </>
+    <HomeSections
+      serverContent={content}
+      profile={profile}
+      settings={settings}
+      heroWork={heroWork ?? featured[0] ?? null}
+      featured={featured.slice(0, 5)}
+      disciplineCards={disciplineCards}
+      timeline={timeline}
+      collections={collections}
+      studioImage={studioImage}
+    />
   );
 }

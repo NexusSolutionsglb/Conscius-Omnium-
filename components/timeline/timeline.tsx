@@ -2,10 +2,12 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import { motion, useScroll, useSpring, useTransform } from "motion/react";
-import type { TimelineEntry } from "@/lib/types";
+import type { HomeContent, TimelineEntry } from "@/lib/types";
 import { EASE } from "@/lib/motion";
 import { prefersReducedMotion } from "@/lib/client";
+import { homeDefaults } from "@/lib/content/defaults/home";
 import { Eyebrow } from "@/components/ui/primitives";
+import { EditableText } from "@/components/editor/editable-text";
 
 /**
  * "His story" — a visual autobiography. On desktop it pins and scrolls
@@ -139,7 +141,13 @@ function VerticalTimeline({ entries }: { entries: TimelineEntry[] }) {
 }
 
 /** Compact teaser used on the home page. */
-export function TimelineStrip({ entries }: { entries: TimelineEntry[] }) {
+export function TimelineStrip({
+  entries,
+  copy = homeDefaults.timeline,
+}: {
+  entries: TimelineEntry[];
+  copy?: HomeContent["timeline"];
+}) {
   const first = entries[0];
   const last = entries[entries.length - 1];
   if (!first || !last) return null;
@@ -148,14 +156,25 @@ export function TimelineStrip({ entries }: { entries: TimelineEntry[] }) {
     <section className="u-container py-24 md:py-32">
       <div className="grid gap-10 md:grid-cols-12">
         <div className="md:col-span-4">
-          <Eyebrow>Origin</Eyebrow>
-          <h2 className="mt-5 font-display text-[clamp(1.7rem,1.1rem+2.4vw,3rem)] font-light leading-[1.14]">
-            From drawing mythology to the edge of fiction.
-          </h2>
-          <p className="mt-6 max-w-sm text-[0.9rem] leading-relaxed text-ink-soft">
-            A visual autobiography that runs from 1995 to 2017 — art, then
-            science, then the discovery that architecture could hold both.
-          </p>
+          <Eyebrow>
+            <EditableText bind="home.timeline.eyebrow">{copy.eyebrow}</EditableText>
+          </Eyebrow>
+          <EditableText
+            as="h2"
+            bind="home.timeline.heading"
+            multiline
+            className="mt-5 font-display text-[clamp(1.7rem,1.1rem+2.4vw,3rem)] font-light leading-[1.14]"
+          >
+            {copy.heading}
+          </EditableText>
+          <EditableText
+            as="p"
+            bind="home.timeline.body"
+            multiline
+            className="mt-6 max-w-sm text-[0.9rem] leading-relaxed text-ink-soft"
+          >
+            {copy.body}
+          </EditableText>
         </div>
 
         <div className="md:col-span-8 md:pl-6">
@@ -181,7 +200,7 @@ export function TimelineStrip({ entries }: { entries: TimelineEntry[] }) {
               href="/about#timeline"
               className="u-link text-[0.6875rem] font-medium uppercase tracking-[0.18em]"
             >
-              Walk through the timeline
+              <EditableText bind="home.timeline.linkLabel">{copy.linkLabel}</EditableText>
             </a>
           </p>
         </div>

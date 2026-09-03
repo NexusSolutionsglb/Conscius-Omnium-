@@ -7,6 +7,8 @@ import { PageTransition } from "@/components/site/page-transition";
 import { Header } from "@/components/site/header";
 import { Footer } from "@/components/site/footer";
 import { WhatsAppFloat } from "@/components/site/whatsapp-button";
+import { MaybeEditorProvider } from "@/components/editor/maybe-editor-provider";
+import { themeToCss } from "@/lib/editor/theme";
 
 export const revalidate = 3600;
 
@@ -20,19 +22,23 @@ export default async function SiteLayout({
     whatsappGeneralMessage(settings.brand),
     profile.whatsapp,
   );
+  const themeCss = themeToCss(settings.theme);
 
   return (
     <SmoothScroll>
-      <CursorProvider>
-        <Header settings={settings} />
-        <PageTransition>
-          <main id="main" className="min-h-screen">
-            {children}
-          </main>
-        </PageTransition>
-        <Footer settings={settings} profile={profile} />
-        <WhatsAppFloat href={whatsappHref} />
-      </CursorProvider>
+      {themeCss && <style dangerouslySetInnerHTML={{ __html: themeCss }} />}
+      <MaybeEditorProvider>
+        <CursorProvider>
+          <Header settings={settings} />
+          <PageTransition>
+            <main id="main" className="min-h-screen">
+              {children}
+            </main>
+          </PageTransition>
+          <Footer settings={settings} profile={profile} />
+          <WhatsAppFloat href={whatsappHref} />
+        </CursorProvider>
+      </MaybeEditorProvider>
     </SmoothScroll>
   );
 }

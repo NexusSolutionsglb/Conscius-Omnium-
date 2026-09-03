@@ -109,6 +109,8 @@ export type PageRow = Timestamps & {
   title: string;
   intro: string | null;
   sections: Json;
+  /** Typed editable content for the visual editor (added in 0002). */
+  content: Json;
   seo: Json;
 }
 
@@ -138,6 +140,10 @@ export type SiteSettingsRow = Timestamps & {
   footer_note: string;
   contact_copy: Json;
   seo: Json;
+  /** Editable theme tokens / chrome overrides (added in 0003). */
+  theme: Json;
+  header: Json;
+  footer: Json;
 }
 
 export type InquiryRow = {

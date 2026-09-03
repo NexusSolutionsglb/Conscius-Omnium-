@@ -552,3 +552,103 @@ export async function deleteMedia(id: string, bucket: string, path: string): Pro
   revalidatePath("/admin/media");
   return { ok: true, message: "Deleted" };
 }
+
+/* ─────────────────── visual editor (Publish) ──────────────────── */
+
+const SLUG_PATH: Record<string, string> = {
+  home: "/",
+  about: "/about",
+  studio: "/studio",
+  work: "/work",
+  exhibitions: "/exhibitions",
+  contact: "/contact",
+};
+
+/** True when a write failed only because the column doesn't exist yet
+ *  (migration not applied). Covers raw Postgres (42703) and PostgREST's
+ *  schema-cache message (PGRST204 / "Could not find the 'x' column"). */
+function isMissingColumn(
+  error: { code?: string; message?: string } | null,
+  column: string,
+): boolean {
+  if (!error) return false;
+  if (error.code === "42703" || error.code === "PGRST204") return true;
+  const m = (error.message ?? "").toLowerCase();
+  return (
+    m.includes(column.toLowerCase()) &&
+    (m.includes("does not exist") ||
+      m.includes("schema cache") ||
+      m.includes("could not find"))
+  );
+}
+
+export async function publishSite(payload: {
+  pages: Record<string, unknown>;
+  settings: {
+    hero?: unknown;
+    contactCopy?: unknown;
+    theme?: unknown;
+    nav?: unknown;
+    brand?: unknown;
+    brandLine?: unknown;
+    tagline?: unknown;
+    footerNote?: unknown;
+  };
+}): Promise<ActionResult> {
+  const supabase = await db();
+
+  for (const [slug, content] of Object.entries(payload.pages ?? {})) {
+    if (!SLUG_PATH[slug]) continue;
+    const { error } = await supabase
+      .from("pages")
+      .upsert(
+        { slug, title: slug[0].toUpperCase() + slug.slice(1), content } as never,
+        { onConflict: "slug" },
+      );
+    if (error) return { ok: false, error: `pages/${slug}: ${error.message}` };
+  }
+
+  const s = payload.settings ?? {};
+
+  // Columns that exist since 0001.
+  const core: Record<string, unknown> = {};
+  if (s.hero !== undefined) core.hero = s.hero;
+  if (s.contactCopy !== undefined) core.contact_copy = s.contactCopy;
+  if (s.nav !== undefined) core.nav = s.nav;
+  if (s.brand !== undefined) core.brand = s.brand;
+  if (s.brandLine !== undefined) core.brand_line = s.brandLine;
+  if (s.tagline !== undefined) core.tagline = s.tagline;
+  if (s.footerNote !== undefined) core.footer_note = s.footerNote;
+
+  if (Object.keys(core).length) {
+    core.id = "default";
+    core.updated_at = new Date().toISOString();
+    const { error } = await supabase
+      .from("site_settings")
+      .upsert(core as never, { onConflict: "id" });
+    if (error) return { ok: false, error: `settings: ${error.message}` };
+  }
+
+  // `theme` needs migration 0003 — best-effort so publish still works without it.
+  let themeSkipped = false;
+  if (s.theme !== undefined) {
+    const { error } = await supabase
+      .from("site_settings")
+      .upsert(
+        { id: "default", theme: s.theme, updated_at: new Date().toISOString() } as never,
+        { onConflict: "id" },
+      );
+    if (error) {
+      if (isMissingColumn(error, "theme")) themeSkipped = true;
+      else return { ok: false, error: `theme: ${error.message}` };
+    }
+  }
+
+  revalidateSite("/contact");
+  return {
+    ok: true,
+    message: themeSkipped
+      ? "Published (theme skipped — run migration 0003 to save theme changes)"
+      : "Published to the live site",
+  };
+}

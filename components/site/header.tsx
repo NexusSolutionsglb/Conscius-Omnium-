@@ -7,10 +7,17 @@ import { motion, useMotionValueEvent, useScroll } from "motion/react";
 import type { SiteSettings } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Magnetic } from "@/components/motion/magnetic";
+import { useEditableSettings } from "@/components/editor/use-editable";
 import { MobileMenu } from "./mobile-menu";
 import { useCursor } from "./cursor";
 
-export function Header({ settings }: { settings: SiteSettings }) {
+export function Header({ settings: base }: { settings: SiteSettings }) {
+  const settings: SiteSettings = {
+    ...base,
+    nav: useEditableSettings("nav", base.nav),
+    brand: useEditableSettings("brand", base.brand),
+    brandLine: useEditableSettings("brandLine", base.brandLine),
+  };
   const pathname = usePathname();
   const { scrollY } = useScroll();
   const [scrolled, setScrolled] = useState(false);

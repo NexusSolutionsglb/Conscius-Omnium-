@@ -1,21 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import type { Work } from "@/lib/types";
+import type { HomeContent, Work } from "@/lib/types";
 import { DISCIPLINE_LABELS } from "@/lib/types";
+import { homeDefaults } from "@/lib/content/defaults/home";
 import { blurFor } from "@/lib/content/blur";
 import { cn } from "@/lib/utils";
 import { ArtImage } from "@/components/motion/image-reveal";
 import { Reveal } from "@/components/motion/reveal";
 import { Eyebrow, TextLink } from "@/components/ui/primitives";
 import { useCursor } from "@/components/site/cursor";
+import { EditableText } from "@/components/editor/editable-text";
 
 /**
  * Home featured work — a deliberately asymmetric editorial sequence,
  * distinct from the /work index. Up to five works: one full-bleed, an
  * offset pair, a wide, and a held-left standard.
  */
-export function FeaturedWork({ works }: { works: Work[] }) {
+export function FeaturedWork({
+  works,
+  copy = homeDefaults.featured,
+}: {
+  works: Work[];
+  copy?: HomeContent["featured"];
+}) {
   const { setCursor, reset } = useCursor();
   const [lead, a, b, c, d] = works;
   if (!lead) return null;
@@ -29,12 +37,20 @@ export function FeaturedWork({ works }: { works: Work[] }) {
     <section className="u-container py-8 md:py-12">
       <Reveal className="mb-14 flex items-end justify-between gap-6">
         <div>
-          <Eyebrow>Selected work</Eyebrow>
-          <h2 className="mt-4 font-display text-[clamp(1.6rem,1rem+2.2vw,2.8rem)] font-light">
-            A few pieces to begin with
-          </h2>
+          <Eyebrow>
+            <EditableText bind="home.featured.eyebrow">{copy.eyebrow}</EditableText>
+          </Eyebrow>
+          <EditableText
+            as="h2"
+            bind="home.featured.heading"
+            className="mt-4 font-display text-[clamp(1.6rem,1rem+2.2vw,2.8rem)] font-light"
+          >
+            {copy.heading}
+          </EditableText>
         </div>
-        <TextLink href="/work">All work</TextLink>
+        <TextLink href="/work">
+          <EditableText bind="home.featured.linkLabel">{copy.linkLabel}</EditableText>
+        </TextLink>
       </Reveal>
 
       {/* Lead — full width */}

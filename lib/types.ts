@@ -229,6 +229,8 @@ export interface SiteSettings {
     description: string;
     ogImage: string;
   };
+  /** Editable theme overrides — empty object means "use the stylesheet defaults". */
+  theme?: ThemeTokens;
 }
 
 export type InquiryType =
@@ -294,4 +296,157 @@ export interface MediaAsset {
   size?: number | null;
   contentType?: string | null;
   createdAt: string;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Visual editor — per-page editable content
+   ───────────────────────────────────────────────────────────────────
+   Each page stores a typed `content` object in `pages.content`. Every
+   field has a default (see lib/content/defaults/*) equal to the copy
+   that used to be hardcoded, so an unset/partial value renders exactly
+   as before. Route files own layout + animation; the editor only
+   changes these values and section order.
+   ═══════════════════════════════════════════════════════════════════ */
+
+export type SectionBackground = "paper" | "paper-dim" | "obsidian";
+export type SectionSpacing = "tight" | "normal" | "spacious";
+
+export interface EditableLink {
+  label: string;
+  href: string;
+}
+
+export type HomeSectionKey =
+  | "intro"
+  | "featured"
+  | "disciplines"
+  | "timeline"
+  | "studioPreview"
+  | "collections"
+  | "contactCta";
+
+export interface HomeContent {
+  /** Post-hero sections, in render order. */
+  order: HomeSectionKey[];
+  /** Sections hidden without being deleted. */
+  hidden: HomeSectionKey[];
+  intro: { eyebrow: string; linkLabel: string };
+  featured: { eyebrow: string; heading: string; linkLabel: string };
+  disciplines: {
+    eyebrow: string;
+    heading: string;
+    body: string;
+    /** Per-discipline blurb shown under each card. */
+    blurbs: Partial<Record<Discipline, string>>;
+  };
+  timeline: { eyebrow: string; heading: string; body: string; linkLabel: string };
+  studioPreview: {
+    eyebrow: string;
+    /** `\n` becomes a line break. */
+    heading: string;
+    body: string;
+    linkLabel: string;
+  };
+  collections: { eyebrow: string; heading: string; linkLabel: string };
+  contactCta: { eyebrow: string; ctaLabel: string };
+}
+
+/** Shared copy shapes. `heading` fields may contain `\n` for a line break. */
+export interface PageHeroCopy {
+  eyebrow: string;
+  heading: string;
+}
+export interface PageCtaCopy {
+  eyebrow: string;
+  heading: string;
+  linkLabel: string;
+}
+
+export interface AboutBodySection {
+  id: string;
+  eyebrow: string;
+  heading: string;
+  /** One string per paragraph. */
+  body: string[];
+}
+
+export interface AboutContent {
+  heroEyebrow: string;
+  intro: string;
+  portraitFallbackCaption: string;
+  body: AboutBodySection[];
+  educationEyebrow: string;
+  timeline: { eyebrow: string; heading: string; body: string };
+  nextCta: PageCtaCopy;
+}
+
+export interface StudioBodySection {
+  id: string;
+  eyebrow: string;
+  heading: string;
+  body: string[];
+  image: string | null;
+  caption: string | null;
+  layout: "image-left" | "image-right";
+}
+
+export interface StudioContent {
+  hero: PageHeroCopy;
+  intro: string;
+  body: StudioBodySection[];
+  endCta: PageCtaCopy;
+}
+
+export interface WorkIndexContent {
+  eyebrow: string;
+  heading: string;
+  /** `{count}` is replaced with the number of published works. */
+  intro: string;
+}
+
+export interface ExhibitionsContent {
+  hero: { eyebrow: string; heading: string; intro: string };
+  listEyebrow: string;
+  listEmpty: string;
+  /** `body` supports `*emphasis*` markers, rendered as `<em>`. */
+  onScreen: { eyebrow: string; heading: string; body: string };
+  trainingEyebrow: string;
+  endCtaLabel: string;
+}
+
+export interface ContactContent {
+  eyebrow: string;
+  formEyebrow: string;
+  whatsappLabel: string;
+}
+
+/**
+ * Editable theme tokens. Every field is optional — an unset field keeps the
+ * built-in value from `app/globals.css`. Applied as a `:root { … }` override.
+ */
+export interface ThemeTokens {
+  colorPaper?: string;
+  colorInk?: string;
+  colorInkSoft?: string;
+  colorInkMute?: string;
+  colorAccent?: string;
+  colorAccentDeep?: string;
+  /** Font family for display/headings. One of the curated `FONT_CHOICES`. */
+  fontDisplay?: string;
+  /** Font family for body/UI text. One of the curated `FONT_CHOICES`. */
+  fontSans?: string;
+  /** Overall type-scale multiplier, 0.85–1.2. */
+  typeScale?: number;
+  /** Max content width in px. */
+  containerWidth?: number;
+}
+
+/** Map of every page slug the visual editor manages to its content shape. */
+export interface PageContentMap {
+  home: HomeContent;
+  about: AboutContent;
+  studio: StudioContent;
+  work: WorkIndexContent;
+  exhibitions: ExhibitionsContent;
+  contact: ContactContent;
 }

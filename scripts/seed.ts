@@ -23,6 +23,7 @@ import {
   timelineSeed,
   worksSeed,
 } from "../lib/content";
+import { pageContentDefaults } from "../lib/content/defaults";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -161,7 +162,7 @@ async function run() {
     });
   }
 
-  console.log(`→ pages (${pagesSeed.length})`);
+  console.log(`→ pages (${pagesSeed.length} legacy + ${Object.keys(pageContentDefaults).length} content)`);
   for (const p of pagesSeed) {
     await supabase.from("pages").upsert(
       {
@@ -171,6 +172,21 @@ async function run() {
         sections: p.sections,
         seo: p.seo ?? {},
       },
+      { onConflict: "slug" },
+    );
+  }
+  // Editable page content for the visual editor — one row per managed page.
+  const pageTitles: Record<string, string> = {
+    home: "Home",
+    about: "About",
+    studio: "Studio & Process",
+    work: "Work",
+    exhibitions: "Exhibitions",
+    contact: "Contact",
+  };
+  for (const [slug, content] of Object.entries(pageContentDefaults)) {
+    await supabase.from("pages").upsert(
+      { slug, title: pageTitles[slug] ?? slug, content },
       { onConflict: "slug" },
     );
   }

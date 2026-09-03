@@ -24,6 +24,7 @@ export const getSettings = cache(async (): Promise<SiteSettings> => {
         hero: { ...settingsSeed.hero, ...mapped.hero },
         contactCopy: { ...settingsSeed.contactCopy, ...mapped.contactCopy },
         seo: { ...settingsSeed.seo, ...mapped.seo },
+        theme: mapped.theme ?? {},
       };
     },
     () => settingsSeed,

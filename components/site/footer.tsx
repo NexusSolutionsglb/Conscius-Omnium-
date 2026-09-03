@@ -1,15 +1,25 @@
+"use client";
+
 import Link from "next/link";
 import type { Profile, SiteSettings } from "@/lib/types";
 import { whatsappGeneralMessage, whatsappLink } from "@/lib/whatsapp";
 import { Reveal } from "@/components/motion/reveal";
+import { useEditableSettings } from "@/components/editor/use-editable";
 
 export function Footer({
-  settings,
+  settings: base,
   profile,
 }: {
   settings: SiteSettings;
   profile: Profile;
 }) {
+  const settings: SiteSettings = {
+    ...base,
+    nav: useEditableSettings("nav", base.nav),
+    brand: useEditableSettings("brand", base.brand),
+    brandLine: useEditableSettings("brandLine", base.brandLine),
+    footerNote: useEditableSettings("footerNote", base.footerNote),
+  };
   const year = new Date().getFullYear();
   const wa = whatsappLink(whatsappGeneralMessage(settings.brand), profile.whatsapp);
 

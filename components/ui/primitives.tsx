@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { type ComponentPropsWithoutRef, type ElementType, type ReactNode } from "react";
+import {
+  Fragment,
+  type ComponentPropsWithoutRef,
+  type ElementType,
+  type ReactNode,
+} from "react";
 import { motion } from "motion/react";
 import { drawLine } from "@/lib/motion";
 import { cn, isExternal } from "@/lib/utils";
@@ -70,6 +75,25 @@ export function TextLink({
     >
       {children}
     </SmartLink>
+  );
+}
+
+/**
+ * Renders a plain string with `*emphasis*` spans as `<em>`. Used for the few
+ * places (e.g. film titles) that need italics inside otherwise editable copy.
+ */
+export function EmphasisText({ children }: { children: string }) {
+  const parts = children.split(/(\*[^*]+\*)/g);
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.startsWith("*") && part.endsWith("*") && part.length > 2 ? (
+          <em key={i}>{part.slice(1, -1)}</em>
+        ) : (
+          <Fragment key={i}>{part}</Fragment>
+        ),
+      )}
+    </>
   );
 }
 

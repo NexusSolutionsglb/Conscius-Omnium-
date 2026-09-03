@@ -178,5 +178,8 @@ export function mapSettings(row: SiteSettingsRow): SiteSettings {
       row.contact_copy,
     ) as SiteSettings["contactCopy"],
     seo: asObject<SiteSettings["seo"]>(row.seo) as SiteSettings["seo"],
+    theme: asObject<NonNullable<SiteSettings["theme"]>>(
+      (row as { theme?: unknown }).theme,
+    ),
   };
 }

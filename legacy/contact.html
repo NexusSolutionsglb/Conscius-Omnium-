@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact — Conscious Omnium | Shivjeet Potdar</title>
+    <meta name="description" content="Get in touch with Shivjeet Potdar and Conscious Omnium. Inquiries for collectors, curators, galleries, and collaborations.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div class="page-transition-overlay">
+        <span class="pt-brand">Conscious Omnium</span>
+        <div class="pt-line"></div>
+        <span class="pt-artist">Shivjeet Potdar</span>
+    </div>
+
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="container">
+            <div class="header-inner">
+                <a href="index.html" class="header-brand">Conscious Omnium</a>
+                <div class="header-center">Shivjeet Potdar</div>
+                <nav class="header-nav">
+                    <a href="work.html" class="nav-link">Work</a>
+                    <a href="about.html" class="nav-link">About</a>
+                    <a href="studio.html" class="nav-link">Studio</a>
+                    <a href="exhibitions.html" class="nav-link">Exhibitions</a>
+                    <a href="contact.html" class="nav-link active">Contact</a>
+                </nav>
+                <button id="menu-toggle" class="menu-toggle" aria-label="Open navigation"><span></span><span></span></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="mobile-menu">
+        <div class="mobile-menu-header">
+            <span class="header-brand">Conscious Omnium</span>
+            <button id="menu-close" class="mobile-menu-close" aria-label="Close menu"><svg fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        </div>
+        <nav class="mobile-nav">
+            <a href="work.html" class="mobile-nav-link">Work</a>
+            <a href="about.html" class="mobile-nav-link">About</a>
+            <a href="studio.html" class="mobile-nav-link">Studio</a>
+            <a href="exhibitions.html" class="mobile-nav-link">Exhibitions</a>
+            <a href="contact.html" class="mobile-nav-link">Contact</a>
+        </nav>
+        <div class="mobile-menu-footer"><p class="label">Shivjeet Potdar</p></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- CONTACT PAGE                                -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section style="min-height: 100vh; padding-top: 140px; padding-bottom: 100px;">
+        <div class="container">
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 80px;">
+
+                <!-- Left: Info -->
+                <div class="hero-animate">
+                    <p class="label" style="margin-bottom: 20px;">Contact</p>
+                    <h1 style="font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1.2; color: var(--charcoal);">
+                        Let's talk about<br>the work.
+                    </h1>
+                    <p class="body-text" style="margin-top: 24px; max-width: 440px;">
+                        For collectors, curators, galleries, institutions, and collaborations. Every inquiry is read and responded to personally by Shivjeet.
+                    </p>
+
+                    <div style="margin-top: 48px; display: flex; flex-direction: column; gap: 28px;">
+                        <div>
+                            <p class="label-dark" style="margin-bottom: 6px;">Email</p>
+                            <a href="mailto:hello@consciousomnium.com" class="body-text" style="transition: color 0.3s; color: var(--text-primary);">hello@consciousomnium.com</a>
+                        </div>
+                        <div>
+                            <p class="label-dark" style="margin-bottom: 6px;">Instagram</p>
+                            <a href="#" class="body-text" style="transition: color 0.3s; color: var(--text-primary);">@consciousomnium</a>
+                        </div>
+                        <div>
+                            <p class="label-dark" style="margin-bottom: 6px;">Location</p>
+                            <p class="body-text">India</p>
+                        </div>
+                    </div>
+
+                    <!-- Small artwork as visual element -->
+                    <div style="margin-top: 60px; max-width: 320px;">
+                        <div class="painting-shadow" style="opacity: 0.85;">
+                            <img src="images/artwork-03.jpg" alt="Horizon Dissolving — Shivjeet Potdar" loading="lazy" style="width: 100%; display: block;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Form -->
+                <div class="hero-animate" style="padding-top: 8px;">
+                    <form id="contact-form" onsubmit="handleContactSubmit(event)" style="display: flex; flex-direction: column; gap: 36px;">
+
+                        <div>
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" id="name" name="name" required class="form-input" placeholder="Your full name">
+                        </div>
+
+                        <div>
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" id="email" name="email" required class="form-input" placeholder="your@email.com">
+                        </div>
+
+                        <div>
+                            <label for="enquiry" class="form-label">Enquiry Type</label>
+                            <select id="enquiry" name="enquiry" class="form-input" style="cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill=\'none\' stroke=\'%238A8279\' viewBox=\'0 0 24 24\' xmlns=\'http://www.w3.org/2000/svg\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M19 9l-7 7-7-7\'/></svg>'); background-repeat: no-repeat; background-position: right 0 center; background-size: 16px;">
+                                <option value="" disabled selected>Select type of enquiry</option>
+                                <option value="collecting">Collecting artwork</option>
+                                <option value="exhibition">Exhibition proposal</option>
+                                <option value="collaboration">Collaboration</option>
+                                <option value="press">Press &amp; media</option>
+                                <option value="general">General enquiry</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="message" class="form-label">Message</label>
+                            <textarea id="message" name="message" rows="5" required class="form-input" style="resize: none;" placeholder="Tell us about your interest in the work"></textarea>
+                        </div>
+
+                        <div style="padding-top: 8px;">
+                            <button type="submit" class="btn-primary magnetic" style="width: auto;">Send Inquiry</button>
+                        </div>
+
+                    </form>
+
+                    <div id="form-success" style="display: none;">
+                        <div style="padding: 48px 0;">
+                            <h3 style="font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 1.6rem; color: var(--charcoal);">Thank you for your inquiry.</h3>
+                            <p class="body-text" style="margin-top: 12px;">
+                                Your message has been received. Shivjeet will respond personally within 48 hours.
+                            </p>
+                            <a href="work.html" class="btn-outline" style="margin-top: 32px;">Continue Exploring →</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <p style="font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--charcoal);">Conscious Omnium</p>
+                    <p class="meta" style="margin-top: 6px;">Shivjeet Potdar</p>
+                    <p class="meta-sm" style="margin-top: 2px;">Contemporary Art Practice</p>
+                </div>
+                <div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;">
+                    <a href="#" class="footer-link">Instagram</a>
+                    <a href="mailto:hello@consciousomnium.com" class="footer-link">Email</a>
+                    <a href="contact.html" class="footer-link">Contact</a>
+                </div>
+                <div style="text-align: right;">
+                    <p class="meta-sm" style="color: var(--warm-grey);">© 2026 Conscious Omnium. All rights reserved.</p>
+                    <div style="display: flex; justify-content: flex-end; gap: 16px; margin-top: 6px;">
+                        <a href="#" style="font-size: 10px; color: var(--stone); transition: color 0.3s;">Privacy</a>
+                        <a href="#" style="font-size: 10px; color: var(--stone); transition: color 0.3s;">Terms</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(26, 24, 22, 0.08); text-align: center;">
+                <p class="meta-sm" style="max-width: 800px; margin: 0 auto 12px; color: var(--warm-grey); line-height: 1.6;">
+                    <strong>Disclaimer:</strong> This website is a sample/demo created solely for presentation and demonstration purposes for the client. It is not intended for reuse or deployment as a production-level website. All designs, visuals, and creative elements presented on this website are copyrighted by Nexus Solutions and may not be reproduced, reused, or distributed without prior written permission.
+                </p>
+                <p class="label-dark" style="font-weight: 700; color: var(--charcoal); letter-spacing: 0.1em;">Owned by Nexus Solutions</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="js/main.js"></script>
+
+</body>
+</html>

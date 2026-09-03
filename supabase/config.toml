@@ -1,0 +1,17 @@
+project_id = "conscious-omnium"
+
+[db]
+major_version = 15
+
+[auth]
+enable_signup = false
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/admin/auth/callback"]
+
+[auth.email]
+enable_signup = false
+enable_confirmations = false
+
+[storage]
+enabled = true
+file_size_limit = "25MiB"

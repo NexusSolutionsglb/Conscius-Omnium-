@@ -599,7 +599,7 @@ async function syncCollection<T extends IdRow>(
   table: string,
   rows: T[] | undefined,
   baseline: T[] | undefined,
-  toRow: (r: T) => Record<string, unknown>,
+  toRow: (r: T, index: number) => Record<string, unknown>,
 ): Promise<string | null> {
   if (!rows) return null;
   const curIds = new Set(rows.filter((r) => isRealId(r.id)).map((r) => r.id));
@@ -613,8 +613,9 @@ async function syncCollection<T extends IdRow>(
   }
 
   const baseIds = new Set((baseline ?? []).map((b) => b.id));
-  for (const r of rows) {
-    const row = toRow(r);
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    const row = toRow(r, i);
     if (isRealId(r.id) && baseIds.has(r.id)) {
       const { error } = await supabase.from(table).update(row as never).eq("id", r.id);
       if (error) return `${table} update: ${error.message}`;
@@ -678,8 +679,18 @@ export async function publishSite(payload: {
   let chromeSkipped = false;
   const extra: Record<string, unknown> = { id: "default", updated_at: new Date().toISOString() };
   if (s.theme !== undefined) extra.theme = s.theme;
-  if (s.footerLegal !== undefined || s.footerOwner !== undefined) {
-    extra.footer = { legal: s.footerLegal ?? "", owner: s.footerOwner ?? "" };
+  if (
+    s.footerLegal !== undefined ||
+    s.footerOwner !== undefined ||
+    s.footerCopyright !== undefined ||
+    s.footerCredit !== undefined
+  ) {
+    extra.footer = {
+      legal: s.footerLegal ?? "",
+      owner: s.footerOwner ?? "",
+      copyright: s.footerCopyright ?? "",
+      credit: s.footerCredit ?? "",
+    };
   }
   if (Object.keys(extra).length > 2) {
     const { error } = await supabase
@@ -710,7 +721,7 @@ export async function publishSite(payload: {
       table,
       cur as IdRow[] | undefined,
       base as IdRow[] | undefined,
-      toRow as (r: IdRow) => Record<string, unknown>,
+      toRow as (r: IdRow, i: number) => Record<string, unknown>,
     );
     if (err) return { ok: false, error: err };
   }

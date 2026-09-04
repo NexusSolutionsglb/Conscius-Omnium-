@@ -11,6 +11,10 @@ import { Reveal } from "@/components/motion/reveal";
 import { Eyebrow, TextLink } from "@/components/ui/primitives";
 import { useCursor } from "@/components/site/cursor";
 import { EditableText } from "@/components/editor/editable-text";
+import { EditableImage } from "@/components/editor/editable-image";
+import { RepeatableList } from "@/components/editor/repeatable-list";
+import { useEditableData, useEditorMode } from "@/components/editor/use-editable";
+import { newWork } from "@/lib/editor/new-entities";
 
 /**
  * Home featured work — a deliberately asymmetric editorial sequence,
@@ -25,6 +29,77 @@ export function FeaturedWork({
   copy?: HomeContent["featured"];
 }) {
   const { setCursor, reset } = useCursor();
+  const editing = useEditorMode() === "edit";
+  const allWorks = useEditableData<Work>("works", works);
+
+  if (editing) {
+    // `allWorks` is the full snapshot list; show the featured set but bind each
+    // card to its real index in `@works` (same object refs, so indexOf works).
+    const featured = allWorks.filter((w) => w.featured);
+    return (
+      <section className="u-container py-8 md:py-12">
+        <Reveal className="mb-10 flex items-end justify-between gap-6">
+          <div>
+            <Eyebrow>
+              <EditableText bind="home.featured.eyebrow">{copy.eyebrow}</EditableText>
+            </Eyebrow>
+            <EditableText
+              as="h2"
+              bind="home.featured.heading"
+              className="mt-4 font-display text-[clamp(1.6rem,1rem+2.2vw,2.8rem)] font-light"
+            >
+              {copy.heading}
+            </EditableText>
+          </div>
+          <TextLink href="/work">
+            <EditableText bind="home.featured.linkLabel">{copy.linkLabel}</EditableText>
+          </TextLink>
+        </Reveal>
+        <div className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          <RepeatableList
+            slug="work"
+            path="featured"
+            items={featured}
+            indexOf={(w) => allWorks.indexOf(w)}
+            makeItem={() => newWork({ featured: true })}
+            addLabel="Add a featured work"
+            addClassName="py-3 sm:col-span-2 lg:col-span-3"
+            listBind="@works"
+            kind="work"
+            itemLabel={(w) => w.title || "Work"}
+          >
+            {(w, i) => (
+              <article>
+                <EditableImage bind={`@works.${i}.coverImage`} folder="work">
+                  {w.coverImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={w.coverImage}
+                      alt={w.title}
+                      className="aspect-[3/2] w-full rounded object-cover"
+                    />
+                  ) : (
+                    <div className="grid aspect-[3/2] place-items-center rounded bg-neutral-100 text-[12px] text-neutral-400">
+                      Click to add a cover
+                    </div>
+                  )}
+                </EditableImage>
+                <h3 className="mt-4 font-display text-[1.4rem] font-normal text-ink">
+                  <EditableText bind={`@works.${i}.title`}>{w.title}</EditableText>
+                </h3>
+                <p className="u-eyebrow mt-1 text-ink-mute">
+                  {DISCIPLINE_LABELS[w.discipline]}
+                  {" · "}
+                  <EditableText bind={`@works.${i}.year`}>{w.year ?? ""}</EditableText>
+                </p>
+              </article>
+            )}
+          </RepeatableList>
+        </div>
+      </section>
+    );
+  }
+
   const [lead, a, b, c, d] = works;
   if (!lead) return null;
 

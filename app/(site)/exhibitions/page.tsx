@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getExhibitionsByYear } from "@/lib/queries/exhibitions";
+import { getAllExhibitions } from "@/lib/queries/exhibitions";
 import { getPublishedWorks } from "@/lib/queries/works";
 import { getProfile } from "@/lib/queries/profile";
 import { getExhibitionsContent } from "@/lib/queries/pages";
@@ -17,8 +17,8 @@ export const metadata: Metadata = buildMetadata({
 });
 
 export default async function ExhibitionsPage() {
-  const [groups, works, profile, content] = await Promise.all([
-    getExhibitionsByYear(),
+  const [allExhibitions, works, profile, content] = await Promise.all([
+    getAllExhibitions(),
     getPublishedWorks(),
     getProfile(),
     getExhibitionsContent(),
@@ -37,7 +37,7 @@ export default async function ExhibitionsPage() {
         ])}
       />
       <ExhibitionsView
-        groups={groups}
+        allExhibitions={allExhibitions}
         onScreen={onScreen}
         profile={profile}
         serverContent={content}

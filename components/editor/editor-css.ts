@@ -156,6 +156,83 @@ export const EDITOR_CSS = `
   flex: 1; border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 10px;
 }
 
+/* "+ Add section" strip at the end of the page. */
+.co-add-bar {
+  display: flex;
+  justify-content: center;
+  padding: 28px 16px 64px;
+}
+:root[data-co-edit="preview"] .co-add-bar { display: none; }
+.co-add-trigger {
+  border: 1.5px dashed #94a3b8;
+  background: rgba(255,255,255,.7);
+  color: #475569;
+  font: 600 12px/1 system-ui, sans-serif;
+  letter-spacing: .04em;
+  padding: 12px 22px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.co-add-trigger:hover { border-color: #475569; color: #1e293b; }
+.co-add-menu {
+  width: min(460px, 92vw);
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.16);
+}
+.co-add-title {
+  font: 600 11px/1 system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: #94a3b8;
+  margin: 2px 2px 10px;
+}
+.co-add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.co-add-item {
+  display: flex; align-items: center; gap: 9px;
+  border: 1px solid #e2e8f0; border-radius: 8px;
+  background: #fff; padding: 10px 12px;
+  font: 500 12.5px/1.2 system-ui, sans-serif; color: #1e293b;
+  cursor: pointer; text-align: left;
+}
+.co-add-item:hover { background: #f1f5f9; border-color: #cbd5e1; }
+.co-add-icon {
+  display: grid; place-items: center;
+  width: 24px; height: 24px; border-radius: 6px;
+  background: #0b1220; color: #fff; font-size: 12px;
+}
+.co-add-cancel {
+  margin-top: 10px; width: 100%;
+  border: 0; background: none; color: #64748b;
+  font: 500 12px/1 system-ui, sans-serif; padding: 8px; cursor: pointer;
+}
+.co-add-cancel:hover { color: #0f172a; }
+
+/* Hidden / unpublished records: dimmed + struck ribbon while editing. */
+:root[data-co-edit="edit"] [data-unpublished] {
+  opacity: .42;
+  position: relative;
+}
+:root[data-co-edit="edit"] [data-unpublished]::after {
+  content: "Hidden";
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 1px 6px;
+  font: 600 9px/1.4 system-ui, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #fff;
+  background: #b91c1c;
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 5;
+}
+
 /* Preview mode: strip every editor affordance. */
 :root[data-co-edit="preview"] .co-editable { outline: none !important; background: none !important; cursor: auto; }
+:root[data-co-edit="preview"] [data-unpublished] { opacity: 1; }
+:root[data-co-edit="preview"] [data-unpublished]::after { display: none; }
 `;

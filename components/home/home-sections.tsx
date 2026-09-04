@@ -2,7 +2,9 @@
 
 import { Fragment, type ReactNode } from "react";
 import type {
+  BlockBase,
   Collection,
+  CustomBlock,
   Discipline,
   HomeContent,
   HomeSectionKey,
@@ -11,9 +13,19 @@ import type {
   TimelineEntry,
   Work,
 } from "@/lib/types";
-import { useEditable, useEditableSettings, useEditorMode } from "@/components/editor/use-editable";
+import { cn } from "@/lib/utils";
+import { sectionStyleClass } from "@/lib/editor/section-style";
+import {
+  useEditable,
+  useEditableData,
+  useEditableProfile,
+  useEditableSettings,
+  useEditorMode,
+} from "@/components/editor/use-editable";
+import { AddSectionBar } from "@/components/editor/add-section-bar";
 import { Hero } from "./hero";
 import { FeaturedWork } from "./featured-work";
+import { CustomBlockView } from "./custom-block";
 import { CollectionsRail, ContactCta, Disciplines, Intro, StudioPreview } from "./sections";
 import { TimelineStrip } from "@/components/timeline/timeline";
 
@@ -24,6 +36,7 @@ export function HomeSections({
   profile,
   settings,
   heroWork,
+  works,
   featured,
   disciplineCards,
   timeline,
@@ -34,6 +47,7 @@ export function HomeSections({
   profile: Profile;
   settings: SiteSettings;
   heroWork: Work | null;
+  works: Work[];
   featured: Work[];
   disciplineCards: DisciplineCard[];
   timeline: TimelineEntry[];
@@ -51,6 +65,16 @@ export function HomeSections({
   const studioPreview = useEditable("home", "studioPreview", serverContent.studioPreview);
   const collectionsCopy = useEditable("home", "collections", serverContent.collections);
   const contactCta = useEditable("home", "contactCta", serverContent.contactCta);
+  const blocks = useEditable<Record<string, CustomBlock>>(
+    "home",
+    "blocks",
+    serverContent.blocks ?? {},
+  );
+  const sectionStyles = useEditable<Record<string, BlockBase>>(
+    "home",
+    "sectionStyles",
+    serverContent.sectionStyles ?? {},
+  );
 
   const liveHero = useEditableSettings("hero", settings.hero);
   const liveContactCopy = useEditableSettings("contactCopy", settings.contactCopy);
@@ -59,6 +83,18 @@ export function HomeSections({
     hero: liveHero,
     contactCopy: liveContactCopy,
   };
+  const bio = useEditableProfile("bio", profile.bio);
+
+  const liveWorks = useEditableData<Work>("works", works);
+
+  // Resolve the hero's featured work live so changing it in the editor updates
+  // the background image without a publish.
+  const resolvedHeroWork =
+    (liveHero.workSlug && liveWorks.find((w) => w.slug === liveHero.workSlug)) ||
+    heroWork ||
+    liveWorks.find((w) => w.featured) ||
+    liveWorks[0] ||
+    null;
 
   const cards = disciplineCards.map((c) => ({
     ...c,
@@ -66,7 +102,7 @@ export function HomeSections({
   }));
 
   const nodes: Record<HomeSectionKey, ReactNode> = {
-    intro: <Intro profile={profile} settings={liveSettings} copy={intro} />,
+    intro: <Intro bio={bio} settings={liveSettings} copy={intro} />,
     featured: <FeaturedWork works={featured} copy={featuredCopy} />,
     disciplines: <Disciplines cards={cards} copy={disciplines} />,
     timeline: <TimelineStrip entries={timeline} copy={timelineCopy} />,
@@ -81,20 +117,48 @@ export function HomeSections({
     ),
   };
 
-  const visible = order.filter((k) => !hidden.includes(k));
+  const editing = mode === "edit";
+  const visible = order.filter((k) => editing || !hidden.includes(k));
+
+  const renderNode = (key: string): ReactNode => {
+    if (key.startsWith("block:")) {
+      const id = key.slice(6);
+      return <CustomBlockView id={id} block={blocks[id]} />;
+    }
+    return nodes[key as HomeSectionKey] ?? null;
+  };
 
   return (
     <>
-      <Hero hero={liveSettings.hero} work={heroWork} />
-      {visible.map((key) =>
-        mode === "edit" ? (
-          <div key={key} style={{ display: "contents" }} data-edit-section={`home:${key}`}>
-            {nodes[key]}
+      <Hero hero={liveSettings.hero} work={resolvedHeroWork} />
+      {visible.map((key, idx) => {
+        const overrideCls = key.startsWith("block:") ? "" : sectionStyleClass(sectionStyles[key]);
+        const node = renderNode(key);
+        const framed = overrideCls ? (
+          <div
+            className={cn(
+              overrideCls,
+              "[&_section]:!bg-transparent [&_section]:!border-y-0 [&_section]:!py-0",
+            )}
+          >
+            {node}
           </div>
         ) : (
-          <Fragment key={key}>{nodes[key]}</Fragment>
-        ),
-      )}
+          node
+        );
+        return editing ? (
+          <div
+            key={`${key}-${idx}`}
+            style={{ display: "contents" }}
+            data-edit-section={`home:${key}`}
+          >
+            {framed}
+          </div>
+        ) : (
+          <Fragment key={`${key}-${idx}`}>{framed}</Fragment>
+        );
+      })}
+      {editing && <AddSectionBar slug="home" />}
     </>
   );
 }

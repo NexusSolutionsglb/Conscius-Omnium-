@@ -234,6 +234,10 @@ export interface SiteSettings {
   /** Footer legal / attribution text (editable; blank ⇒ hidden). */
   footerLegal?: string;
   footerOwner?: string;
+  /** Footer copyright line — `{year}` / `{brand}` tokens substituted. */
+  footerCopyright?: string;
+  /** Footer studio-credit line — `{name}` / `{roles}` tokens substituted. */
+  footerCredit?: string;
 }
 
 export type InquiryType =
@@ -311,13 +315,56 @@ export interface MediaAsset {
    changes these values and section order.
    ═══════════════════════════════════════════════════════════════════ */
 
-export type SectionBackground = "paper" | "paper-dim" | "obsidian";
-export type SectionSpacing = "tight" | "normal" | "spacious";
+export type SectionBackground = "default" | "paper" | "paper-dim" | "obsidian";
+export type SectionSpacing = "default" | "tight" | "normal" | "spacious";
 
 export interface EditableLink {
   label: string;
   href: string;
 }
+
+/* ── Custom blocks — new section types the admin can add anywhere ── */
+
+export interface BlockBase {
+  background?: SectionBackground;
+  spacing?: SectionSpacing;
+}
+export interface RichTextBlock extends BlockBase {
+  type: "richText";
+  eyebrow: string;
+  heading: string;
+  body: string;
+}
+export interface ImageBlock extends BlockBase {
+  type: "image";
+  image: string | null;
+  caption: string;
+  full: boolean;
+}
+export interface QuoteBlock extends BlockBase {
+  type: "quote";
+  text: string;
+  attribution: string;
+}
+export interface CtaBlock extends BlockBase {
+  type: "cta";
+  eyebrow: string;
+  heading: string;
+  body: string;
+  ctaLabel: string;
+  ctaHref: string;
+}
+export interface GalleryBlock extends BlockBase {
+  type: "gallery";
+  images: { url: string; alt: string }[];
+}
+export type CustomBlock =
+  | RichTextBlock
+  | ImageBlock
+  | QuoteBlock
+  | CtaBlock
+  | GalleryBlock;
+export type CustomBlockType = CustomBlock["type"];
 
 export type HomeSectionKey =
   | "intro"
@@ -329,10 +376,15 @@ export type HomeSectionKey =
   | "contactCta";
 
 export interface HomeContent {
-  /** Post-hero sections, in render order. */
-  order: HomeSectionKey[];
+  /** Post-hero sections, in render order. Entries are `HomeSectionKey` or
+   *  `block:<id>` for an admin-added custom block. */
+  order: (HomeSectionKey | string)[];
   /** Sections hidden without being deleted. */
-  hidden: HomeSectionKey[];
+  hidden: (HomeSectionKey | string)[];
+  /** Optional per-section background / spacing overrides, keyed like `order`. */
+  sectionStyles?: Record<string, BlockBase>;
+  /** Admin-added custom blocks, keyed by id. */
+  blocks?: Record<string, CustomBlock>;
   intro: { eyebrow: string; linkLabel: string };
   featured: { eyebrow: string; heading: string; linkLabel: string };
   disciplines: {
@@ -381,7 +433,7 @@ export interface AboutContent {
   portraitFallbackCaption: string;
   body: AboutBodySection[];
   educationEyebrow: string;
-  timeline: { eyebrow: string; heading: string; body: string };
+  timeline: { eyebrow: string; heading: string; body: string; stripLabel: string };
   nextCta: PageCtaCopy;
 }
 
@@ -422,7 +474,15 @@ export interface ExhibitionsContent {
 export interface ContactContent {
   eyebrow: string;
   formEyebrow: string;
+  /** WhatsApp button label */
   whatsappLabel: string;
+  /** Contact-detail row labels */
+  emailLabel: string;
+  phoneLabel: string;
+  whatsappRowLabel: string;
+  locationLabel: string;
+  /** Text of the WhatsApp detail row value */
+  messageStudio: string;
 }
 
 /**

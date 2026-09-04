@@ -7,6 +7,7 @@ import { motion, useMotionValueEvent, useScroll } from "motion/react";
 import type { SiteSettings } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Magnetic } from "@/components/motion/magnetic";
+import { EditableText } from "@/components/editor/editable-text";
 import { useEditableSettings } from "@/components/editor/use-editable";
 import { MobileMenu } from "./mobile-menu";
 import { useCursor } from "./cursor";
@@ -65,7 +66,7 @@ export function Header({ settings: base }: { settings: SiteSettings }) {
               aria-label={`${settings.brand} — home`}
             >
               <span className="font-display text-[0.95rem] font-medium uppercase tracking-[0.2em]">
-                {settings.brand}
+                <EditableText bind="@settings.brand">{settings.brand}</EditableText>
               </span>
               <span
                 className={cn(
@@ -73,12 +74,12 @@ export function Header({ settings: base }: { settings: SiteSettings }) {
                   solid ? "text-ink-mute" : "text-paper/60",
                 )}
               >
-                {settings.brandLine}
+                <EditableText bind="@settings.brandLine">{settings.brandLine}</EditableText>
               </span>
             </Link>
 
             <nav className="hidden items-center gap-9 md:flex" aria-label="Primary">
-              {settings.nav.map((item) => {
+              {settings.nav.map((item, i) => {
                 const active =
                   item.href === "/"
                     ? pathname === "/"
@@ -90,7 +91,7 @@ export function Header({ settings: base }: { settings: SiteSettings }) {
                     aria-current={active ? "page" : undefined}
                     className="group relative py-1 text-[0.6875rem] font-medium uppercase tracking-[0.16em]"
                   >
-                    {item.label}
+                    <EditableText bind={`@settings.nav.${i}.label`}>{item.label}</EditableText>
                     <span
                       className={cn(
                         "absolute -bottom-0.5 left-0 h-px w-full origin-right bg-current transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:origin-left group-hover:scale-x-100",

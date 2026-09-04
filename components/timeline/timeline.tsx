@@ -8,23 +8,116 @@ import { prefersReducedMotion } from "@/lib/client";
 import { homeDefaults } from "@/lib/content/defaults/home";
 import { Eyebrow } from "@/components/ui/primitives";
 import { EditableText } from "@/components/editor/editable-text";
+import { EditableImage } from "@/components/editor/editable-image";
+import { RepeatableList } from "@/components/editor/repeatable-list";
+import { useEditableData, useEditorMode } from "@/components/editor/use-editable";
+import { newTimelineEntry } from "@/lib/editor/new-entities";
+
+const STRIP_LABEL_DEFAULT = "His story — 1995 to 2017";
 
 /**
  * "His story" — a visual autobiography. On desktop it pins and scrolls
  * horizontally; on mobile (and under reduced-motion) it is a vertical
  * archive. Typographic by design — archival images attach per-entry
- * from Admin.
+ * from Admin. In the visual editor it collapses to one editable list.
  */
-export function Timeline({ entries }: { entries: TimelineEntry[] }) {
+export function Timeline({
+  entries,
+  label = STRIP_LABEL_DEFAULT,
+  labelBind = "about.timeline.stripLabel",
+}: {
+  entries: TimelineEntry[];
+  label?: string;
+  labelBind?: string;
+}) {
+  const editing = useEditorMode() === "edit";
+  const live = useEditableData<TimelineEntry>("timeline", entries);
+
+  if (editing) return <EditableTimeline entries={live} label={label} labelBind={labelBind} />;
+
+  const shown = live.filter((e) => e.published);
   return (
     <>
-      <HorizontalTimeline entries={entries} />
-      <VerticalTimeline entries={entries} />
+      <HorizontalTimeline entries={shown} label={label} />
+      <VerticalTimeline entries={shown} label={label} />
     </>
   );
 }
 
-function HorizontalTimeline({ entries }: { entries: TimelineEntry[] }) {
+/** One flat, fully editable list — replaces the pinned scroll in edit mode. */
+function EditableTimeline({
+  entries,
+  label,
+  labelBind,
+}: {
+  entries: TimelineEntry[];
+  label: string;
+  labelBind: string;
+}) {
+  return (
+    <section className="u-container py-16">
+      <Eyebrow>
+        <EditableText bind={labelBind}>{label}</EditableText>
+      </Eyebrow>
+      <ol className="mt-10 border-l border-line pl-6">
+        <RepeatableList
+          slug="about"
+          path="timelineEntries"
+          items={entries}
+          makeItem={newTimelineEntry}
+          addLabel="Add a timeline moment"
+          addClassName="py-3"
+          listBind="@timeline"
+          kind="timeline"
+          itemLabel={(e) => `${e.year} · ${e.title}` || "Moment"}
+        >
+          {(entry, i) => (
+            <li
+              className="relative pb-12 last:pb-0"
+              data-unpublished={entry.published ? undefined : ""}
+            >
+              <span className="absolute -left-[1.6rem] top-1.5 h-2 w-2 rounded-full bg-ink" />
+              <span className="font-display text-[2.4rem] font-light leading-none text-ink-faint/60">
+                <EditableText bind={`@timeline.${i}.year`}>{entry.year}</EditableText>
+              </span>
+              <h3 className="mt-3 font-display text-[1.4rem] font-normal leading-tight text-ink">
+                <EditableText bind={`@timeline.${i}.title`}>{entry.title}</EditableText>
+              </h3>
+              <p className="mt-2 text-[0.88rem] leading-relaxed text-ink-soft">
+                <EditableText bind={`@timeline.${i}.description`} multiline>
+                  {entry.description}
+                </EditableText>
+              </p>
+              <div className="mt-3 max-w-xs">
+                <EditableImage bind={`@timeline.${i}.image`} folder="timeline">
+                  {entry.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={entry.image} alt="" className="w-full rounded" />
+                  ) : (
+                    <span className="text-[0.72rem] text-ink-faint underline">
+                      Add an image
+                    </span>
+                  )}
+                </EditableImage>
+              </div>
+              <p className="u-eyebrow mt-3 text-ink-faint">
+                <EditableText bind={`@timeline.${i}.category`}>{entry.category ?? ""}</EditableText>
+              </p>
+            </li>
+          )}
+        </RepeatableList>
+      </ol>
+    </section>
+  );
+}
+
+function HorizontalTimeline({
+  entries,
+  label,
+}: {
+  entries: TimelineEntry[];
+  label: string;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLOListElement>(null);
   const reduced = typeof window !== "undefined" && prefersReducedMotion();
@@ -59,7 +152,7 @@ function HorizontalTimeline({ entries }: { entries: TimelineEntry[] }) {
     >
       <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden">
         <div className="u-container">
-          <Eyebrow>His story — 1995 to 2017</Eyebrow>
+          <Eyebrow>{label}</Eyebrow>
         </div>
 
         <motion.ol
@@ -106,10 +199,16 @@ function HorizontalTimeline({ entries }: { entries: TimelineEntry[] }) {
   );
 }
 
-function VerticalTimeline({ entries }: { entries: TimelineEntry[] }) {
+function VerticalTimeline({
+  entries,
+  label,
+}: {
+  entries: TimelineEntry[];
+  label: string;
+}) {
   return (
     <section className="u-container py-16 lg:hidden">
-      <Eyebrow>His story — 1995 to 2017</Eyebrow>
+      <Eyebrow>{label}</Eyebrow>
       <ol className="mt-10 border-l border-line pl-6">
         {entries.map((entry) => (
           <motion.li
@@ -148,9 +247,19 @@ export function TimelineStrip({
   entries: TimelineEntry[];
   copy?: HomeContent["timeline"];
 }) {
-  const first = entries[0];
-  const last = entries[entries.length - 1];
-  if (!first || !last) return null;
+  const editing = useEditorMode() === "edit";
+  const live = useEditableData<TimelineEntry>("timeline", entries);
+  const published = live.filter((e) => e.published);
+
+  const first = published[0];
+  const last = published[published.length - 1];
+  if (!editing && (!first || !last)) return null;
+
+  const picks = editing
+    ? live.slice(0, 6)
+    : [first, published[Math.floor(published.length / 2)], last].filter(
+        (e): e is NonNullable<typeof e> => Boolean(e),
+      );
 
   return (
     <section className="u-container py-24 md:py-32">
@@ -179,9 +288,37 @@ export function TimelineStrip({
 
         <div className="md:col-span-8 md:pl-6">
           <div className="relative flex gap-8 overflow-x-auto pb-4 [scrollbar-width:none] md:grid md:grid-cols-3 md:gap-6 md:overflow-visible">
-            {[first, entries[Math.floor(entries.length / 2)], last]
-              .filter((e): e is NonNullable<typeof e> => Boolean(e))
-              .map((entry) => (
+            {editing ? (
+              <RepeatableList
+                slug="home"
+                path="timelinePicks"
+                items={picks}
+                indexOf={(e) => live.indexOf(e)}
+                makeItem={newTimelineEntry}
+                addLabel="Add a moment"
+                addClassName="py-2 md:col-span-3"
+                listBind="@timeline"
+                kind="timeline"
+                itemLabel={(entry) => `${entry.year} · ${entry.title}`}
+              >
+                {(entry, i) => (
+                  <div className="min-w-[68vw] sm:min-w-[280px] md:min-w-0">
+                    <span className="font-display text-[2.6rem] font-light leading-none text-ink-faint/55">
+                      <EditableText bind={`@timeline.${i}.year`}>{entry.year}</EditableText>
+                    </span>
+                    <h3 className="mt-3 font-display text-[1.15rem] leading-snug text-ink">
+                      <EditableText bind={`@timeline.${i}.title`}>{entry.title}</EditableText>
+                    </h3>
+                    <p className="mt-2 text-[0.82rem] leading-relaxed text-ink-mute">
+                      <EditableText bind={`@timeline.${i}.description`} multiline>
+                        {entry.description}
+                      </EditableText>
+                    </p>
+                  </div>
+                )}
+              </RepeatableList>
+            ) : (
+              picks.map((entry) => (
                 <div key={entry.id} className="min-w-[68vw] sm:min-w-[280px] md:min-w-0">
                   <span className="font-display text-[2.6rem] font-light leading-none text-ink-faint/55">
                     {entry.year}
@@ -193,7 +330,8 @@ export function TimelineStrip({
                     {entry.description}
                   </p>
                 </div>
-              ))}
+              ))
+            )}
           </div>
           <p className="mt-10">
             <a

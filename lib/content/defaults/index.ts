@@ -52,6 +52,8 @@ function mergeHomeContent(stored: unknown): HomeContent {
   return {
     order: s.order?.length ? s.order : homeDefaults.order,
     hidden: Array.isArray(s.hidden) ? s.hidden : homeDefaults.hidden,
+    sectionStyles: s.sectionStyles ?? {},
+    blocks: s.blocks ?? {},
     intro: { ...homeDefaults.intro, ...s.intro },
     featured: { ...homeDefaults.featured, ...s.featured },
     disciplines: {

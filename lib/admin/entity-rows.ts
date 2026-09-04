@@ -11,7 +11,9 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export const isRealId = (id: unknown): id is string =>
   typeof id === "string" && UUID_RE.test(id);
 
-export function workRow(w: Work): Record<string, unknown> {
+/** `index` (array position at publish time) becomes `sort_order` so on-page
+ *  drag-reorder persists. Falls back to the entity's own `sortOrder`. */
+export function workRow(w: Work, index?: number): Record<string, unknown> {
   return {
     id: w.id,
     slug: w.slug,
@@ -38,10 +40,14 @@ export function workRow(w: Work): Record<string, unknown> {
     currency: w.currency ?? "INR",
     price_visible: w.priceVisible ?? false,
     featured: w.featured ?? false,
-    sort_order: w.sortOrder ?? 100,
+    sort_order: index ?? w.sortOrder ?? 100,
     cover_image: normalizeImageUrl(w.coverImage) || null,
     accent: w.accent ?? null,
-    images: (w.images ?? []).map((im) => ({ ...im, url: normalizeImageUrl(im.url) })),
+    images: (w.images ?? []).map((im, i) => ({
+      ...im,
+      url: normalizeImageUrl(im.url),
+      sortOrder: i,
+    })),
     related_slugs: w.relatedSlugs ?? [],
     seo: w.seo ?? {},
     published_at:
@@ -50,7 +56,7 @@ export function workRow(w: Work): Record<string, unknown> {
   };
 }
 
-export function collectionRow(c: Collection): Record<string, unknown> {
+export function collectionRow(c: Collection, index?: number): Record<string, unknown> {
   return {
     id: c.id,
     slug: c.slug,
@@ -60,12 +66,12 @@ export function collectionRow(c: Collection): Record<string, unknown> {
     cover_image: normalizeImageUrl(c.coverImage) || null,
     featured: c.featured ?? false,
     published: c.published ?? true,
-    sort_order: c.sortOrder ?? 100,
+    sort_order: index ?? c.sortOrder ?? 100,
     updated_at: new Date().toISOString(),
   };
 }
 
-export function exhibitionRow(e: Exhibition): Record<string, unknown> {
+export function exhibitionRow(e: Exhibition, index?: number): Record<string, unknown> {
   return {
     id: e.id,
     title: e.title,
@@ -78,13 +84,13 @@ export function exhibitionRow(e: Exhibition): Record<string, unknown> {
     description: e.description ?? null,
     url: e.url ?? null,
     published: e.published ?? true,
-    sort_order: e.sortOrder ?? 100,
+    sort_order: index ?? e.sortOrder ?? 100,
     related_slugs: e.relatedSlugs ?? [],
     updated_at: new Date().toISOString(),
   };
 }
 
-export function timelineRow(t: TimelineEntry): Record<string, unknown> {
+export function timelineRow(t: TimelineEntry, index?: number): Record<string, unknown> {
   return {
     id: t.id,
     year: t.year,
@@ -92,7 +98,7 @@ export function timelineRow(t: TimelineEntry): Record<string, unknown> {
     description: t.description ?? "",
     image: normalizeImageUrl(t.image) || null,
     category: t.category ?? null,
-    sort_order: t.sortOrder ?? 100,
+    sort_order: index ?? t.sortOrder ?? 100,
     published: t.published ?? true,
     updated_at: new Date().toISOString(),
   };

@@ -10,6 +10,8 @@ import { blurFor } from "@/lib/content/blur";
 import { ArtImage } from "@/components/motion/image-reveal";
 import { Magnetic } from "@/components/motion/magnetic";
 import { useCursor } from "@/components/site/cursor";
+import { EditableText } from "@/components/editor/editable-text";
+import { useEditorMode, useNodeProps } from "@/components/editor/use-editable";
 
 export function Hero({ hero, work }: { hero: HeroConfig; work: Work | null }) {
   const ref = useRef<HTMLElement>(null);
@@ -21,6 +23,8 @@ export function Hero({ hero, work }: { hero: HeroConfig; work: Work | null }) {
   const contentY = useTransform(scrollYProgress, [0, 1], [0, 46]);
   const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
   const { setCursor, reset } = useCursor();
+  const editing = useEditorMode() === "edit";
+  const nodeProps = useNodeProps("home", "@settings.hero", "hero", "Hero");
 
   const image = work?.coverImage ?? hero.image ?? "/work/ghosts-takht-mahal.jpg";
   const alt = work?.images[0]?.alt ?? "Featured work by Shivjeet Potdar";
@@ -29,6 +33,7 @@ export function Hero({ hero, work }: { hero: HeroConfig; work: Work | null }) {
   return (
     <section
       ref={ref}
+      {...nodeProps}
       className="u-invert relative flex h-[100svh] min-h-[600px] flex-col justify-end overflow-hidden"
     >
       <motion.div style={{ y: imageY }} className="absolute inset-[-6%_0_0_0] -z-20">
@@ -59,23 +64,34 @@ export function Hero({ hero, work }: { hero: HeroConfig; work: Work | null }) {
           transition={{ duration: 0.8, ease: EASE.outExpo, delay: 0.15 }}
           className="text-[0.6875rem] font-medium uppercase tracking-[0.24em] text-paper/70"
         >
-          {hero.eyebrow}
+          <EditableText bind="@settings.hero.eyebrow">{hero.eyebrow}</EditableText>
         </motion.p>
 
-        <h1 className="mt-6 max-w-[15ch] font-display text-[clamp(2.5rem,1.1rem+5.4vw,5.8rem)] font-light leading-[1.03] tracking-[-0.02em] text-paper md:mt-7">
-          {headingLines.map((line, i) => (
-            <span key={i} className="block overflow-hidden pb-[0.06em]">
-              <motion.span
-                className="block"
-                initial={{ y: "110%" }}
-                animate={{ y: "0%" }}
-                transition={{ duration: 1, ease: EASE.outExpo, delay: 0.28 + i * 0.12 }}
-              >
-                {line}
-              </motion.span>
-            </span>
-          ))}
-        </h1>
+        {editing ? (
+          <EditableText
+            as="h1"
+            bind="@settings.hero.heading"
+            linebreaks
+            className="mt-6 max-w-[15ch] font-display text-[clamp(2.5rem,1.1rem+5.4vw,5.8rem)] font-light leading-[1.03] tracking-[-0.02em] text-paper md:mt-7"
+          >
+            {hero.heading}
+          </EditableText>
+        ) : (
+          <h1 className="mt-6 max-w-[15ch] font-display text-[clamp(2.5rem,1.1rem+5.4vw,5.8rem)] font-light leading-[1.03] tracking-[-0.02em] text-paper md:mt-7">
+            {headingLines.map((line, i) => (
+              <span key={i} className="block overflow-hidden pb-[0.06em]">
+                <motion.span
+                  className="block"
+                  initial={{ y: "110%" }}
+                  animate={{ y: "0%" }}
+                  transition={{ duration: 1, ease: EASE.outExpo, delay: 0.28 + i * 0.12 }}
+                >
+                  {line}
+                </motion.span>
+              </span>
+            ))}
+          </h1>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 18 }}
@@ -90,7 +106,7 @@ export function Hero({ hero, work }: { hero: HeroConfig; work: Work | null }) {
               onPointerLeave={reset}
               className="inline-flex items-center gap-3 border border-paper/35 px-8 py-3.5 text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-paper transition-colors hover:border-paper hover:bg-paper/10"
             >
-              {hero.ctaLabel}
+              <EditableText bind="@settings.hero.ctaLabel">{hero.ctaLabel}</EditableText>
               <span aria-hidden>&rarr;</span>
             </Link>
           </Magnetic>

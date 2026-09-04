@@ -7,4 +7,9 @@ export const contactDefaults: ContactContent = {
   eyebrow: "Contact",
   formEyebrow: "Send an enquiry",
   whatsappLabel: "Chat on WhatsApp",
+  emailLabel: "Email",
+  phoneLabel: "Phone",
+  whatsappRowLabel: "WhatsApp",
+  locationLabel: "Based in",
+  messageStudio: "Message the studio",
 };

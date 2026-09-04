@@ -8,10 +8,16 @@ import { InquiryForm } from "@/components/forms/inquiry-form";
 import { WhatsAppLink } from "@/components/site/whatsapp-button";
 import { EditableText } from "@/components/editor/editable-text";
 import { EditableHeading } from "@/components/editor/editable-heading";
-import { useEditable, useEditableSettings } from "@/components/editor/use-editable";
+import { RepeatableList } from "@/components/editor/repeatable-list";
+import {
+  useEditable,
+  useEditableProfile,
+  useEditableSettings,
+} from "@/components/editor/use-editable";
+import { newSocial } from "@/lib/editor/new-entities";
 
 export function ContactView({
-  profile,
+  profile: baseProfile,
   settings,
   serverContent,
 }: {
@@ -23,23 +29,23 @@ export function ContactView({
     eyebrow: useEditable("contact", "eyebrow", serverContent.eyebrow),
     formEyebrow: useEditable("contact", "formEyebrow", serverContent.formEyebrow),
     whatsappLabel: useEditable("contact", "whatsappLabel", serverContent.whatsappLabel),
+    emailLabel: useEditable("contact", "emailLabel", serverContent.emailLabel),
+    phoneLabel: useEditable("contact", "phoneLabel", serverContent.phoneLabel),
+    whatsappRowLabel: useEditable("contact", "whatsappRowLabel", serverContent.whatsappRowLabel),
+    locationLabel: useEditable("contact", "locationLabel", serverContent.locationLabel),
+    messageStudio: useEditable("contact", "messageStudio", serverContent.messageStudio),
   };
   const contactCopy = useEditableSettings("contactCopy", settings.contactCopy);
+  const profile: Profile = {
+    ...baseProfile,
+    email: useEditableProfile("email", baseProfile.email),
+    phone: useEditableProfile("phone", baseProfile.phone),
+    location: useEditableProfile("location", baseProfile.location),
+    social: useEditableProfile("social", baseProfile.social),
+    whatsapp: useEditableProfile("whatsapp", baseProfile.whatsapp),
+  };
 
   const waHref = whatsappLink(whatsappGeneralMessage(settings.brand), profile.whatsapp);
-
-  const details = [
-    { label: "Email", value: profile.email, href: `mailto:${profile.email}` },
-    { label: "Phone", value: profile.phone, href: `tel:${profile.phone.replace(/\s/g, "")}` },
-    { label: "WhatsApp", value: "Message the studio", href: waHref, external: true },
-    ...profile.social.map((s) => ({
-      label: s.label,
-      value: s.label,
-      href: s.href,
-      external: true,
-    })),
-    { label: "Based in", value: profile.location, href: undefined },
-  ];
 
   return (
     <div className="u-container grid gap-16 pb-24 pt-36 md:grid-cols-12 md:gap-10 md:pb-32 md:pt-44">
@@ -60,23 +66,71 @@ export function ContactView({
         </Reveal>
 
         <Reveal delay={0.15} className="mt-12 flex flex-col gap-6">
-          {details.map((d) => (
-            <div key={d.label}>
-              <p className="u-eyebrow">{d.label}</p>
-              {d.href ? (
+          <Detail label={<EditableText bind="contact.emailLabel">{content.emailLabel}</EditableText>}>
+            <a
+              href={`mailto:${profile.email}`}
+              className="mt-1 inline-block text-[0.95rem] text-ink transition-colors hover:text-accent-deep"
+            >
+              <EditableText bind="@profile.email">{profile.email}</EditableText>
+            </a>
+          </Detail>
+
+          <Detail label={<EditableText bind="contact.phoneLabel">{content.phoneLabel}</EditableText>}>
+            <a
+              href={`tel:${profile.phone.replace(/\s/g, "")}`}
+              className="mt-1 inline-block text-[0.95rem] text-ink transition-colors hover:text-accent-deep"
+            >
+              <EditableText bind="@profile.phone">{profile.phone}</EditableText>
+            </a>
+          </Detail>
+
+          <Detail
+            label={
+              <EditableText bind="contact.whatsappRowLabel">{content.whatsappRowLabel}</EditableText>
+            }
+          >
+            <a
+              href={waHref}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-1 inline-block text-[0.95rem] text-ink transition-colors hover:text-accent-deep"
+            >
+              <EditableText bind="contact.messageStudio">{content.messageStudio}</EditableText>
+            </a>
+          </Detail>
+
+          <RepeatableList
+            slug="contact"
+            path="social"
+            items={profile.social}
+            makeItem={newSocial}
+            addLabel="Add social link"
+            addClassName="py-1"
+            listBind="@profile.social"
+            kind="social"
+            itemLabel={(s) => s.label || "Social link"}
+          >
+            {(s, i) => (
+              <Detail label={s.label}>
                 <a
-                  href={d.href}
-                  target={d.external ? "_blank" : undefined}
-                  rel={d.external ? "noreferrer" : undefined}
+                  href={s.href}
+                  target="_blank"
+                  rel="noreferrer"
                   className="mt-1 inline-block text-[0.95rem] text-ink transition-colors hover:text-accent-deep"
                 >
-                  {d.value}
+                  <EditableText bind={`@profile.social.${i}.label`}>{s.label}</EditableText>
                 </a>
-              ) : (
-                <p className="mt-1 text-[0.95rem] text-ink-soft">{d.value}</p>
-              )}
-            </div>
-          ))}
+              </Detail>
+            )}
+          </RepeatableList>
+
+          <Detail
+            label={<EditableText bind="contact.locationLabel">{content.locationLabel}</EditableText>}
+          >
+            <p className="mt-1 text-[0.95rem] text-ink-soft">
+              <EditableText bind="@profile.location">{profile.location}</EditableText>
+            </p>
+          </Detail>
         </Reveal>
 
         <Reveal delay={0.2} className="mt-10">
@@ -92,6 +146,15 @@ export function ContactView({
           <InquiryForm />
         </Reveal>
       </div>
+    </div>
+  );
+}
+
+function Detail({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="u-eyebrow">{label}</p>
+      {children}
     </div>
   );
 }

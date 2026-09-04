@@ -32,6 +32,10 @@ export interface EditorSettings {
   /** Editable footer legal / attribution text (was hard-coded). */
   footerLegal: string;
   footerOwner: string;
+  /** `© {year} {brand}. All rights reserved.` — tokens substituted at render. */
+  footerCopyright: string;
+  /** Studio credit line under the copyright; `{name}` / `{roles}` tokens. */
+  footerCredit: string;
 }
 
 /** Records that live in their own DB tables but are edited inline. */
@@ -52,4 +56,10 @@ export interface EditorSelection {
   /** dotted path for text, or `@section:<key>` / `@item:<path>:<index>` for a block */
   id: string;
   kind: "text" | "section";
+  /** inspector schema key (`data-edit-kind`) — drives a field-form inspector */
+  schema?: string;
+  /** snapshot path the schema's fields are relative to (`data-edit-bind`) */
+  bind?: string;
+  /** human label for the inspector header */
+  label?: string;
 }

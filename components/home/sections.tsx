@@ -5,7 +5,6 @@ import { motion } from "motion/react";
 import type {
   Collection,
   HomeContent,
-  Profile,
   SiteSettings,
   Work,
 } from "@/lib/types";
@@ -22,15 +21,18 @@ import { Eyebrow, Rule, TextLink } from "@/components/ui/primitives";
 import { useCursor } from "@/components/site/cursor";
 import { EditableText } from "@/components/editor/editable-text";
 import { EditableImage } from "@/components/editor/editable-image";
+import { RepeatableList } from "@/components/editor/repeatable-list";
+import { useEditableData, useEditorMode } from "@/components/editor/use-editable";
+import { newCollection } from "@/lib/editor/new-entities";
 
 /* ── 02 · Artist introduction ─────────────────────────────── */
 
 export function Intro({
-  profile,
+  bio,
   settings,
   copy = homeDefaults.intro,
 }: {
-  profile: Profile;
+  bio: string[];
   settings: SiteSettings;
   copy?: HomeContent["intro"];
 }) {
@@ -52,10 +54,14 @@ export function Intro({
           />
           <div className="mt-10 grid gap-8 md:grid-cols-2">
             <Reveal className="u-prose text-[0.92rem] leading-[1.75]">
-              <p>{profile.bio[0]}</p>
+              <EditableText as="p" bind="@profile.bio.0" multiline>
+                {bio[0] ?? ""}
+              </EditableText>
             </Reveal>
             <Reveal delay={0.08} className="u-prose text-[0.92rem] leading-[1.75]">
-              <p>{profile.bio[1]}</p>
+              <EditableText as="p" bind="@profile.bio.1" multiline>
+                {bio[1] ?? ""}
+              </EditableText>
               <p className="mt-6">
                 <TextLink href="/about">
                   <EditableText bind="home.intro.linkLabel">{copy.linkLabel}</EditableText>
@@ -85,6 +91,8 @@ export function Disciplines({
   copy?: HomeContent["disciplines"];
 }) {
   const { setCursor, reset } = useCursor();
+  const works = useEditableData<Work>("works", []);
+  const workIndex = (slug: string) => works.findIndex((w) => w.slug === slug);
   return (
     <section className="border-y border-line bg-paper-dim/50 py-24 md:py-36">
       <div className="u-container">
@@ -110,7 +118,9 @@ export function Disciplines({
         </Reveal>
 
         <StaggerList className="mt-16 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-          {cards.map(({ discipline, work, blurb }) => (
+          {cards.map(({ discipline, work, blurb }) => {
+            const wi = workIndex(work.slug);
+            return (
             <StaggerItem key={discipline} as="article">
               <Link
                 href={`/work?discipline=${discipline}`}
@@ -118,16 +128,18 @@ export function Disciplines({
                 onPointerEnter={() => setCursor("view")}
                 onPointerLeave={reset}
               >
-                <ArtImage
-                  src={work.coverImage}
-                  alt={work.images[0]?.alt ?? work.title}
-                  ratio="5 / 4"
-                  fill
-                  sizes="(min-width:1024px) 30vw, (min-width:640px) 45vw, 100vw"
-                  hoverZoom
-                  placeholder={blurFor(work.coverImage) ? "blur" : "empty"}
-                  blurDataURL={blurFor(work.coverImage)}
-                />
+                <EditableImage bind={wi >= 0 ? `@works.${wi}.coverImage` : "home.disciplines.__none"} folder="work">
+                  <ArtImage
+                    src={work.coverImage}
+                    alt={work.images[0]?.alt ?? work.title}
+                    ratio="5 / 4"
+                    fill
+                    sizes="(min-width:1024px) 30vw, (min-width:640px) 45vw, 100vw"
+                    hoverZoom
+                    placeholder={blurFor(work.coverImage) ? "blur" : "empty"}
+                    blurDataURL={blurFor(work.coverImage)}
+                  />
+                </EditableImage>
                 <h3 className="mt-5 font-display text-[1.4rem] font-normal text-ink">
                   {DISCIPLINE_LABELS[discipline]}
                 </h3>
@@ -141,7 +153,8 @@ export function Disciplines({
                 </EditableText>
               </Link>
             </StaggerItem>
-          ))}
+            );
+          })}
         </StaggerList>
       </div>
     </section>
@@ -213,7 +226,11 @@ export function CollectionsRail({
   collections: Collection[];
   copy?: HomeContent["collections"];
 }) {
-  if (!collections.length) return null;
+  const editing = useEditorMode() === "edit";
+  const live = useEditableData<Collection>("collections", collections);
+  const shown = editing ? live : live.filter((c) => c.published).slice(0, 3);
+  if (!editing && !shown.length) return null;
+
   return (
     <section className="u-container py-24 md:py-32">
       <Reveal className="flex items-end justify-between gap-6">
@@ -234,28 +251,50 @@ export function CollectionsRail({
         </TextLink>
       </Reveal>
       <StaggerList className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {collections.slice(0, 3).map((c) => (
-          <StaggerItem key={c.slug} as="article">
-            <Link href={`/work/collection/${c.slug}`} className="group block">
-              {c.coverImage && (
-                <ArtImage
-                  src={c.coverImage}
-                  alt={c.title}
-                  ratio="3 / 2"
-                  fill
-                  sizes="(min-width:1024px) 30vw, 45vw"
-                  hoverZoom
-                  placeholder={blurFor(c.coverImage) ? "blur" : "empty"}
-                  blurDataURL={blurFor(c.coverImage)}
-                />
-              )}
-              <h3 className="mt-4 font-display text-[1.3rem] text-ink">{c.title}</h3>
-              <p className="mt-2 line-clamp-2 max-w-xs text-[0.82rem] leading-relaxed text-ink-mute">
-                {c.description}
-              </p>
-            </Link>
-          </StaggerItem>
-        ))}
+        <RepeatableList
+          slug="work"
+          path="collections"
+          items={shown}
+          makeItem={newCollection}
+          addLabel="Add a series"
+          addClassName="py-2 sm:col-span-2 lg:col-span-3"
+          listBind="@collections"
+          kind="collection"
+          itemLabel={(c) => c.title || "Series"}
+        >
+          {(c, i) => (
+            <StaggerItem as="article" data-unpublished={editing && !c.published ? "" : undefined}>
+              <Link href={`/work/collection/${c.slug}`} className="group block">
+                <EditableImage bind={`@collections.${i}.coverImage`} folder="collection">
+                  {c.coverImage ? (
+                    <ArtImage
+                      src={c.coverImage}
+                      alt={c.title}
+                      ratio="3 / 2"
+                      fill
+                      sizes="(min-width:1024px) 30vw, 45vw"
+                      hoverZoom
+                      placeholder={blurFor(c.coverImage) ? "blur" : "empty"}
+                      blurDataURL={blurFor(c.coverImage)}
+                    />
+                  ) : editing ? (
+                    <div className="grid aspect-[3/2] place-items-center bg-neutral-100 text-[12px] text-neutral-400">
+                      Click to add a cover
+                    </div>
+                  ) : null}
+                </EditableImage>
+                <h3 className="mt-4 font-display text-[1.3rem] text-ink">
+                  <EditableText bind={`@collections.${i}.title`}>{c.title}</EditableText>
+                </h3>
+                <p className="mt-2 line-clamp-2 max-w-xs text-[0.82rem] leading-relaxed text-ink-mute">
+                  <EditableText bind={`@collections.${i}.description`} multiline>
+                    {c.description}
+                  </EditableText>
+                </p>
+              </Link>
+            </StaggerItem>
+          )}
+        </RepeatableList>
       </StaggerList>
     </section>
   );

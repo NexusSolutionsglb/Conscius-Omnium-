@@ -3,6 +3,11 @@
 import { useMemo } from "react";
 import type { Work } from "@/lib/types";
 import { StaggerList } from "@/components/motion/reveal";
+import { EditableText } from "@/components/editor/editable-text";
+import { EditableImage } from "@/components/editor/editable-image";
+import { RepeatableList } from "@/components/editor/repeatable-list";
+import { useEditableData, useEditorMode } from "@/components/editor/use-editable";
+import { newWork } from "@/lib/editor/new-entities";
 import { WorkCard, type CardSize } from "./work-card";
 
 /**
@@ -10,6 +15,9 @@ import { WorkCard, type CardSize } from "./work-card";
  * repeating six-beat rhythm: a full-bleed opener, an offset pair, a
  * centred smaller piece, a right-shifted wide, a left-held standard,
  * then a portrait. Whitespace does the rest.
+ *
+ * In the visual editor it becomes one plain editable grid so every work
+ * can be added / reordered / hidden / opened for editing.
  */
 
 type Slot =
@@ -26,6 +34,60 @@ const RHYTHM: Slot[] = [
 ];
 
 export function WorkIndex({ works }: { works: Work[] }) {
+  const editing = useEditorMode() === "edit";
+  const live = useEditableData<Work>("works", works);
+
+  if (editing) return <EditableWorkGrid works={live} />;
+
+  return <RhythmGrid works={works} />;
+}
+
+function EditableWorkGrid({ works }: { works: Work[] }) {
+  return (
+    <div className="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+      <RepeatableList
+        slug="work"
+        path="items"
+        items={works}
+        makeItem={newWork}
+        addLabel="Add a work"
+        addClassName="py-3 sm:col-span-2 lg:col-span-3"
+        listBind="@works"
+        kind="work"
+        itemLabel={(w) => w.title || "Work"}
+      >
+        {(work, i) => (
+          <article data-unpublished={work.status === "published" ? undefined : ""}>
+            <div className="relative">
+              <EditableImage bind={`@works.${i}.coverImage`} folder="work">
+                {work.coverImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={work.coverImage}
+                    alt={work.title}
+                    className="aspect-[3/2] w-full rounded object-cover"
+                  />
+                ) : (
+                  <div className="grid aspect-[3/2] place-items-center rounded bg-neutral-100 text-[12px] text-neutral-400">
+                    Click to add a cover
+                  </div>
+                )}
+              </EditableImage>
+            </div>
+            <h3 className="mt-4 font-display text-[1.35rem] font-normal leading-tight text-ink">
+              <EditableText bind={`@works.${i}.title`}>{work.title}</EditableText>
+            </h3>
+            <p className="u-eyebrow mt-1.5 text-ink-mute">
+              <EditableText bind={`@works.${i}.year`}>{work.year ?? ""}</EditableText>
+            </p>
+          </article>
+        )}
+      </RepeatableList>
+    </div>
+  );
+}
+
+function RhythmGrid({ works }: { works: Work[] }) {
   const rows = useMemo(() => {
     const out: { slot: Slot; items: Work[]; key: string }[] = [];
     let i = 0;

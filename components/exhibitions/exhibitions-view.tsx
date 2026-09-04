@@ -11,19 +11,34 @@ import { ExhibitionList } from "@/components/exhibitions/exhibition-list";
 import { EditableText } from "@/components/editor/editable-text";
 import { EditableHeading } from "@/components/editor/editable-heading";
 import { EditableRichText } from "@/components/editor/editable-rich-text";
-import { useEditable } from "@/components/editor/use-editable";
+import { RepeatableList } from "@/components/editor/repeatable-list";
+import { useEditable, useEditableData, useEditableProfile, useEditorMode } from "@/components/editor/use-editable";
+import { newEducation, newExhibition } from "@/lib/editor/new-entities";
+
+function groupByYear(list: Exhibition[]) {
+  const groups = new Map<string, Exhibition[]>();
+  for (const item of list) {
+    const bucket = groups.get(item.year) ?? [];
+    bucket.push(item);
+    groups.set(item.year, bucket);
+  }
+  return Array.from(groups.entries())
+    .sort((a, b) => Number(b[0]) - Number(a[0]))
+    .map(([year, items]) => ({ year, items }));
+}
 
 export function ExhibitionsView({
-  groups,
+  allExhibitions,
   onScreen,
   profile,
   serverContent,
 }: {
-  groups: { year: string; items: Exhibition[] }[];
+  allExhibitions: Exhibition[];
   onScreen: Work[];
   profile: Profile;
   serverContent: ExhibitionsContent;
 }) {
+  const editing = useEditorMode() === "edit";
   const hero = useEditable("exhibitions", "hero", serverContent.hero);
   const listEyebrow = useEditable("exhibitions", "listEyebrow", serverContent.listEyebrow);
   const listEmpty = useEditable("exhibitions", "listEmpty", serverContent.listEmpty);
@@ -34,6 +49,9 @@ export function ExhibitionsView({
     serverContent.trainingEyebrow,
   );
   const endCtaLabel = useEditable("exhibitions", "endCtaLabel", serverContent.endCtaLabel);
+  const liveExhibitions = useEditableData<Exhibition>("exhibitions", allExhibitions);
+  const education = useEditableProfile("education", profile.education);
+  const publicGroups = groupByYear(liveExhibitions.filter((e) => e.published));
 
   return (
     <>
@@ -61,8 +79,10 @@ export function ExhibitionsView({
           </Eyebrow>
         </Reveal>
         <div className="mt-8">
-          {groups.length ? (
-            <ExhibitionList groups={groups} />
+          {editing ? (
+            <EditableExhibitions items={liveExhibitions} />
+          ) : publicGroups.length ? (
+            <ExhibitionList groups={publicGroups} />
           ) : (
             <EditableText
               as="p"
@@ -75,7 +95,7 @@ export function ExhibitionsView({
         </div>
       </section>
 
-      {onScreen.length > 0 && (
+      {(onScreen.length > 0 || editing) && (
         <section className="border-y border-line bg-paper-dim/50 py-20 md:py-28">
           <div className="u-container">
             <Reveal className="max-w-2xl">
@@ -132,14 +152,34 @@ export function ExhibitionsView({
           </Eyebrow>
         </Reveal>
         <div className="mt-8 divide-y divide-line border-y border-line">
-          {profile.education.map((ed) => (
-            <div key={ed.qualification} className="grid gap-2 py-5 sm:grid-cols-[1fr_auto]">
-              <div>
-                <p className="font-display text-[1.2rem] text-ink">{ed.qualification}</p>
-                <p className="text-[0.84rem] text-ink-mute">{ed.institution}</p>
+          <RepeatableList
+            slug="exhibitions"
+            path="education"
+            items={education}
+            makeItem={newEducation}
+            addLabel="Add training / education"
+            addClassName="py-3"
+            listBind="@profile.education"
+            kind="education"
+            itemLabel={(e) => e.qualification || "Education"}
+          >
+            {(ed, i) => (
+              <div className="grid gap-2 py-5 sm:grid-cols-[1fr_auto]">
+                <div>
+                  <p className="font-display text-[1.2rem] text-ink">
+                    <EditableText bind={`@profile.education.${i}.qualification`}>
+                      {ed.qualification}
+                    </EditableText>
+                  </p>
+                  <p className="text-[0.84rem] text-ink-mute">
+                    <EditableText bind={`@profile.education.${i}.institution`}>
+                      {ed.institution}
+                    </EditableText>
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            )}
+          </RepeatableList>
         </div>
       </section>
 
@@ -151,5 +191,57 @@ export function ExhibitionsView({
         </Reveal>
       </section>
     </>
+  );
+}
+
+/** Flat, fully editable exhibitions list — shown in place of the year-grouped
+ *  accordion while editing. */
+function EditableExhibitions({ items }: { items: Exhibition[] }) {
+  return (
+    <div className="divide-y divide-line border-y border-line">
+      <RepeatableList
+        slug="exhibitions"
+        path="items"
+        items={items}
+        makeItem={newExhibition}
+        addLabel="Add an exhibition"
+        addClassName="py-3"
+        listBind="@exhibitions"
+        kind="exhibition"
+        itemLabel={(e) => `${e.year} · ${e.title}`}
+      >
+        {(item, i) => (
+          <div
+            className="py-4"
+            data-unpublished={item.published ? undefined : ""}
+          >
+            <div className="flex items-baseline justify-between gap-4">
+              <span className="font-display text-[1.25rem] font-normal text-ink">
+                <EditableText bind={`@exhibitions.${i}.title`}>{item.title}</EditableText>
+              </span>
+              <span className="u-eyebrow shrink-0 text-ink-faint">
+                <EditableText bind={`@exhibitions.${i}.year`}>{item.year}</EditableText>
+              </span>
+            </div>
+            <p className="mt-0.5 text-[0.82rem] text-ink-mute">
+              <EditableText bind={`@exhibitions.${i}.venue`}>{item.venue}</EditableText>
+              {(item.city || item.country) && (
+                <>
+                  {", "}
+                  <EditableText bind={`@exhibitions.${i}.city`}>{item.city ?? ""}</EditableText>
+                </>
+              )}
+            </p>
+            {item.description && (
+              <p className="mt-2 max-w-xl text-[0.86rem] leading-relaxed text-ink-soft">
+                <EditableText bind={`@exhibitions.${i}.description`} multiline>
+                  {item.description}
+                </EditableText>
+              </p>
+            )}
+          </div>
+        )}
+      </RepeatableList>
+    </div>
   );
 }

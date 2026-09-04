@@ -78,6 +78,7 @@ export default async function HomePage() {
       profile={profile}
       settings={settings}
       heroWork={heroWork ?? featured[0] ?? null}
+      works={allWorks}
       featured={featured.slice(0, 5)}
       disciplineCards={disciplineCards}
       timeline={timeline}

@@ -1,12 +1,13 @@
 "use client";
 
 import { createStore } from "zustand/vanilla";
-import type { PageContentMap } from "@/lib/types";
+import type { CustomBlockType, PageContentMap } from "@/lib/types";
 import {
   pageContentDefaults,
   mergePageContent,
   type EditablePageSlug,
 } from "@/lib/content/defaults";
+import { blockId, newBlock } from "./new-entities";
 import { getPath, setPath, reorderPath } from "./paths";
 import type { Device, EditorMode, EditorSelection, EditorSnapshot } from "./types";
 
@@ -41,6 +42,11 @@ export interface EditorStore extends EditorSnapshot {
   duplicateItem: (slug: EditablePageSlug, path: string, index: number) => void;
   toggleHidden: (slug: EditablePageSlug, key: string) => void;
   restoreSection: (slug: EditablePageSlug, key: string) => void;
+
+  /* ── custom section blocks ── */
+  addBlock: (slug: EditablePageSlug, type: CustomBlockType, at?: number) => void;
+  duplicateSection: (slug: EditablePageSlug, key: string) => void;
+  deleteSection: (slug: EditablePageSlug, key: string) => void;
 
   restoreAll: () => void;
   discardDraft: () => void;
@@ -205,6 +211,75 @@ export function createEditorStore(initial: EditorSnapshot) {
         commit((d) => {
           const def = (pageContentDefaults[slug] as unknown as Record<string, unknown>)[key];
           return setPath(d, `pages.${slug}.${key}`, clone(def));
+        }),
+
+      addBlock: (slug, type, at) =>
+        commit((d) => {
+          const page = d.pages[slug] as {
+            order: string[];
+            blocks?: Record<string, unknown>;
+          };
+          const id = blockId();
+          const order = [...(page.order ?? [])];
+          order.splice(at ?? order.length, 0, `block:${id}`);
+          let next = setPath(d, `pages.${slug}.order`, order);
+          next = setPath(next, `pages.${slug}.blocks.${id}`, newBlock(type));
+          return next;
+        }),
+
+      duplicateSection: (slug, key) =>
+        commit((d) => {
+          const page = d.pages[slug] as {
+            order: string[];
+            blocks?: Record<string, unknown>;
+          };
+          const order = [...(page.order ?? [])];
+          const i = order.indexOf(key);
+          if (i < 0) return d;
+          if (key.startsWith("block:")) {
+            const srcId = key.slice(6);
+            const src = (page.blocks ?? {})[srcId];
+            if (src == null) return d;
+            const id = blockId();
+            order.splice(i + 1, 0, `block:${id}`);
+            let next = setPath(d, `pages.${slug}.order`, order);
+            next = setPath(next, `pages.${slug}.blocks.${id}`, clone(src));
+            return next;
+          }
+          // Fixed section: duplicating just repeats it in the order.
+          order.splice(i + 1, 0, key);
+          return setPath(d, `pages.${slug}.order`, order);
+        }),
+
+      deleteSection: (slug, key) =>
+        commit((d) => {
+          const page = d.pages[slug] as {
+            order: string[];
+            hidden?: string[];
+            blocks?: Record<string, unknown>;
+            sectionStyles?: Record<string, unknown>;
+          };
+          const order = [...(page.order ?? [])];
+          const at = order.indexOf(key);
+          if (at >= 0) order.splice(at, 1);
+          let next = setPath(d, `pages.${slug}.order`, order);
+          next = setPath(
+            next,
+            `pages.${slug}.hidden`,
+            (page.hidden ?? []).filter((k) => k !== key),
+          );
+          if (key.startsWith("block:")) {
+            const id = key.slice(6);
+            const blocks = { ...(page.blocks ?? {}) };
+            delete blocks[id];
+            next = setPath(next, `pages.${slug}.blocks`, blocks);
+          }
+          if (page.sectionStyles?.[key]) {
+            const styles = { ...page.sectionStyles };
+            delete styles[key];
+            next = setPath(next, `pages.${slug}.sectionStyles`, styles);
+          }
+          return next;
         }),
 
       restoreAll: () =>

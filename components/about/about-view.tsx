@@ -13,16 +13,13 @@ import { EditableHeading } from "@/components/editor/editable-heading";
 import { EditableImage } from "@/components/editor/editable-image";
 import { RepeatableList } from "@/components/editor/repeatable-list";
 import { useEditable, useEditableProfile, useEditorMode } from "@/components/editor/use-editable";
+import { newEducation } from "@/lib/editor/new-entities";
 
 const NEW_SECTION = () => ({
   id: `about-${Date.now()}`,
   eyebrow: "New section",
   heading: "Heading",
   body: ["Write this section."],
-});
-const NEW_EDU = (): Profile["education"][number] => ({
-  qualification: "Qualification",
-  institution: "Institution",
 });
 
 export function AboutView({
@@ -196,10 +193,12 @@ export function AboutView({
             slug="about"
             path="__profile_education"
             items={p.education}
-            makeItem={NEW_EDU}
+            makeItem={newEducation}
             addLabel="Add education"
             addClassName="py-2"
             listBind="@profile.education"
+            kind="education"
+            itemLabel={(ed) => ed.qualification || "Education"}
           >
             {(ed, i) => (
               <Reveal as="div">
@@ -263,7 +262,11 @@ export function AboutView({
           </Reveal>
         </div>
         <div className="mt-6">
-          <Timeline entries={timeline} />
+          <Timeline
+            entries={timeline}
+            label={tl.stripLabel ?? "His story — 1995 to 2017"}
+            labelBind="about.timeline.stripLabel"
+          />
         </div>
       </section>
 

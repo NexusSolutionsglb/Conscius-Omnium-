@@ -5,6 +5,12 @@ import { type Variants } from "motion/react";
 import { fadeUp, revealUp, staggerContainer, viewportOnce } from "@/lib/motion";
 import { m } from "@/lib/motion-dom";
 
+/** Extra DOM props (e.g. `data-*`, `id`) passed straight through to the element. */
+type PassThrough = {
+  id?: string;
+  [key: `data-${string}`]: string | number | boolean | undefined;
+};
+
 type RevealProps = {
   children: ReactNode;
   as?: ElementType;
@@ -13,7 +19,7 @@ type RevealProps = {
   y?: number;
   once?: boolean;
   variant?: "fade-up" | "reveal-up";
-};
+} & PassThrough;
 
 /** Scroll-triggered fade + rise. The workhorse reveal. */
 export function Reveal({
@@ -24,6 +30,7 @@ export function Reveal({
   y,
   once = true,
   variant = "fade-up",
+  ...rest
 }: RevealProps) {
   const MotionTag = m(as as ElementType);
   const base = variant === "reveal-up" ? revealUp : fadeUp;
@@ -48,6 +55,7 @@ export function Reveal({
       initial="hidden"
       whileInView="show"
       viewport={once ? viewportOnce : { margin: "0px 0px -12% 0px" }}
+      {...rest}
     >
       {children}
     </MotionTag>
@@ -61,13 +69,14 @@ export function StaggerList({
   className,
   stagger = 0.09,
   delayChildren = 0,
+  ...rest
 }: {
   children: ReactNode;
   as?: ElementType;
   className?: string;
   stagger?: number;
   delayChildren?: number;
-}) {
+} & PassThrough) {
   const MotionTag = m(as as ElementType);
   return (
     <MotionTag
@@ -76,6 +85,7 @@ export function StaggerList({
       initial="hidden"
       whileInView="show"
       viewport={viewportOnce}
+      {...rest}
     >
       {children}
     </MotionTag>
@@ -86,14 +96,15 @@ export function StaggerItem({
   children,
   as = "div",
   className,
+  ...rest
 }: {
   children: ReactNode;
   as?: ElementType;
   className?: string;
-}) {
+} & PassThrough) {
   const MotionTag = m(as as ElementType);
   return (
-    <MotionTag className={className} variants={fadeUp}>
+    <MotionTag className={className} variants={fadeUp} {...rest}>
       {children}
     </MotionTag>
   );

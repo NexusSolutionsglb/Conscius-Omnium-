@@ -5,15 +5,25 @@ import { useEditorStore, useEditorStoreApi } from "./editor-store-context";
 import { useDragReorder } from "@/lib/editor/use-drag-reorder";
 import { pageContentDefaults, type EditablePageSlug } from "@/lib/content/defaults";
 
+type Meta = { schema?: string; bind?: string; label?: string };
+
 type Target =
-  | { kind: "section"; slug: EditablePageSlug; key: string; el: HTMLElement }
-  | {
+  | ({ kind: "section"; slug: EditablePageSlug; key: string; el: HTMLElement } & Meta)
+  | ({
       kind: "item";
       slug: EditablePageSlug;
       path: string;
       index: number;
       /** full snapshot path of the array this item lives in */
       listPath: string;
+      el: HTMLElement;
+    } & Meta)
+  | {
+      kind: "node";
+      slug: EditablePageSlug;
+      bind: string;
+      schema?: string;
+      label?: string;
       el: HTMLElement;
     };
 
@@ -29,12 +39,22 @@ function measurable(el: HTMLElement): HTMLElement {
   return el;
 }
 
+function meta(el: HTMLElement): Meta {
+  return {
+    schema: el.dataset.editKind || undefined,
+    bind: el.dataset.editBind || undefined,
+    label: el.dataset.editLabel || undefined,
+  };
+}
+
 function parse(el: HTMLElement | null): Target | null {
   if (!el) return null;
-  const sec = el.dataset.editSection; // "home:disciplines"
+  const sec = el.dataset.editSection; // "home:disciplines" | "home:block:b1a2"
   if (sec) {
-    const [slug, key] = sec.split(":");
-    return { kind: "section", slug: slug as EditablePageSlug, key, el: measurable(el) };
+    const i = sec.indexOf(":");
+    const slug = sec.slice(0, i);
+    const key = sec.slice(i + 1);
+    return { kind: "section", slug: slug as EditablePageSlug, key, el: measurable(el), ...meta(el) };
   }
   const item = el.dataset.editItem; // "about:body:2"
   if (item) {
@@ -46,13 +66,27 @@ function parse(el: HTMLElement | null): Target | null {
       index: Number(idx),
       listPath: el.dataset.editList ?? `pages.${slug}.${path}`,
       el: measurable(el),
+      ...meta(el),
+    };
+  }
+  const node = el.dataset.editNode; // "home" (slug) — inspector-only block
+  if (node) {
+    return {
+      kind: "node",
+      slug: (node || "home") as EditablePageSlug,
+      bind: el.dataset.editBind ?? "",
+      schema: el.dataset.editKind || undefined,
+      label: el.dataset.editLabel || undefined,
+      el: measurable(el),
     };
   }
   return null;
 }
 
 function selectionId(t: Target): string {
-  return t.kind === "section" ? `@section:${t.key}` : `@item:${t.path}:${t.index}`;
+  if (t.kind === "section") return `@section:${t.key}`;
+  if (t.kind === "item") return `@item:${t.path}:${t.index}`;
+  return `@node:${t.bind}`;
 }
 
 function findEl(slug: EditablePageSlug, id: string): HTMLElement | null {
@@ -65,8 +99,21 @@ function findEl(slug: EditablePageSlug, id: string): HTMLElement | null {
     const rest = id.slice("@item:".length); // "path:index"
     return document.querySelector<HTMLElement>(`[data-edit-item="${slug}:${rest}"]`);
   }
+  if (id.startsWith("@node:")) {
+    const bind = id.slice("@node:".length);
+    return document.querySelector<HTMLElement>(`[data-edit-node][data-edit-bind="${bind}"]`);
+  }
   return null;
 }
+
+const CSS = (t: Target) => ({
+  slug: t.slug,
+  id: selectionId(t),
+  kind: "section" as const,
+  schema: "schema" in t ? t.schema : undefined,
+  bind: "bind" in t ? t.bind : undefined,
+  label: "label" in t ? t.label : undefined,
+});
 
 /** Hover + selection frame and toolbar for editable sections and repeatable items. */
 export function SectionOverlay() {
@@ -78,7 +125,7 @@ export function SectionOverlay() {
   const activeRef = useRef<Target | null>(null);
   const clearTimer = useRef<number>(0);
 
-  // Sticky selection (a section/item that was clicked) wins over hover.
+  // Sticky selection (a section/item/node that was clicked) wins over hover.
   const sticky: Target | null =
     selection?.kind === "section" && selection.id.startsWith("@")
       ? parse(findEl(selection.slug, selection.id))
@@ -115,7 +162,9 @@ export function SectionOverlay() {
       const target = asEl(e.target);
       window.clearTimeout(clearTimer.current);
       if (target?.closest("[data-editor-ui]")) return; // over the toolbar — keep
-      const el = target?.closest<HTMLElement>("[data-edit-section],[data-edit-item]");
+      const el = target?.closest<HTMLElement>(
+        "[data-edit-section],[data-edit-item],[data-edit-node]",
+      );
       if (el) {
         setHover(parse(el));
       } else {
@@ -127,10 +176,12 @@ export function SectionOverlay() {
       if (draggingRef.current) return;
       if (!target || target.closest("[data-editor-ui]")) return;
       if (target.closest(".co-editable")) return; // editing text — leave it
-      const el = target.closest<HTMLElement>("[data-edit-section],[data-edit-item]");
+      const el = target.closest<HTMLElement>(
+        "[data-edit-section],[data-edit-item],[data-edit-node]",
+      );
       const t = parse(el);
       if (t && api) {
-        api.getState().select({ slug: t.slug, id: selectionId(t), kind: "section" });
+        api.getState().select(CSS(t));
       } else if (api) {
         api.getState().select(null);
       }
@@ -193,7 +244,9 @@ export function SectionOverlay() {
   const dragSelector =
     t.kind === "section"
       ? `[data-edit-section^="${t.slug}:"]`
-      : `[data-edit-item^="${t.slug}:${t.path}:"]`;
+      : t.kind === "item"
+        ? `[data-edit-item^="${t.slug}:${t.path}:"]`
+        : "";
 
   const st = api.getState();
   const pad = 2;
@@ -215,12 +268,11 @@ export function SectionOverlay() {
     left: Math.max(6, Math.min(rect.left, window.innerWidth - 260)),
   };
 
-  const openInspector = () =>
-    api.getState().select({ slug: t.slug, id: selectionId(t), kind: "section" });
+  const openInspector = () => api.getState().select(CSS(t));
 
   const order: string[] | undefined =
     t.kind === "section" ? (st.pages[t.slug] as { order?: string[] }).order : undefined;
-  const canMove = t.kind === "item" || (order?.length ?? 0) > 1;
+  const canMove = t.kind === "item" || (t.kind === "section" && (order?.length ?? 0) > 1);
 
   const move = (dir: -1 | 1) => {
     if (t.kind === "section") {
@@ -229,54 +281,75 @@ export function SectionOverlay() {
       const j = i + dir;
       if (i < 0 || j < 0 || j >= order.length) return;
       api.getState().reorder(t.slug, "order", i, j);
-    } else {
+    } else if (t.kind === "item") {
       api.getState().reorderList(t.listPath, t.index, t.index + dir);
     }
   };
 
   const canHide = t.kind === "section" && "hidden" in (st.pages[t.slug] as object);
-  const canDelete = t.kind === "item";
+  const isBlock = t.kind === "section" && t.key.startsWith("block:");
+  const canDelete = t.kind === "item" || t.kind === "section";
+  const canDuplicate = t.kind === "item" || t.kind === "section";
   const hasDefault =
     t.kind === "section" &&
     Object.prototype.hasOwnProperty.call(pageContentDefaults[t.slug], t.key);
+  const hasInspector = t.kind === "node" || t.kind === "item" || t.kind === "section";
+
+  const duplicate = () => {
+    if (t.kind === "item") api.getState().duplicateAt(t.listPath, t.index);
+    else if (t.kind === "section") api.getState().duplicateSection(t.slug, t.key);
+  };
+  const remove = () => {
+    if (t.kind === "item") {
+      if (confirm("Delete this block?")) api.getState().removeAt(t.listPath, t.index);
+    } else if (t.kind === "section") {
+      const msg = isBlock
+        ? "Delete this section?"
+        : "Remove this section? “Restore defaults” brings it back.";
+      if (confirm(msg)) api.getState().deleteSection(t.slug, t.key);
+    }
+  };
 
   return (
     <div data-editor-ui="">
       <div className="co-section-frame" style={frameStyle} data-selected={isSelected || undefined} />
       <DragChrome drag={drag} hint={hint} />
       <div className="co-section-toolbar" style={toolbarStyle}>
-        <button
-          title="Drag to reorder"
-          className="co-drag"
-          disabled={!canMove}
-          onPointerDown={(e) => {
-            if (!canMove || !wrapEl) return;
-            startDrag(e, {
-              label:
-                t.kind === "section"
-                  ? sectionLabel(t.key)
-                  : `Block ${t.index + 1}`,
-              selector: dragSelector,
-              fromEl: wrapEl,
-            });
-          }}
-        >
-          ⠿
-        </button>
-        <button title="Move up" disabled={!canMove} onClick={() => move(-1)}>
-          ↑
-        </button>
-        <button title="Move down" disabled={!canMove} onClick={() => move(1)}>
-          ↓
-        </button>
-        <button title="Edit settings" onClick={openInspector}>
-          ⚙
-        </button>
-        {t.kind === "item" && (
+        {(t.kind === "section" || t.kind === "item") && (
           <button
-            title="Duplicate"
-            onClick={() => api.getState().duplicateAt(t.listPath, t.index)}
+            title="Drag to reorder"
+            className="co-drag"
+            disabled={!canMove}
+            onPointerDown={(e) => {
+              if (!canMove || !wrapEl) return;
+              startDrag(e, {
+                label:
+                  t.kind === "section" ? sectionLabel(t.key) : t.label || `Block ${t.index + 1}`,
+                selector: dragSelector,
+                fromEl: wrapEl,
+              });
+            }}
           >
+            ⠿
+          </button>
+        )}
+        {(t.kind === "section" || t.kind === "item") && (
+          <>
+            <button title="Move up" disabled={!canMove} onClick={() => move(-1)}>
+              ↑
+            </button>
+            <button title="Move down" disabled={!canMove} onClick={() => move(1)}>
+              ↓
+            </button>
+          </>
+        )}
+        {hasInspector && (
+          <button title="Edit settings" onClick={openInspector}>
+            ⚙
+          </button>
+        )}
+        {canDuplicate && (
+          <button title="Duplicate" onClick={duplicate}>
             ⧉
           </button>
         )}
@@ -294,13 +367,7 @@ export function SectionOverlay() {
           </button>
         )}
         {canDelete && (
-          <button
-            className="co-danger"
-            title="Delete"
-            onClick={() => {
-              if (confirm("Delete this block?")) api.getState().removeAt(t.listPath, t.index);
-            }}
-          >
+          <button className="co-danger" title="Delete" onClick={remove}>
             🗑
           </button>
         )}
@@ -310,6 +377,7 @@ export function SectionOverlay() {
 }
 
 const SECTION_LABELS: Record<string, string> = {
+  hero: "Hero",
   intro: "Intro",
   featured: "Featured work",
   disciplines: "Disciplines",

@@ -17,6 +17,8 @@ export const homeDefaults: HomeContent = {
     "contactCta",
   ],
   hidden: [],
+  sectionStyles: {},
+  blocks: {},
 
   intro: {
     eyebrow: "The practice",

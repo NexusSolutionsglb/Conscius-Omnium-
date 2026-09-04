@@ -10,7 +10,12 @@ import { EDITABLE_PAGE_SLUGS, type EditablePageSlug } from "@/lib/content/defaul
 import type { PageContentMap } from "@/lib/types";
 import type { EditorSnapshot } from "@/lib/editor/types";
 import { EditorShell } from "@/components/editor/editor-shell";
-import { FOOTER_LEGAL_DEFAULT, FOOTER_OWNER_DEFAULT } from "@/lib/content/defaults/footer";
+import {
+  FOOTER_COPYRIGHT_DEFAULT,
+  FOOTER_CREDIT_DEFAULT,
+  FOOTER_LEGAL_DEFAULT,
+  FOOTER_OWNER_DEFAULT,
+} from "@/lib/content/defaults/footer";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +67,8 @@ export default async function EditPage({
       footerNote: settings.footerNote,
       footerLegal: settings.footerLegal ?? FOOTER_LEGAL_DEFAULT,
       footerOwner: settings.footerOwner ?? FOOTER_OWNER_DEFAULT,
+      footerCopyright: settings.footerCopyright ?? FOOTER_COPYRIGHT_DEFAULT,
+      footerCredit: settings.footerCredit ?? FOOTER_CREDIT_DEFAULT,
     },
   };
 

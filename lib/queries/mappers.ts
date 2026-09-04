@@ -182,12 +182,17 @@ export function mapSettings(row: SiteSettingsRow): SiteSettings {
       (row as { theme?: unknown }).theme,
     ),
     ...(() => {
-      const footer = asObject<{ legal?: string; owner?: string }>(
-        (row as { footer?: unknown }).footer,
-      );
+      const footer = asObject<{
+        legal?: string;
+        owner?: string;
+        copyright?: string;
+        credit?: string;
+      }>((row as { footer?: unknown }).footer);
       return {
         footerLegal: footer.legal,
         footerOwner: footer.owner,
+        footerCopyright: footer.copyright,
+        footerCredit: footer.credit,
       };
     })(),
   };

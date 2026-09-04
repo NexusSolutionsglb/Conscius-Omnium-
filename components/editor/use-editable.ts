@@ -51,3 +51,23 @@ export function useIsEditing(): boolean {
 export function useEditorMode(): "edit" | "preview" | undefined {
   return useOptionalEditorStore((s) => s.mode);
 }
+
+/**
+ * Data attributes that turn any element into an inspector-editable "node"
+ * (hero, footer bar, …). `{}` on the public site so the DOM is unchanged.
+ */
+export function useNodeProps(
+  slug: EditablePageSlug,
+  bind: string,
+  schema: string,
+  label: string,
+): Record<string, string> {
+  const inEditor = useOptionalEditorStore((s) => s.mode) !== undefined;
+  if (!inEditor) return {};
+  return {
+    "data-edit-node": slug,
+    "data-edit-bind": bind,
+    "data-edit-kind": schema,
+    "data-edit-label": label,
+  };
+}

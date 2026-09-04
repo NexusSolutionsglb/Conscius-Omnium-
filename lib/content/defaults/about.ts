@@ -22,6 +22,7 @@ export const aboutDefaults: AboutContent = {
     eyebrow: "His story",
     heading: "A visual autobiography, 1995–2017.",
     body: "Drawing mythology, then wanting to be an artist, then a scientist, then finding that architecture could hold both — and finally moving toward the boundary between reality and fiction.",
+    stripLabel: "His story — 1995 to 2017",
   },
   nextCta: {
     eyebrow: "Next",

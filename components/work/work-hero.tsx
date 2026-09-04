@@ -26,9 +26,7 @@ export function WorkHero({ work }: { work: Work }) {
                     Gallery
                   </Link>
                 </li>
-                <li aria-hidden className="text-ink-faint">
-                  /
-                </li>
+                <li aria-hidden className="text-ink-faint">·</li>
                 <li>
                   <Link
                     href={`/gallery?discipline=${work.discipline}`}
@@ -42,6 +40,10 @@ export function WorkHero({ work }: { work: Work }) {
             <h1 className="mt-4 max-w-4xl font-display text-[clamp(2.2rem,1.3rem+3.6vw,4.4rem)] font-light leading-[1.03]">
               {work.title}
             </h1>
+            <div className="mt-4 flex items-center gap-3">
+              <span className="block h-px w-12 bg-ink-faint" />
+              <span className="block h-px w-4 bg-ink-faint/50" />
+            </div>
           </div>
           {work.year && (
             <span className="font-display text-[1.5rem] font-light text-ink-faint">
@@ -51,7 +53,7 @@ export function WorkHero({ work }: { work: Work }) {
         </div>
       </div>
 
-      <div className="mt-10 md:mt-14">
+  <div className="mt-10 md:mt-16 bg-[#f5f3f0] py-14">
         <WorkImageViewer images={work.images} />
       </div>
     </div>

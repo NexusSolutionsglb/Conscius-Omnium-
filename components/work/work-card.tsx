@@ -81,7 +81,7 @@ export function WorkCard({
 
         <div
           className={cn(
-            "mt-4 flex flex-wrap items-start justify-between gap-x-6 gap-y-1.5",
+            "mt-5 flex flex-wrap items-start justify-between gap-x-6 gap-y-1.5 border-t border-line pt-4",
             align === "center" && "justify-center text-center",
             align === "right" && "flex-row-reverse text-right",
           )}

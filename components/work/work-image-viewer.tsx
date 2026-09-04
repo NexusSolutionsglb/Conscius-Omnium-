@@ -72,7 +72,7 @@ export function WorkImageViewer({ images }: { images: WorkImage[] }) {
             sizes="(min-width:1024px) 60vw, 92vw"
             placeholder={blurFor(current.url) ? "blur" : "empty"}
             blurDataURL={blurFor(current.url)}
-            wrapperClassName="h-[clamp(15rem,56vh,42rem)] max-w-full bg-paper"
+            wrapperClassName="w-full h-auto md:w-auto md:h-[clamp(20rem,75vh,54rem)]"
           />
         </button>
 
@@ -126,7 +126,7 @@ export function WorkImageViewer({ images }: { images: WorkImage[] }) {
                 sizes="88px"
                 placeholder={blurFor(image.url) ? "blur" : "empty"}
                 blurDataURL={blurFor(image.url)}
-                wrapperClassName="h-14 w-14 bg-paper md:h-[4.5rem] md:w-[4.5rem]"
+                wrapperClassName="h-14 w-14 md:h-[4.5rem] md:w-[4.5rem]"
               />
             </button>
           ))}

@@ -107,7 +107,7 @@ function RhythmGrid({ works }: { works: Work[] }) {
   }, [works]);
 
   return (
-    <div className="flex flex-col gap-24 md:gap-32">
+    <div className="flex flex-col gap-28 md:gap-40">
       {rows.map(({ slot, items, key }, rowIndex) => {
         if (!items.length || !items[0]) return null;
 
@@ -115,10 +115,10 @@ function RhythmGrid({ works }: { works: Work[] }) {
           return (
             <StaggerList
               key={key}
-              className="grid gap-x-10 gap-y-16 md:grid-cols-2 md:gap-x-16"
+              className="grid gap-x-12 gap-y-16 md:grid-cols-2 md:gap-x-20"
             >
               {items.map((work, i) => (
-                <div key={work.slug} className={i === 1 ? "md:pt-24" : undefined}>
+                <div key={work.slug} className={i === 1 ? "md:pt-32" : undefined}>
                   <WorkCard
                     work={work}
                     size={i === 1 ? "portrait" : "standard"}

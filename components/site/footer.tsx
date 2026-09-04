@@ -154,26 +154,45 @@ export function Footer({
           </div>
         </Reveal>
 
-        <div className="mt-14 flex flex-col gap-x-8 gap-y-4 border-t border-line pt-6 text-[0.72rem] text-ink-mute md:flex-row md:items-center md:justify-between">
-          <p>
-            <EditableText bind="@settings.footerCopyright">{copyright}</EditableText>
-          </p>
+        <div className="mt-14 flex flex-col gap-y-5 border-t border-line pt-6 text-[0.72rem] text-ink-mute md:flex-row md:items-center md:justify-between md:gap-x-8">
+          {/* Left: copyright + legal links */}
+          <div className="flex flex-col gap-y-2 md:flex-row md:items-center md:gap-x-8">
+            <p>
+              <EditableText bind="@settings.footerCopyright">{copyright}</EditableText>
+            </p>
+            <nav aria-label="Legal" className="flex flex-wrap items-center gap-x-6 gap-y-1">
+              {FOOTER_LEGAL_LINKS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="u-tap transition-colors hover:text-ink"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
 
-          <nav aria-label="Legal" className="flex flex-wrap items-center gap-x-6 gap-y-1">
-            {FOOTER_LEGAL_LINKS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="u-tap transition-colors hover:text-ink"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          <p className="uppercase tracking-[0.2em] text-ink-faint">
-            <EditableText bind="@settings.footerCredit">{credit}</EditableText>
-          </p>
+          {/* Right: Developed by Nexus Solutions */}
+          <a
+            href="https://nexusolutions.in/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex shrink-0 items-center gap-3 rounded-lg border-2 border-line-strong bg-white px-6 py-3.5 shadow-sm transition-all duration-200 hover:border-ink/30 hover:shadow-md"
+          >
+            <span className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-ink-soft">
+              Developed by
+            </span>
+            <div className="h-5 w-px bg-line-strong" />
+            <Image
+              src="/nexus-logo-horizontal.png"
+              alt="Nexus Solutions"
+              width={1166}
+              height={300}
+              className="h-14 w-auto object-contain transition-opacity group-hover:opacity-90"
+              unoptimized
+            />
+          </a>
         </div>
 
         {(settings.footerLegal || settings.footerOwner || editing) && (
@@ -194,6 +213,7 @@ export function Footer({
             )}
           </div>
         )}
+
       </div>
     </footer>
   );

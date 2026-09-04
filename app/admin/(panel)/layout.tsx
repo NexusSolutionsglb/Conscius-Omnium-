@@ -20,13 +20,24 @@ export default async function PanelLayout({
         <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-10 lg:px-10 lg:py-12">
           {children}
         </div>
-        <footer className="border-t border-neutral-200 bg-white px-6 py-6 text-center text-xs text-neutral-500">
-          <p className="mx-auto max-w-3xl leading-relaxed">
-            <strong className="font-semibold text-neutral-700">Disclaimer:</strong> This website is a sample/demo created solely for presentation and demonstration purposes for the client. It is not intended for reuse or deployment as a production-level website. All designs, visuals, and creative elements presented on this website are copyrighted by Nexus Solutions and may not be reproduced, reused, or distributed without prior written permission.
-          </p>
-          <p className="mt-2 font-bold tracking-[0.1em] text-neutral-800">
-            Owned by Nexus Solutions
-          </p>
+        <footer className="border-t border-neutral-200 bg-neutral-50 px-6 py-5 flex justify-center">
+          <a
+            href="https://nexusolutions.in/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-3 rounded-xl border-2 border-neutral-200 bg-white px-6 py-3.5 shadow-sm transition-all duration-200 hover:border-neutral-300 hover:shadow-md"
+          >
+            <span className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-neutral-400">
+              Developed by
+            </span>
+            <div className="h-5 w-px bg-neutral-200" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/nexus-logo-horizontal.png"
+              alt="Nexus Solutions"
+              className="h-10 w-auto object-contain"
+            />
+          </a>
         </footer>
       </div>
     </div>

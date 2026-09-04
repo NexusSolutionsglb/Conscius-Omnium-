@@ -53,7 +53,7 @@ export function WorkImageViewer({ images }: { images: WorkImage[] }) {
           onClick={() => open(images, index)}
           onPointerEnter={() => setCursor("open", "Open")}
           onPointerLeave={reset}
-          className="u-artframe inline-block max-w-full p-3 md:p-4"
+          className="u-artframe inline-block max-w-full"
           aria-label={`Open full screen: ${current.alt}`}
         >
           <ArtImage

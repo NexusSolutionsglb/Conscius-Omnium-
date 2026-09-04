@@ -178,18 +178,18 @@ export function Footer({
             href="https://nexusolutions.in/"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex shrink-0 items-center gap-3 rounded-lg border-2 border-line-strong bg-white px-6 py-3.5 shadow-sm transition-all duration-200 hover:border-ink/30 hover:shadow-md"
+            className="group flex shrink-0 items-center gap-4 rounded-xl border-2 border-line-strong bg-white px-5 py-3 shadow-sm transition-all duration-200 hover:border-ink/30 hover:shadow-md"
           >
             <span className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-ink-soft">
               Developed by
             </span>
-            <div className="h-5 w-px bg-line-strong" />
+            <div className="h-6 w-px bg-line-strong" />
             <Image
               src="/nexus-logo-horizontal.png"
               alt="Nexus Solutions"
               width={1166}
               height={300}
-              className="h-14 w-auto object-contain transition-opacity group-hover:opacity-90"
+              className="h-10 w-auto object-contain transition-opacity group-hover:opacity-90"
               unoptimized
             />
           </a>

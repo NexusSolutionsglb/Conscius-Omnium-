@@ -217,11 +217,11 @@
      soft one for the room it hangs in. The paper ground behind it
      reads as the mount. */
   .u-artframe {
-    background: var(--color-paper);
     box-shadow:
-      0 1px 2px color-mix(in oklab, var(--color-ink) 12%, transparent),
-      0 9px 22px -10px color-mix(in oklab, var(--color-ink) 26%, transparent),
-      0 34px 62px -28px color-mix(in oklab, var(--color-ink) 38%, transparent);
+      0 2px 6px rgba(0, 0, 0, 0.70),
+      0 8px 20px rgba(0, 0, 0, 0.65),
+      0 24px 60px rgba(0, 0, 0, 0.55),
+      0 60px 120px rgba(0, 0, 0, 0.45);
     transition:
       box-shadow 0.6s var(--ease-out-expo),
       transform 0.6s var(--ease-out-expo);
@@ -239,7 +239,6 @@
 
   /* Thumbnail scale — the same light, a shorter drop. */
   .u-artframe--sm {
-    background: var(--color-paper);
     box-shadow:
       0 1px 1px color-mix(in oklab, var(--color-ink) 10%, transparent),
       0 4px 10px -4px color-mix(in oklab, var(--color-ink) 24%, transparent);

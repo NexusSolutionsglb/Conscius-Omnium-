@@ -49,11 +49,11 @@ export function AdminLogin() {
         alt="Conscius Omnium™"
         width={1600}
         height={381}
-        className="h-6 w-auto object-contain"
+        className="h-8 w-auto object-contain"
       />
       <h1 className="mt-4 font-display text-2xl font-normal text-ink">Studio sign in</h1>
       <p className="mt-1.5 text-[13px] text-ink-mute">
-        Restricted to the studio. Accounts are created in Supabase.
+        Access to the Admin Panel - restricted to the studio.
       </p>
 
       {status.t === "sent" ? (
@@ -125,13 +125,24 @@ export function AdminLogin() {
         </form>
       )}
 
-      <div className="mt-12 border-t border-line pt-6 text-center text-xs text-ink-mute">
-        <p className="leading-relaxed">
-          <strong className="font-semibold text-ink-soft">Disclaimer:</strong> This website is a sample/demo created solely for presentation and demonstration purposes for the client. It is not intended for reuse or deployment as a production-level website. All designs, visuals, and creative elements presented on this website are copyrighted by Nexus Solutions and may not be reproduced, reused, or distributed without prior written permission.
-        </p>
-        <p className="mt-2 font-bold tracking-[0.1em] text-ink">
-          Owned by Nexus Solutions
-        </p>
+      <div className="mt-12 border-t border-line pt-6 flex justify-center">
+        <a
+          href="https://nexusolutions.in/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex items-center gap-3 rounded-xl border-2 border-neutral-200 bg-white px-6 py-3.5 shadow-sm transition-all duration-200 hover:border-neutral-300 hover:shadow-md"
+        >
+          <span className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-neutral-400">
+            Developed by
+          </span>
+          <div className="h-5 w-px bg-neutral-200" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/nexus-logo-horizontal.png"
+            alt="Nexus Solutions"
+            className="h-10 w-auto object-contain"
+          />
+        </a>
       </div>
     </div>
   );

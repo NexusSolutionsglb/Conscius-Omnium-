@@ -54,7 +54,7 @@ export function WorkCard({
         onPointerLeave={reset}
         aria-label={`${work.title} — ${DISCIPLINE_LABELS[work.discipline]}`}
       >
-        <div className="relative">
+        <div className="relative shadow-[0_8px_24px_rgba(0,0,0,0.12),_0_20px_60px_rgba(0,0,0,0.10),_0_2px_6px_rgba(0,0,0,0.08)] transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/card:shadow-[0_16px_40px_rgba(0,0,0,0.18),_0_32px_80px_rgba(0,0,0,0.14),_0_4px_12px_rgba(0,0,0,0.10)]">
           <ArtImage
             src={work.coverImage}
             alt={work.images[0]?.alt ?? work.title}

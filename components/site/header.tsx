@@ -111,7 +111,7 @@ export function Header({
                       width={1600}
                       height={381}
                       priority
-                      className="h-8 w-auto object-contain md:h-10"
+                      className="h-12 w-auto object-contain md:h-12"
                     />
                   ) : (
                     <span className="font-display text-[0.95rem] font-medium uppercase tracking-[0.2em] text-ink">
@@ -128,7 +128,7 @@ export function Header({
                       width={1600}
                       height={381}
                       priority
-                      className="h-8 w-auto object-contain md:h-10"
+                      className="h-12 w-auto object-contain md:h-12"
                     />
                   ) : (
                     <span className="font-display text-[0.95rem] font-medium uppercase tracking-[0.2em] text-paper">
@@ -197,7 +197,7 @@ function NavLink({
     <Link
       href={item.href}
       aria-current={active ? "page" : undefined}
-      className="group relative py-1 text-[0.6875rem] font-medium uppercase tracking-[0.16em]"
+      className="group relative py-1 text-sm font-bold uppercase tracking-[0.22em]"
     >
       <EditableText bind={`@settings.nav.${index}.label`}>{item.label}</EditableText>
       <span

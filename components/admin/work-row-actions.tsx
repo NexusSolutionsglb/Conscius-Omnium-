@@ -94,7 +94,7 @@ export function WorkRowActions({
               <a
                 href={`/work/${slug}`}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="block px-3 py-1.5 text-neutral-600 hover:bg-neutral-50"
               >
                 View / preview ↗

@@ -15,6 +15,7 @@ import {
   FOOTER_COPYRIGHT_DEFAULT,
   FOOTER_CREDIT_DEFAULT,
   FOOTER_LEGAL_DEFAULT,
+  FOOTER_LEGAL_LINKS,
   FOOTER_OWNER_DEFAULT,
 } from "@/lib/content/defaults/footer";
 import { newSocial } from "@/lib/editor/new-entities";
@@ -87,7 +88,7 @@ export function Footer({
               <Link
                 key={item.href}
                 href={item.href}
-                className="w-fit text-[0.82rem] text-ink-soft transition-colors hover:text-ink"
+                className="u-tap w-fit text-[0.82rem] text-ink-soft transition-colors hover:text-ink"
               >
                 <EditableText bind={`@settings.nav.${i}.label`}>{item.label}</EditableText>
               </Link>
@@ -98,15 +99,15 @@ export function Footer({
             <p className="u-eyebrow mb-1.5 text-ink-faint">Contact</p>
             <a
               href={`mailto:${profile.email}`}
-              className="w-fit text-[0.82rem] text-ink-soft transition-colors hover:text-ink"
+              className="u-tap w-fit text-[0.82rem] text-ink-soft transition-colors hover:text-ink"
             >
               <EditableText bind="@profile.email">{profile.email}</EditableText>
             </a>
             <a
               href={wa}
               target="_blank"
-              rel="noreferrer"
-              className="w-fit text-[0.82rem] text-ink-soft transition-colors hover:text-ink"
+              rel="noopener noreferrer"
+              className="u-tap w-fit text-[0.82rem] text-ink-soft transition-colors hover:text-ink"
             >
               Message the studio
             </a>
@@ -125,8 +126,8 @@ export function Footer({
                 <a
                   href={s.href}
                   target="_blank"
-                  rel="noreferrer"
-                  className="w-fit text-[0.82rem] text-ink-soft transition-colors hover:text-ink"
+                  rel="noopener noreferrer"
+                  className="u-tap w-fit text-[0.82rem] text-ink-soft transition-colors hover:text-ink"
                 >
                   <EditableText bind={`@profile.social.${i}.label`}>{s.label}</EditableText>
                 </a>
@@ -138,11 +139,24 @@ export function Footer({
           </div>
         </Reveal>
 
-        <div className="mt-14 flex flex-col gap-3 border-t border-line pt-6 text-[0.7rem] text-ink-faint sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-14 flex flex-col gap-x-8 gap-y-4 border-t border-line pt-6 text-[0.72rem] text-ink-mute md:flex-row md:items-center md:justify-between">
           <p>
             <EditableText bind="@settings.footerCopyright">{copyright}</EditableText>
           </p>
-          <p className="uppercase tracking-[0.2em]">
+
+          <nav aria-label="Legal" className="flex flex-wrap items-center gap-x-6 gap-y-1">
+            {FOOTER_LEGAL_LINKS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="u-tap transition-colors hover:text-ink"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <p className="uppercase tracking-[0.2em] text-ink-faint">
             <EditableText bind="@settings.footerCredit">{credit}</EditableText>
           </p>
         </div>

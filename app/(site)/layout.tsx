@@ -29,7 +29,7 @@ export default async function SiteLayout({
       {themeCss && <style dangerouslySetInnerHTML={{ __html: themeCss }} />}
       <MaybeEditorProvider>
         <CursorProvider>
-          <Header settings={settings} />
+          <Header settings={settings} profile={profile} />
           <PageTransition>
             <main id="main" className="min-h-screen">
               {children}

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useMotionValueEvent, useScroll } from "motion/react";
-import type { SiteSettings } from "@/lib/types";
+import type { Profile, SiteSettings } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Magnetic } from "@/components/motion/magnetic";
 import { EditableText } from "@/components/editor/editable-text";
@@ -12,7 +12,13 @@ import { useEditableSettings } from "@/components/editor/use-editable";
 import { MobileMenu } from "./mobile-menu";
 import { useCursor } from "./cursor";
 
-export function Header({ settings: base }: { settings: SiteSettings }) {
+export function Header({
+  settings: base,
+  profile,
+}: {
+  settings: SiteSettings;
+  profile?: Profile;
+}) {
   const settings: SiteSettings = {
     ...base,
     nav: useEditableSettings("nav", base.nav),
@@ -106,8 +112,10 @@ export function Header({ settings: base }: { settings: SiteSettings }) {
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
-              className="group -mr-2 flex h-10 w-10 items-center justify-center md:hidden"
+              className="group -mr-2 flex h-11 w-11 items-center justify-center md:hidden"
               aria-label="Open menu"
+              aria-haspopup="dialog"
+              aria-controls="site-menu"
               aria-expanded={menuOpen}
             >
               <Magnetic strength={0.2}>
@@ -125,6 +133,7 @@ export function Header({ settings: base }: { settings: SiteSettings }) {
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
         settings={settings}
+        profile={profile}
       />
     </>
   );

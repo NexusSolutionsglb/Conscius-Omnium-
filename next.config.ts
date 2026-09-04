@@ -41,6 +41,8 @@ const nextConfig: NextConfig = {
     ],
     // Artwork is displayed large; allow generous device sizes.
     deviceSizes: [400, 640, 828, 1080, 1280, 1600, 1920, 2560],
+    // Optimised derivatives are content-addressed; keep them a good while.
+    minimumCacheTTL: 60 * 60 * 24 * 30,
   },
   async headers() {
     return [
@@ -50,9 +52,38 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          // Belt-and-braces with X-Frame-Options; the visual editor frames the
+          // site from its own origin, so `self` must stay allowed.
+          { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+          { key: "X-DNS-Prefetch-Control", value: "on" },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
+            value:
+              "camera=(), microphone=(), geolocation=(), interest-cohort=(), browsing-topics=()",
+          },
+        ],
+      },
+      {
+        // Bundled portfolio imagery — stable filenames, safe to cache hard at
+        // the edge while still revalidating in the background.
+        source: "/work/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+      {
+        source: "/:path*.svg",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
           },
         ],
       },

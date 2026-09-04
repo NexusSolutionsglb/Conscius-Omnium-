@@ -1,11 +1,14 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { motion, useScroll, useSpring, useTransform } from "motion/react";
 import type { HomeContent, TimelineEntry } from "@/lib/types";
 import { EASE } from "@/lib/motion";
 import { prefersReducedMotion } from "@/lib/client";
 import { homeDefaults } from "@/lib/content/defaults/home";
+import { ArtImage } from "@/components/motion/image-reveal";
+import { blurFor } from "@/lib/content/blur";
 import { Eyebrow } from "@/components/ui/primitives";
 import { EditableText } from "@/components/editor/editable-text";
 import { EditableImage } from "@/components/editor/editable-image";
@@ -148,7 +151,7 @@ function HorizontalTimeline({
       ref={ref}
       className="relative hidden lg:block"
       style={{ height: `${Math.min(entries.length * 42 + 60, 460)}vh` }}
-      aria-hidden
+      aria-label={label}
     >
       <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden">
         <div className="u-container">
@@ -177,6 +180,18 @@ function HorizontalTimeline({
                   <p className="mt-3 max-w-md text-[0.9rem] leading-relaxed text-ink-soft">
                     {entry.description}
                   </p>
+                  {entry.image && (
+                    <ArtImage
+                      src={entry.image}
+                      alt={`${entry.year} — ${entry.title}`}
+                      ratio="4 / 3"
+                      fill
+                      sizes="46vw"
+                      placeholder={blurFor(entry.image) ? "blur" : "empty"}
+                      blurDataURL={blurFor(entry.image)}
+                      wrapperClassName="mt-6 w-full max-w-sm"
+                    />
+                  )}
                   {entry.category && (
                     <p className="u-eyebrow mt-4 text-ink-faint">{entry.category}</p>
                   )}
@@ -229,6 +244,18 @@ function VerticalTimeline({
             <p className="mt-2 text-[0.88rem] leading-relaxed text-ink-soft">
               {entry.description}
             </p>
+            {entry.image && (
+              <ArtImage
+                src={entry.image}
+                alt={`${entry.year} — ${entry.title}`}
+                ratio="4 / 3"
+                fill
+                sizes="(min-width: 640px) 24rem, 82vw"
+                placeholder={blurFor(entry.image) ? "blur" : "empty"}
+                blurDataURL={blurFor(entry.image)}
+                wrapperClassName="mt-4 w-full max-w-sm"
+              />
+            )}
             {entry.category && (
               <p className="u-eyebrow mt-3 text-ink-faint">{entry.category}</p>
             )}
@@ -334,12 +361,12 @@ export function TimelineStrip({
             )}
           </div>
           <p className="mt-10">
-            <a
+            <Link
               href="/about#timeline"
-              className="u-link text-[0.6875rem] font-medium uppercase tracking-[0.18em]"
+              className="u-tap u-link text-[0.6875rem] font-medium uppercase tracking-[0.18em]"
             >
               <EditableText bind="home.timeline.linkLabel">{copy.linkLabel}</EditableText>
-            </a>
+            </Link>
           </p>
         </div>
       </div>

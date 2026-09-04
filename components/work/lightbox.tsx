@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import Image from "next/image";
@@ -27,6 +28,9 @@ export function LightboxProvider({ children }: { children: React.ReactNode }) {
   const [index, setIndex] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [zoomed, setZoomed] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
 
   const open = useCallback((imgs: WorkImage[], i: number) => {
     setImages(imgs);
@@ -49,18 +53,50 @@ export function LightboxProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isOpen) return;
+    returnFocusRef.current = document.activeElement as HTMLElement | null;
     lockScroll(true);
     getLenis()?.stop();
+    const focusTimer = window.setTimeout(() => closeRef.current?.focus(), 60);
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-      if (e.key === "ArrowRight") go(1);
-      if (e.key === "ArrowLeft") go(-1);
+      if (e.key === "Escape") {
+        close();
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        go(1);
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        go(-1);
+        return;
+      }
+      if (e.key !== "Tab") return;
+
+      // Keep Tab inside the viewer while it is modal.
+      const nodes = panelRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (!nodes || nodes.length === 0) return;
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || !panelRef.current?.contains(active))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
+
     window.addEventListener("keydown", onKey);
     return () => {
+      window.clearTimeout(focusTimer);
       window.removeEventListener("keydown", onKey);
       lockScroll(false);
       getLenis()?.start();
+      returnFocusRef.current?.focus?.();
     };
   }, [isOpen, close, go]);
 
@@ -73,6 +109,7 @@ export function LightboxProvider({ children }: { children: React.ReactNode }) {
       <AnimatePresence>
         {isOpen && current && (
           <motion.div
+            ref={panelRef}
             className="fixed inset-0 z-[400] flex flex-col bg-[#100d0b]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -84,13 +121,19 @@ export function LightboxProvider({ children }: { children: React.ReactNode }) {
           >
             {/* top bar */}
             <div className="flex items-center justify-between px-5 py-4 text-paper/70 md:px-8">
-              <span className="text-[0.7rem] uppercase tracking-[0.22em]">
+              <span
+                className="text-[0.7rem] uppercase tracking-[0.22em]"
+                role="status"
+                aria-live="polite"
+              >
+                <span className="sr-only">Image </span>
                 {String(index + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
               </span>
               <button
+                ref={closeRef}
                 type="button"
                 onClick={close}
-                className="flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em] transition-colors hover:text-paper"
+                className="flex min-h-[44px] items-center gap-2 text-[0.7rem] uppercase tracking-[0.22em] transition-colors hover:text-paper"
                 aria-label="Close viewer"
               >
                 Close

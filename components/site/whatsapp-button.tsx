@@ -26,7 +26,7 @@ export function WhatsAppFloat({ href }: { href: string }) {
     <motion.a
       href={href}
       target="_blank"
-      rel="noreferrer"
+      rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"
       className="u-no-print fixed bottom-5 right-5 z-[110] flex h-12 w-12 items-center justify-center rounded-full bg-ink text-paper shadow-[0_8px_30px_rgba(26,22,19,0.25)] md:bottom-7 md:right-7"
       initial={{ opacity: 0, scale: 0.6 }}
@@ -56,7 +56,7 @@ export function WhatsAppLink({
     <a
       href={href}
       target="_blank"
-      rel="noreferrer"
+      rel="noopener noreferrer"
       className={cn(
         "u-btn",
         variant === "ghost" && "u-btn--ghost",

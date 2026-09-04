@@ -102,7 +102,7 @@ function ExhibitionRow({ item, typeLabel }: { item: Exhibition; typeLabel: strin
                   <Link
                     key={slug}
                     href={`/work/${slug}`}
-                    className="u-link text-[0.7rem] font-medium uppercase tracking-[0.14em]"
+                    className="u-tap u-link text-[0.7rem] font-medium uppercase tracking-[0.14em]"
                   >
                     View related work
                   </Link>
@@ -111,8 +111,8 @@ function ExhibitionRow({ item, typeLabel }: { item: Exhibition; typeLabel: strin
                   <a
                     href={item.url}
                     target="_blank"
-                    rel="noreferrer"
-                    className="u-link text-[0.7rem] font-medium uppercase tracking-[0.14em]"
+                    rel="noopener noreferrer"
+                    className="u-tap u-link text-[0.7rem] font-medium uppercase tracking-[0.14em]"
                   >
                     External link
                   </a>

@@ -5,10 +5,12 @@
  * content or a no-op.
  */
 
+import { SITE_URL } from "@/lib/site-url";
+
+export { PRODUCTION_ORIGIN } from "@/lib/site-url";
+
 export const env = {
-  siteUrl:
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-    "http://localhost:3000",
+  siteUrl: SITE_URL,
 
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
   // Supabase renamed "anon key" → "publishable key"; accept either.
@@ -32,6 +34,8 @@ export const env = {
     /[^\d]/g,
     "",
   ),
+
+  googleSiteVerification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? "",
 
   gaId: process.env.NEXT_PUBLIC_GA_ID ?? "",
   plausibleDomain: process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ?? "",

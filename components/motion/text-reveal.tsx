@@ -56,7 +56,10 @@ export function TextReveal({
               },
             }}
           >
+            {/* Trailing space keeps copied text readable across masked line
+                breaks ("scale of a table", not "scaleof a table"). */}
             {line || " "}
+            {i < lines.length - 1 ? " " : null}
           </motion.span>
         </span>
       ))}

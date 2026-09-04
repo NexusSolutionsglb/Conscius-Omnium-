@@ -107,6 +107,7 @@ export function AboutView({
                     alt="A work from Shivjeet Potdar's practice"
                     ratio="4 / 5"
                     fill
+                    priority
                     sizes="(min-width:768px) 40vw, 100vw"
                     placeholder={blurFor(portraitFallback) ? "blur" : "empty"}
                     blurDataURL={blurFor(portraitFallback)}

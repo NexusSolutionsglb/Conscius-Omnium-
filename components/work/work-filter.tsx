@@ -34,8 +34,11 @@ export function WorkFilter({
 
   return (
     <div
+      role="group"
+      aria-label="Filter work by discipline"
+      aria-busy={pending}
       className={cn(
-        "flex flex-wrap items-baseline gap-x-6 gap-y-3 transition-opacity",
+        "flex flex-wrap items-baseline gap-x-6 gap-y-1 transition-opacity",
         pending && "opacity-50",
       )}
     >
@@ -44,8 +47,8 @@ export function WorkFilter({
         onClick={() => select(null)}
         aria-pressed={!active}
         className={cn(
-          "u-link text-[0.72rem] font-medium uppercase tracking-[0.14em]",
-          !active ? "text-ink" : "text-ink-faint hover:text-ink",
+          "u-tap u-link py-2 text-[0.72rem] font-medium uppercase tracking-[0.14em]",
+          !active ? "text-ink" : "text-ink-mute hover:text-ink",
         )}
       >
         All
@@ -58,8 +61,8 @@ export function WorkFilter({
           onClick={() => select(d)}
           aria-pressed={active === d}
           className={cn(
-            "u-link text-[0.72rem] font-medium uppercase tracking-[0.14em]",
-            active === d ? "text-ink" : "text-ink-faint hover:text-ink",
+            "u-tap u-link py-2 text-[0.72rem] font-medium uppercase tracking-[0.14em]",
+            active === d ? "text-ink" : "text-ink-mute hover:text-ink",
           )}
         >
           {DISCIPLINE_LABELS[d]}

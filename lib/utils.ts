@@ -88,12 +88,7 @@ export function truncate(input: string, max = 160): string {
   return `${input.slice(0, max - 1).trimEnd()}…`;
 }
 
-export function absoluteUrl(path = ""): string {
-  const base =
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-    "http://localhost:3000";
-  return `${base}${path.startsWith("/") ? path : `/${path}`}`;
-}
+export { absoluteUrl } from "@/lib/site-url";
 
 /**
  * Normalise an image URL before it is stored or rendered.

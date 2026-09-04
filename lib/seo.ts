@@ -9,7 +9,16 @@ type BuildMeta = {
   title?: string;
   description?: string;
   path?: string;
+  /**
+   * A page-specific social image. Omit it and the route inherits the generated
+   * 1200×630 card from `app/opengraph-image.tsx` — always the right aspect
+   * ratio, so nothing gets cropped by a feed.
+   */
   image?: string | null;
+  /** True pixel size of `image`. Never guessed: a wrong hint crops the unfurl. */
+  imageWidth?: number | null;
+  imageHeight?: number | null;
+  imageAlt?: string | null;
   type?: "website" | "article" | "profile";
   noIndex?: boolean;
   publishedTime?: string | null;
@@ -20,6 +29,9 @@ export function buildMetadata({
   description,
   path = "/",
   image,
+  imageWidth,
+  imageHeight,
+  imageAlt,
   type = "website",
   noIndex = false,
   publishedTime,
@@ -30,7 +42,23 @@ export function buildMetadata({
     : s.seo.defaultTitle;
   const resolvedDescription = truncate(description || s.seo.description, 300);
   const url = absoluteUrl(path);
-  const ogImage = absoluteUrl(image || s.seo.ogImage);
+
+  // Setting `openGraph` explicitly suppresses Next's file-convention image, so
+  // the generated card is wired up by hand rather than left to inference.
+  const ogImage = image
+    ? {
+        url: absoluteUrl(image),
+        alt: imageAlt || resolvedTitle,
+        ...(imageWidth && imageHeight
+          ? { width: imageWidth, height: imageHeight }
+          : {}),
+      }
+    : {
+        url: absoluteUrl("/opengraph-image"),
+        alt: s.seo.defaultTitle,
+        width: 1200,
+        height: 630,
+      };
 
   return {
     title: resolvedTitle,
@@ -38,7 +66,12 @@ export function buildMetadata({
     alternates: { canonical: url },
     robots: noIndex
       ? { index: false, follow: false }
-      : { index: true, follow: true, "max-image-preview": "large" },
+      : {
+          index: true,
+          follow: true,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+        },
     openGraph: {
       type,
       title: resolvedTitle,
@@ -46,14 +79,16 @@ export function buildMetadata({
       url,
       siteName: s.brand,
       locale: "en_IN",
-      images: [{ url: ogImage, width: 1200, height: 630, alt: resolvedTitle }],
+      // Left undefined on purpose when there is no page-specific artwork, so
+      // the generated card supplied by the file convention is used instead.
+      images: [ogImage],
       ...(publishedTime ? { publishedTime } : {}),
     },
     twitter: {
       card: "summary_large_image",
       title: resolvedTitle,
       description: resolvedDescription,
-      images: [ogImage],
+      images: [ogImage.url],
     },
   };
 }

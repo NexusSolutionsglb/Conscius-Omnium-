@@ -43,7 +43,7 @@ type SmartLinkProps = ComponentPropsWithoutRef<typeof Link> & { href: string };
 export function SmartLink({ href, children, ...rest }: SmartLinkProps) {
   if (isExternal(href)) {
     return (
-      <a href={href} target="_blank" rel="noreferrer" {...(rest as ComponentPropsWithoutRef<"a">)}>
+      <a href={href} target="_blank" rel="noopener noreferrer" {...(rest as ComponentPropsWithoutRef<"a">)}>
         {children}
       </a>
     );
@@ -69,7 +69,7 @@ export function TextLink({
     <SmartLink
       href={href}
       className={cn(
-        "u-link text-[0.6875rem] font-medium uppercase tracking-[0.18em]",
+        "u-tap u-link text-[0.6875rem] font-medium uppercase tracking-[0.18em]",
         className,
       )}
     >

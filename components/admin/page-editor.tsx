@@ -104,7 +104,7 @@ export function PageEditor({ page }: { page: ManagedPage }) {
 
       <div className="flex items-center gap-3">
         <SubmitButton>Save page</SubmitButton>
-        <a href={`/${page.slug}`} target="_blank" rel="noreferrer" className="text-[12px] text-neutral-500 hover:underline">
+        <a href={`/${page.slug}`} target="_blank" rel="noopener noreferrer" className="text-[12px] text-neutral-500 hover:underline">
           Preview ↗
         </a>
         {msg && <span className="text-[12px] text-emerald-600">{msg}</span>}

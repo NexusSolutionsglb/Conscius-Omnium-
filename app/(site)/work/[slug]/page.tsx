@@ -13,7 +13,9 @@ import {
   buildMetadata,
   workJsonLd,
 } from "@/lib/seo";
+import { absoluteUrl } from "@/lib/utils";
 import { Reveal } from "@/components/motion/reveal";
+import { ShareBar } from "@/components/site/share-bar";
 import { JsonLd } from "@/components/site/json-ld";
 import { LightboxProvider } from "@/components/work/lightbox";
 import { WorkHero } from "@/components/work/work-hero";
@@ -49,6 +51,12 @@ export async function generateMetadata({
       `${work.title} — ${DISCIPLINE_LABELS[work.discipline]} by Shivjeet Potdar.`,
     path: `/work/${work.slug}`,
     image: work.seo?.ogImage || work.coverImage,
+    // Only pass a size when we actually know it, and only for the cover — a
+    // custom seo.ogImage has no stored dimensions.
+    ...(work.seo?.ogImage
+      ? {}
+      : { imageWidth: work.images[0]?.width, imageHeight: work.images[0]?.height }),
+    imageAlt: work.images[0]?.alt || work.title,
     type: "article",
     publishedTime: work.publishedAt,
     noIndex: work.status !== "published",
@@ -130,7 +138,10 @@ export default async function WorkDetailPage({
                   <p className="u-eyebrow">Credits</p>
                   <dl className="mt-4 divide-y divide-line border-y border-line">
                     {work.credits.map((c, i) => (
-                      <div key={i} className="grid grid-cols-[8rem_1fr] gap-4 py-2.5">
+                      <div
+                        key={i}
+                        className="grid grid-cols-1 gap-x-4 gap-y-1 py-2.5 sm:grid-cols-[8rem_1fr]"
+                      >
                         <dt className="u-eyebrow pt-0.5">{c.role}</dt>
                         <dd className="text-[0.88rem] text-ink-soft">{c.name}</dd>
                       </div>
@@ -148,6 +159,14 @@ export default async function WorkDetailPage({
               </Reveal>
               <Reveal className="mt-10">
                 <WorkInquiryBar work={work} whatsappNumber={env.whatsappNumber} />
+              </Reveal>
+              <Reveal className="mt-10 border-t border-line pt-8">
+                <p className="u-eyebrow mb-4">Share this work</p>
+                <ShareBar
+                  url={absoluteUrl(`/work/${work.slug}`)}
+                  title={`${work.title} — Shivjeet Potdar`}
+                  summary={work.summary ?? undefined}
+                />
               </Reveal>
             </aside>
           </div>

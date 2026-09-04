@@ -92,7 +92,7 @@ export function ContactView({
             <a
               href={waHref}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="mt-1 inline-block text-[0.95rem] text-ink transition-colors hover:text-accent-deep"
             >
               <EditableText bind="contact.messageStudio">{content.messageStudio}</EditableText>
@@ -115,7 +115,7 @@ export function ContactView({
                 <a
                   href={s.href}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="mt-1 inline-block text-[0.95rem] text-ink transition-colors hover:text-accent-deep"
                 >
                   <EditableText bind={`@profile.social.${i}.label`}>{s.label}</EditableText>

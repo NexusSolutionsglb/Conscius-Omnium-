@@ -136,7 +136,6 @@ export function FeaturedWork({
             alt={lead.images[0]?.alt ?? lead.title}
             ratio="16 / 10"
             fill
-            priority
             sizes="(min-width:1280px) 90vw, 100vw"
             hoverZoom
             placeholder={blurFor(lead.coverImage) ? "blur" : "empty"}

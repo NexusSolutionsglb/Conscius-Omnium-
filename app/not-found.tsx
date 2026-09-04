@@ -1,36 +1,49 @@
-import Link from "next/link";
+import type { Metadata } from "next";
+import { getSettings } from "@/lib/queries/settings";
+import { getProfile } from "@/lib/queries/profile";
+import { whatsappGeneralMessage, whatsappLink } from "@/lib/whatsapp";
+import { themeToCss } from "@/lib/editor/theme";
+import { Header } from "@/components/site/header";
+import { Footer } from "@/components/site/footer";
+import { WhatsAppFloat } from "@/components/site/whatsapp-button";
+import { ErrorState, NOT_FOUND_SUGGESTIONS } from "@/components/site/error-state";
+
+export const metadata: Metadata = {
+  title: "Page not found — Conscious Omnium",
+  description:
+    "That page isn't here. Return to the work of Shivjeet Potdar — architecture, miniatures, photography, production design and film.",
+  robots: { index: false, follow: true },
+};
 
 /**
- * Rendered inside the root layout for URLs that match no route.
- * Route-level `notFound()` calls inside `(site)` use the group's own
- * not-found (with full site chrome).
+ * Rendered inside the root layout for URLs that match no route at all.
+ * It carries the full site chrome so a mistyped link is a detour, not a
+ * dead end. Route-level `notFound()` calls inside `(site)` use that
+ * group's own not-found, which is already inside the chrome.
  */
-export default function RootNotFound() {
-  return (
-    <div className="flex min-h-screen flex-col justify-between px-6 py-12 text-center">
-      <div className="flex flex-1 flex-col items-center justify-center py-12">
-        <p className="font-display text-[clamp(4rem,10vw,9rem)] font-light leading-none text-ink-faint/50">
-          404
-        </p>
-        <h1 className="mt-3 font-display text-[1.7rem] font-light text-ink">
-          This page has dissolved.
-        </h1>
-        <p className="mt-4 max-w-sm text-[0.9rem] text-ink-mute">
-          The page you&rsquo;re looking for isn&rsquo;t here.
-        </p>
-        <Link href="/" className="u-btn mt-8">
-          Return home
-        </Link>
-      </div>
+export default async function RootNotFound() {
+  const [settings, profile] = await Promise.all([getSettings(), getProfile()]);
+  const themeCss = themeToCss(settings.theme);
+  const whatsappHref = whatsappLink(
+    whatsappGeneralMessage(settings.brand),
+    profile.whatsapp,
+  );
 
-      <div className="mx-auto max-w-3xl border-t border-line/60 pt-6 text-center">
-        <p className="text-[0.72rem] leading-relaxed text-ink-mute">
-          <strong className="font-semibold text-ink">Disclaimer:</strong> This website is a sample/demo created solely for presentation and demonstration purposes for the client. It is not intended for reuse or deployment as a production-level website. All designs, visuals, and creative elements presented on this website are copyrighted by Nexus Solutions and may not be reproduced, reused, or distributed without prior written permission.
-        </p>
-        <p className="mt-2 text-[0.72rem] font-bold tracking-[0.1em] text-ink">
-          Owned by Nexus Solutions
-        </p>
-      </div>
-    </div>
+  return (
+    <>
+      {themeCss && <style dangerouslySetInnerHTML={{ __html: themeCss }} />}
+      <Header settings={settings} profile={profile} />
+      <main id="main" className="min-h-screen pt-16 md:pt-[4.75rem]">
+        <ErrorState
+          code="404"
+          title="This page has dissolved."
+          message="The page you're looking for isn't here — it may have been moved, renamed, or never existed."
+          action={{ label: "Return home", href: "/" }}
+          suggestions={NOT_FOUND_SUGGESTIONS}
+        />
+      </main>
+      <Footer settings={settings} profile={profile} />
+      <WhatsAppFloat href={whatsappHref} />
+    </>
   );
 }

@@ -12,15 +12,21 @@ const fraunces = Fraunces({
   display: "swap",
   variable: "--font-fraunces",
   // Variable font — weight is fluid, so no `weight` array alongside `axes`.
-  axes: ["SOFT", "opsz", "WONK"],
+  // Only `opsz` is kept: browsers apply it automatically via font-optical-sizing,
+  // so display type gets the right cut. SOFT and WONK were declared but never
+  // referenced by any font-variation-settings, so they were pure download cost.
+  axes: ["opsz"],
   style: ["normal", "italic"],
 });
 
+// Inter is a variable font: asking for a weight list forces three static
+// cuts and stops Next from emitting a preload link for the body face.
+// Leaving `weight` off ships one variable file that covers 400–600.
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
-  weight: ["400", "500", "600"],
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -30,9 +36,14 @@ export const metadata: Metadata = {
   authors: [{ name: "Shivjeet Potdar" }],
   creator: "Shivjeet Potdar",
   icons: {
+    // `app/apple-icon.tsx` supplies the PNG touch icon via the file convention.
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    shortcut: [{ url: "/favicon.svg", type: "image/svg+xml" }],
   },
+  formatDetection: { telephone: false, email: false, address: false },
+  ...(env.googleSiteVerification
+    ? { verification: { google: env.googleSiteVerification } }
+    : {}),
 };
 
 export const viewport: Viewport = {
@@ -66,7 +77,7 @@ export default async function RootLayout({
             __html: JSON.stringify([personJsonLd(profile), websiteJsonLd(settings)]),
           }}
         />
-        <Analytics />
+        <Analytics gaId={env.gaId} plausibleDomain={env.plausibleDomain} />
       </body>
     </html>
   );

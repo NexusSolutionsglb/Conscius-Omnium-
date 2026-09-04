@@ -21,13 +21,34 @@ export function WorkHero({ work }: { work: Work }) {
     <div className="u-container pt-28 md:pt-36">
       <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
         <div>
-          <p className="u-eyebrow">
-            <Link href="/work" className="transition-colors hover:text-ink">
-              Selected Work
-            </Link>
-            <span className="mx-2 text-ink-faint">/</span>
-            <span className="text-ink-soft">{DISCIPLINE_LABELS[work.discipline]}</span>
-          </p>
+          <nav aria-label="Breadcrumb" className="u-eyebrow">
+            <ol className="flex flex-wrap items-center gap-2">
+              <li>
+                <Link href="/" className="transition-colors hover:text-ink">
+                  Home
+                </Link>
+              </li>
+              <li aria-hidden className="text-ink-faint">
+                /
+              </li>
+              <li>
+                <Link href="/work" className="transition-colors hover:text-ink">
+                  Selected Work
+                </Link>
+              </li>
+              <li aria-hidden className="text-ink-faint">
+                /
+              </li>
+              <li>
+                <Link
+                  href={`/work?discipline=${work.discipline}`}
+                  className="text-ink-soft transition-colors hover:text-ink"
+                >
+                  {DISCIPLINE_LABELS[work.discipline]}
+                </Link>
+              </li>
+            </ol>
+          </nav>
           <h1 className="mt-4 max-w-4xl font-display text-[clamp(2.2rem,1.3rem+3.6vw,4.4rem)] font-light leading-[1.03]">
             {work.title}
           </h1>

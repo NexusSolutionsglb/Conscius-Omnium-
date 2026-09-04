@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import { prefersReducedMotion } from "@/lib/client";
@@ -11,13 +11,34 @@ export function getLenis() {
   return lenisSingleton;
 }
 
+/** Scroll the window, whether or not Lenis is driving. */
+function scrollTo(target: number | HTMLElement, immediate: boolean) {
+  if (lenisSingleton) {
+    lenisSingleton.scrollTo(target, { immediate, offset: typeof target === "number" ? 0 : -96 });
+    return;
+  }
+  if (typeof target === "number") {
+    window.scrollTo({ top: target, behavior: immediate ? "auto" : "smooth" });
+  } else {
+    target.scrollIntoView({ behavior: immediate ? "auto" : "smooth", block: "start" });
+  }
+}
+
 /**
  * Lenis-driven smooth scrolling for the public site. Respects
- * prefers-reduced-motion (falls back to native), pauses via
- * `data-lenis-stop`, and resets to top on route change.
+ * prefers-reduced-motion (falls back to native scrolling) and pauses via
+ * `data-lenis-stop`.
+ *
+ * Scroll position on navigation follows the browser's own rules:
+ *  · a forward navigation starts at the top of the new page,
+ *  · a back/forward navigation keeps the position the browser restored,
+ *  · a URL carrying a #hash lands on that section (deep links, contents rails).
  */
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  // Set by popstate, consumed by the navigation effect below.
+  const restoring = useRef(false);
+  const firstRender = useRef(true);
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
@@ -46,12 +67,46 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  // Remember that the *next* route change came from the back/forward button so
+  // the position the browser restored isn't thrown away.
   useEffect(() => {
-    if (lenisSingleton) {
-      lenisSingleton.scrollTo(0, { immediate: true });
-    } else {
-      window.scrollTo(0, 0);
+    const onPop = () => {
+      restoring.current = true;
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      // A deep link with a hash should land on its section, not the top.
+      const id = window.location.hash.slice(1);
+      if (id) {
+        const el = document.getElementById(decodeURIComponent(id));
+        if (el) {
+          // Wait a frame so fonts and the reveal animations have laid out.
+          requestAnimationFrame(() => scrollTo(el, true));
+        }
+      }
+      return;
     }
+
+    if (restoring.current) {
+      restoring.current = false;
+      return;
+    }
+
+    const id = window.location.hash.slice(1);
+    if (id) {
+      const el = document.getElementById(decodeURIComponent(id));
+      if (el) {
+        scrollTo(el, false);
+        return;
+      }
+    }
+
+    scrollTo(0, true);
   }, [pathname]);
 
   return <>{children}</>;

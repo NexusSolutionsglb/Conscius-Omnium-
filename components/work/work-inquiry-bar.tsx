@@ -46,7 +46,7 @@ export function WorkInquiryBar({
           triggerLabel={notForSale ? "Enquire about this work" : "Enquire about this work"}
           defaultType={notForSale ? "general" : "purchase"}
         />
-        <a href={waHref} target="_blank" rel="noreferrer" className="u-btn u-btn--ghost">
+        <a href={waHref} target="_blank" rel="noopener noreferrer" className="u-btn u-btn--ghost">
           Enquire on WhatsApp
         </a>
       </div>

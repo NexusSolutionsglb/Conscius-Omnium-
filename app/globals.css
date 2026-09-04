@@ -10,12 +10,15 @@
 @theme {
   /* — Surfaces ———————————————————————————————— */
   --color-paper: #f7f4ef; /* warm ivory ground */
-  --color-paper-dim: #efeae1; /* recessed sections */
-  --color-paper-deep: #e7e1d5; /* hairline fills */
+  /* Recessed surfaces are DERIVED from the ground so a theme override of
+     --color-paper (Admin → Settings → Theme) stays chromatically coherent
+     instead of leaving warm panels stranded on a cool page. */
+  --color-paper-dim: color-mix(in oklab, var(--color-paper) 95%, var(--color-ink)); /* recessed sections */
+  --color-paper-deep: color-mix(in oklab, var(--color-paper) 90%, var(--color-ink)); /* hairline fills */
   --color-ink: #1a1613; /* near-black display type */
-  --color-ink-soft: #443d35; /* body copy */
-  --color-ink-mute: #7a7167; /* captions, meta */
-  --color-ink-faint: #a79d90; /* disabled, timestamps */
+  --color-ink-soft: #443d35; /* body copy — 9.7:1 */
+  --color-ink-mute: #665d54; /* captions, meta — 5.9:1 */
+  --color-ink-faint: #756c62; /* timestamps, tertiary — 4.7:1 */
 
   /* — Dark mode surfaces (used for immersive / viewer contexts) — */
   --color-obsidian: #14110e;
@@ -238,6 +241,67 @@
     transform-origin: left;
   }
 
+  /* Comfortable hit area for the small type used in the footer and utility
+     rows, without changing how those rows look on a mouse-driven screen. */
+  @media (pointer: coarse) {
+    .u-tap {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+  }
+
+  /* Long-form legal / editorial copy — privacy, terms. */
+  .u-legal {
+    max-width: 68ch;
+    color: var(--color-ink-soft);
+    font-size: 0.95rem;
+    line-height: 1.75;
+  }
+  .u-legal h2 {
+    margin-top: 3.25rem;
+    font-size: var(--text-h3);
+    font-weight: 380;
+  }
+  .u-legal h3 {
+    margin-top: 2rem;
+    font-size: 1.05rem;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    letter-spacing: 0.01em;
+  }
+  .u-legal :is(h2, h3) + * {
+    margin-top: 0.9rem;
+  }
+  .u-legal p + p,
+  .u-legal p + ul,
+  .u-legal ul + p {
+    margin-top: 1.1rem;
+  }
+  .u-legal ul {
+    list-style: none;
+    padding-left: 1.15rem;
+  }
+  .u-legal li {
+    position: relative;
+    margin-top: 0.55rem;
+  }
+  .u-legal li::before {
+    content: "—";
+    position: absolute;
+    left: -1.15rem;
+    color: var(--color-ink-faint);
+  }
+  .u-legal a {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    text-decoration-color: var(--color-line-strong);
+    transition: text-decoration-color 0.3s var(--ease-out-soft);
+  }
+  .u-legal a:hover {
+    text-decoration-color: currentColor;
+  }
+
   /* Solid pill button — used sparingly */
   .u-btn {
     display: inline-flex;
@@ -294,11 +358,38 @@
   }
 }
 
+/* ─── Loading skeleton ─────────────────────────────────────── */
+@keyframes co-skeleton-rule {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+@keyframes co-skeleton-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.u-skeleton-rule {
+  animation: co-skeleton-rule 1.6s var(--ease-in-out-quint) infinite;
+}
+.u-skeleton {
+  animation: co-skeleton-breathe 2.4s var(--ease-out-soft) infinite;
+}
+
 /* ─── Custom cursor (desktop, fine pointer only) ───────────── */
 @media (hover: hover) and (pointer: fine) {
   .has-custom-cursor,
   .has-custom-cursor * {
     cursor: none;
+  }
+  /* …except where the native cursor carries meaning. Hiding the caret over a
+     text field makes the enquiry form feel broken. */
+  .has-custom-cursor :is(input, textarea, select, [contenteditable="true"]) {
+    cursor: auto;
+  }
+  .has-custom-cursor :is(select, [role="button"]) {
+    cursor: pointer;
+  }
+  .has-custom-cursor :is(input, button, select, textarea):disabled {
+    cursor: not-allowed;
   }
 }
 
@@ -321,8 +412,56 @@
 }
 
 /* ─── Print ───────────────────────────────────────────────── */
+/* A work page or a legal document should print as a clean sheet: the site
+   chrome drops away, motion is neutralised, and links keep their address. */
 @media print {
-  .u-no-print {
+  .u-no-print,
+  nav[aria-label="On this page"],
+  [role="dialog"] {
     display: none !important;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 11pt;
+  }
+
+  /* Reveal animations must never leave printed content blank. */
+  [style*="opacity"],
+  [style*="transform"] {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+
+  .u-container {
+    max-width: none;
+    padding-inline: 0;
+  }
+
+  :is(h1, h2, h3) {
+    break-after: avoid;
+    color: #000 !important;
+  }
+
+  article,
+  figure,
+  li,
+  img {
+    break-inside: avoid;
+  }
+
+  /* Print the destination of links that leave the page. */
+  a[href^="http"]::after,
+  a[href^="mailto:"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    word-break: break-all;
+  }
+
+  @page {
+    margin: 16mm;
   }
 }

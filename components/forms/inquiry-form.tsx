@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { INQUIRY_TYPE_LABELS, type InquiryType, type Work } from "@/lib/types";
@@ -32,6 +33,7 @@ export function InquiryForm({
   onSuccess,
 }: InquiryFormProps) {
   const mountedAt = useRef<number>(Date.now());
+  const formRef = useRef<HTMLFormElement>(null);
   const [state, setState] = useState<SubmitState>({ status: "idle" });
 
   const typeOptions = useMemo(() => {
@@ -80,6 +82,15 @@ export function InquiryForm({
           message: json.error ?? "Something went wrong. Please try again.",
           fieldErrors: json.fieldErrors,
         });
+        // Put the caret back where the problem is, rather than leaving the
+        // visitor to hunt for the highlighted field.
+        const firstInvalid = Object.keys(json.fieldErrors ?? {})[0];
+        requestAnimationFrame(() => {
+          const el = firstInvalid
+            ? formRef.current?.querySelector<HTMLElement>(`[name="${firstInvalid}"]`)
+            : null;
+          (el ?? formRef.current?.querySelector<HTMLElement>("[aria-invalid='true']"))?.focus();
+        });
         return;
       }
       setState({
@@ -105,6 +116,8 @@ export function InquiryForm({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: EASE.outExpo }}
         className="py-2"
+        role="status"
+        aria-live="polite"
       >
         <p className="u-eyebrow text-accent-deep">Enquiry received</p>
         <h3 className="mt-3 font-display text-[1.7rem] font-normal leading-tight text-ink">
@@ -120,7 +133,7 @@ export function InquiryForm({
           {state.emailed ? " — a confirmation is on its way to your inbox." : "."}
         </p>
         <div className="mt-7 flex flex-wrap gap-3">
-          <a href={state.whatsappUrl} target="_blank" rel="noreferrer" className="u-btn">
+          <a href={state.whatsappUrl} target="_blank" rel="noopener noreferrer" className="u-btn">
             Continue on WhatsApp
           </a>
           <button
@@ -139,7 +152,7 @@ export function InquiryForm({
     state.status === "error" ? state.fieldErrors?.[name]?.[0] : undefined;
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-7">
+    <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex flex-col gap-7">
       {work && (
         <div className="border border-line-strong/60 bg-paper-dim/60 p-4">
           <p className="u-eyebrow">Enquiring about</p>
@@ -229,8 +242,9 @@ export function InquiryForm({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="text-[0.8rem] text-[#9a3b32]"
+            className="border-l-2 border-[#9a3b32] pl-3 text-[0.8rem] text-[#9a3b32]"
             role="alert"
+            aria-live="assertive"
           >
             {state.message}
           </motion.p>
@@ -241,12 +255,17 @@ export function InquiryForm({
         <button
           type="submit"
           disabled={state.status === "submitting"}
+          aria-busy={state.status === "submitting"}
           className="u-btn disabled:cursor-wait disabled:opacity-60"
         >
           {state.status === "submitting" ? "Sending…" : "Send enquiry"}
         </button>
-        <p className="text-[0.7rem] leading-relaxed text-ink-faint">
-          No mailing list. Your details are used only to reply.
+        <p className="text-[0.7rem] leading-relaxed text-ink-mute">
+          No mailing list. Your details are used only to reply — see the{" "}
+          <Link href="/privacy" className="u-link">
+            Privacy Policy
+          </Link>
+          .
         </p>
       </div>
     </form>

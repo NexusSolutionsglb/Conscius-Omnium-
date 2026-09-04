@@ -59,7 +59,7 @@ export function InquiryDetail({ inquiry }: { inquiry: Inquiry }) {
             <a
               href={`/work/${inquiry.workSlug}`}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="mt-3 inline-block text-[12px] text-neutral-500 hover:underline"
             >
               View the work ↗
@@ -81,7 +81,7 @@ export function InquiryDetail({ inquiry }: { inquiry: Inquiry }) {
             <a
               href={waHref}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="rounded-md border border-neutral-300 px-3 py-1.5 text-[12px] font-medium hover:bg-neutral-50"
             >
               Open in WhatsApp

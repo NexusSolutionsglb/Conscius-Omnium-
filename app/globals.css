@@ -210,6 +210,50 @@
     color: var(--color-ink-soft);
   }
 
+  /* ─── Artwork "on the wall" treatment ───────────────────────
+     A photographed painting should sit off the page like a physical
+     print rather than lie flat on it: a tight contact shadow at the
+     edge, a mid shadow for the body of the work, and a wide, very
+     soft one for the room it hangs in. The paper ground behind it
+     reads as the mount. */
+  .u-artframe {
+    background: var(--color-paper);
+    box-shadow:
+      0 1px 2px color-mix(in oklab, var(--color-ink) 12%, transparent),
+      0 9px 22px -10px color-mix(in oklab, var(--color-ink) 26%, transparent),
+      0 34px 62px -28px color-mix(in oklab, var(--color-ink) 38%, transparent);
+    transition:
+      box-shadow 0.6s var(--ease-out-expo),
+      transform 0.6s var(--ease-out-expo);
+  }
+
+  /* Lifts on hover — for the cards that are also links. */
+  .u-artframe--lift:hover,
+  .u-artframe--lift:focus-visible {
+    transform: translateY(-4px);
+    box-shadow:
+      0 2px 4px color-mix(in oklab, var(--color-ink) 14%, transparent),
+      0 16px 32px -12px color-mix(in oklab, var(--color-ink) 30%, transparent),
+      0 48px 82px -30px color-mix(in oklab, var(--color-ink) 44%, transparent);
+  }
+
+  /* Thumbnail scale — the same light, a shorter drop. */
+  .u-artframe--sm {
+    background: var(--color-paper);
+    box-shadow:
+      0 1px 1px color-mix(in oklab, var(--color-ink) 10%, transparent),
+      0 4px 10px -4px color-mix(in oklab, var(--color-ink) 24%, transparent);
+    transition:
+      box-shadow 0.4s var(--ease-out-expo),
+      transform 0.4s var(--ease-out-expo);
+  }
+  .u-artframe--sm:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 2px color-mix(in oklab, var(--color-ink) 12%, transparent),
+      0 8px 18px -6px color-mix(in oklab, var(--color-ink) 30%, transparent);
+  }
+
   /* Hairline rule that draws itself in */
   .u-rule {
     height: 1px;

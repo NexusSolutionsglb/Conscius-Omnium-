@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Work } from "@/lib/types";
 import { DISCIPLINE_LABELS } from "@/lib/types";
-import { WorkImageScroller } from "./work-image-scroller";
+import { WorkImageViewer } from "./work-image-viewer";
 
 export function WorkHero({ work }: { work: Work }) {
   return (
@@ -52,7 +52,7 @@ export function WorkHero({ work }: { work: Work }) {
       </div>
 
       <div className="mt-10 md:mt-14">
-        <WorkImageScroller images={work.images} />
+        <WorkImageViewer images={work.images} />
       </div>
     </div>
   );

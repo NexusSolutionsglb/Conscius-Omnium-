@@ -14,6 +14,13 @@ type ArtImageProps = Omit<ImageProps, "onLoad"> & {
   wrapperClassName?: string;
   /** Slight zoom on hover — for cards. */
   hoverZoom?: boolean;
+  /**
+   * How the image sits in its box. "cover" fills and crops (cards with a
+   * fixed `ratio`); "contain" scales the whole image down to fit, so a
+   * painting is never cut off — use it wherever the artwork itself is the
+   * subject.
+   */
+  fit?: "cover" | "contain";
 };
 
 /**
@@ -30,6 +37,7 @@ export function ArtImage({
   noReveal = false,
   wrapperClassName,
   hoverZoom = false,
+  fit = "cover",
   className,
   alt,
   ...props
@@ -52,14 +60,23 @@ export function ArtImage({
     <div
       ref={ref}
       className={cn(
-        "relative overflow-hidden bg-paper-deep",
+        "relative",
+        // A contained image is letterboxed by design, so the caller owns the
+        // ground behind it; a covered one fills its box, so the placeholder
+        // tint only ever shows while it loads.
+        fit === "contain"
+          ? "flex items-center justify-center"
+          : "overflow-hidden bg-paper-deep",
         hoverZoom && "group/art",
         wrapperClassName,
       )}
       style={ratio ? { aspectRatio: ratio } : undefined}
     >
       <motion.div
-        className="relative h-full w-full"
+        className={cn(
+          "relative",
+          fit === "contain" ? "flex max-h-full max-w-full" : "h-full w-full",
+        )}
         initial={false}
         animate={{
           clipPath: revealed ? "inset(0% 0% 0% 0%)" : "inset(0% 0% 100% 0%)",
@@ -70,7 +87,10 @@ export function ArtImage({
           ref={imgRef}
           alt={alt}
           className={cn(
-            "h-full w-full object-cover transition-[transform,opacity] duration-[1000ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+            "transition-[transform,opacity] duration-[1000ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+            fit === "contain"
+              ? "h-auto max-h-full w-auto max-w-full object-contain"
+              : "h-full w-full object-cover",
             loaded ? "opacity-100" : "opacity-0",
             hoverZoom && "group-hover/art:scale-[1.035]",
             className,

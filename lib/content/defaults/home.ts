@@ -7,15 +7,7 @@ import type { HomeContent } from "@/lib/types";
  * With nothing saved to `pages.content`, the page renders identically.
  */
 export const homeDefaults: HomeContent = {
-  order: [
-    "intro",
-    "featured",
-    "disciplines",
-    "timeline",
-    "studioPreview",
-    "collections",
-    "contactCta",
-  ],
+  order: ["intro", "featured", "studioPreview", "collections", "contactCta"],
   hidden: [],
   sectionStyles: {},
   blocks: {},
@@ -28,32 +20,21 @@ export const homeDefaults: HomeContent = {
   featured: {
     eyebrow: "Selected work",
     heading: "A few pieces to begin with",
-    linkLabel: "All work",
+    linkLabel: "The full gallery",
   },
 
   disciplines: {
-    eyebrow: "Across disciplines",
-    heading: "Different mediums, the same question.",
-    body: "What to do with the ruin, the eco-void, the monument — how to hold a place rather than erase it. The answer arrives as a building, a miniature, a render, or a title card.",
-    blurbs: {
-      architecture:
-        "Built and speculative — a house that breathes, a tower over a ruin, a black marble monument to love.",
-      "production-design":
-        "Title cards, first-look posters and character design for Kannada cinema and a Prime Original.",
-      photography:
-        "Miniatures and conservation workers, shot until the seam between model and world disappears.",
-      experimental:
-        "Plaster cities, a pierced tin can as architecture, an infotech flush plate that pays you back.",
-      art: "An abstract Shiva from a blue cosmos; an entire seascape in four lines.",
-      graphic: "Marks and identities folded back into Indian myth.",
-    },
+    eyebrow: "",
+    heading: "",
+    body: "",
+    blurbs: {},
   },
 
   timeline: {
-    eyebrow: "Origin",
-    heading: "From drawing mythology to the edge of fiction.",
-    body: "A visual autobiography that runs from 1995 to 2017 — art, then science, then the discovery that architecture could hold both.",
-    linkLabel: "Walk through the timeline",
+    eyebrow: "",
+    heading: "",
+    body: "",
+    linkLabel: "",
   },
 
   studioPreview: {
@@ -67,7 +48,7 @@ export const homeDefaults: HomeContent = {
   collections: {
     eyebrow: "Series",
     heading: "Bodies of work",
-    linkLabel: "All work",
+    linkLabel: "The full gallery",
   },
 
   contactCta: {

@@ -101,7 +101,7 @@ function ExhibitionRow({ item, typeLabel }: { item: Exhibition; typeLabel: strin
                 {item.relatedSlugs?.map((slug) => (
                   <Link
                     key={slug}
-                    href={`/work/${slug}`}
+                    href={`/gallery/${slug}`}
                     className="u-tap u-link text-[0.7rem] font-medium uppercase tracking-[0.14em]"
                   >
                     View related work

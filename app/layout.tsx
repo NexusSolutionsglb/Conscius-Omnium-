@@ -32,7 +32,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(env.siteUrl),
   ...buildMetadata({ path: "/" }),
-  applicationName: "Conscious Omnium",
+  applicationName: "Conscius Omnium™",
   authors: [{ name: "Shivjeet Potdar" }],
   creator: "Shivjeet Potdar",
   icons: {

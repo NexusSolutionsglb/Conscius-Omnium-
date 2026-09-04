@@ -92,7 +92,7 @@ export function WorkRowActions({
               style={{ top: coords.top, left: coords.left }}
             >
               <a
-                href={`/work/${slug}`}
+                href={`/gallery/${slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block px-3 py-1.5 text-neutral-600 hover:bg-neutral-50"

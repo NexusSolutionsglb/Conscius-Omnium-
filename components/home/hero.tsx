@@ -1,140 +1,98 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
-import type { HeroConfig, Work } from "@/lib/types";
-import { DISCIPLINE_LABELS } from "@/lib/types";
+import { motion } from "motion/react";
+import type { HeroConfig } from "@/lib/types";
 import { EASE } from "@/lib/motion";
-import { blurFor } from "@/lib/content/blur";
-import { ArtImage } from "@/components/motion/image-reveal";
 import { Magnetic } from "@/components/motion/magnetic";
 import { useCursor } from "@/components/site/cursor";
 import { EditableText } from "@/components/editor/editable-text";
-import { useEditorMode, useNodeProps } from "@/components/editor/use-editable";
+import { EditableImage } from "@/components/editor/editable-image";
+import { useNodeProps } from "@/components/editor/use-editable";
 
-export function Hero({ hero, work }: { hero: HeroConfig; work: Work | null }) {
-  const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"],
-  });
-  const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "12%"]);
-  const contentY = useTransform(scrollYProgress, [0, 1], [0, 46]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+/**
+ * The full-bleed red hero — matches the client's reference sketch: a
+ * saturated red field, centred "AWARENESS THROUGH ART" (bold) / "BY
+ * SHIVJEET POTDAR" (italic, same size), and a single "Seek" CTA into the
+ * enquiry form. Built video-ready: `hero.video` fills the background the
+ * instant a real clip is supplied; until then it's a plain deep-red field
+ * (no stock footage, no invented photography).
+ */
+export function Hero({ hero }: { hero: HeroConfig }) {
   const { setCursor, reset } = useCursor();
-  const editing = useEditorMode() === "edit";
   const nodeProps = useNodeProps("home", "@settings.hero", "hero", "Hero");
-
-  const image = work?.coverImage ?? hero.image ?? "/work/ghosts-takht-mahal.jpg";
-  const alt = work?.images[0]?.alt ?? "Featured work by Shivjeet Potdar";
-  const headingLines = hero.heading.split("\n");
 
   return (
     <section
-      ref={ref}
       {...nodeProps}
-      className="u-invert relative flex h-[100svh] min-h-[600px] flex-col justify-end overflow-hidden"
+      className="u-invert relative flex h-[100svh] min-h-[560px] flex-col items-center justify-center overflow-hidden bg-[#c81e1e]"
     >
-      <motion.div style={{ y: imageY }} className="absolute inset-[-6%_0_0_0] -z-20">
-        <ArtImage
-          src={image}
-          alt={alt}
-          fill
-          priority
-          noReveal
-          sizes="100vw"
-          placeholder={blurFor(image) ? "blur" : "empty"}
-          blurDataURL={blurFor(image)}
-          className="object-cover [filter:contrast(1.05)_saturate(1.03)_brightness(0.9)]"
-          wrapperClassName="h-full w-full"
+      {hero.video ? (
+        <EditableImage bind="@settings.hero.video" folder="hero">
+          <video
+            src={hero.video}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 -z-20 h-full w-full object-cover"
+          />
+        </EditableImage>
+      ) : (
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-20 bg-[radial-gradient(120%_90%_at_50%_18%,#e2372b_0%,#c81e1e_46%,#9c1414_100%)]"
         />
-      </motion.div>
+      )}
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(80%_60%_at_50%_100%,rgba(0,0,0,0.32)_0%,transparent_70%)]" />
 
-      {/* legibility scrim */}
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_top,rgba(12,10,8,0.9)_0%,rgba(12,10,8,0.62)_38%,rgba(12,10,8,0.24)_66%,rgba(12,10,8,0.34)_100%)]" />
-
-      <motion.div
-        style={{ y: contentY, opacity: contentOpacity }}
-        className="u-container relative z-10 pb-[14vh] pt-28"
-      >
-        <motion.p
-          initial={{ opacity: 0, y: 14 }}
+      <div className="u-container relative z-10 flex flex-col items-center px-6 text-center">
+        <motion.h1
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: EASE.outExpo, delay: 0.15 }}
-          className="text-[0.6875rem] font-medium uppercase tracking-[0.24em] text-paper/70"
+          transition={{ duration: 0.9, ease: EASE.outExpo, delay: 0.15 }}
+          className="font-sans text-[clamp(1.5rem,0.9rem+2.6vw,3rem)] font-bold uppercase leading-tight tracking-[0.04em] text-paper"
         >
-          <EditableText bind="@settings.hero.eyebrow">{hero.eyebrow}</EditableText>
+          <EditableText bind="@settings.hero.heading">{hero.heading}</EditableText>
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, ease: EASE.outExpo, delay: 0.3 }}
+          className="mt-2 font-sans text-[clamp(1.5rem,0.9rem+2.6vw,3rem)] italic leading-tight text-paper"
+        >
+          <EditableText bind="@settings.hero.supporting">{hero.supporting}</EditableText>
         </motion.p>
-
-        {editing ? (
-          <EditableText
-            as="h1"
-            bind="@settings.hero.heading"
-            linebreaks
-            className="mt-6 max-w-[15ch] font-display text-[clamp(2.5rem,1.1rem+5.4vw,5.8rem)] font-light leading-[1.03] tracking-[-0.02em] text-paper md:mt-7"
-          >
-            {hero.heading}
-          </EditableText>
-        ) : (
-          <h1 className="mt-6 max-w-[15ch] font-display text-[clamp(2.5rem,1.1rem+5.4vw,5.8rem)] font-light leading-[1.03] tracking-[-0.02em] text-paper md:mt-7">
-            {headingLines.map((line, i) => (
-              <span key={i} className="block overflow-hidden pb-[0.06em]">
-                <motion.span
-                  className="block"
-                  initial={{ y: "110%" }}
-                  animate={{ y: "0%" }}
-                  transition={{ duration: 1, ease: EASE.outExpo, delay: 0.28 + i * 0.12 }}
-                >
-                  {line}
-                </motion.span>
-              </span>
-            ))}
-          </h1>
-        )}
 
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: EASE.outExpo, delay: 0.62 }}
-          className="mt-9 flex flex-wrap items-end justify-between gap-x-8 gap-y-5"
+          transition={{ duration: 0.9, ease: EASE.outExpo, delay: 0.5 }}
+          className="mt-10"
         >
           <Magnetic>
             <Link
               href={hero.ctaHref}
               onPointerEnter={() => setCursor("view", "Enter")}
               onPointerLeave={reset}
-              className="inline-flex items-center gap-3 border border-paper/35 px-8 py-3.5 text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-paper transition-colors hover:border-paper hover:bg-paper/10"
+              className="inline-flex items-center gap-3 border border-paper px-10 py-3.5 text-[0.75rem] font-medium uppercase tracking-[0.24em] text-paper transition-colors hover:bg-paper hover:text-[#c81e1e]"
             >
               <EditableText bind="@settings.hero.ctaLabel">{hero.ctaLabel}</EditableText>
-              <span aria-hidden>&rarr;</span>
             </Link>
           </Magnetic>
-
-          {hero.showMeta && work && (
-            <div className="max-w-[16rem] text-[0.72rem] leading-relaxed text-paper/55 sm:text-right">
-              <p className="text-paper/85">{work.title}</p>
-              <p>
-                {[DISCIPLINE_LABELS[work.discipline], work.year, work.medium]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
-              {work.dimensions && <p>{work.dimensions}</p>}
-            </div>
-          )}
         </motion.div>
-      </motion.div>
+      </div>
 
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.3, duration: 1 }}
-        className="pointer-events-none absolute bottom-5 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-2 text-paper/45 lg:flex"
+        transition={{ delay: 1.1, duration: 1 }}
+        className="pointer-events-none absolute bottom-6 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-2 text-paper/60 lg:flex"
       >
         <span className="text-[0.55rem] uppercase tracking-[0.3em]">Scroll</span>
-        <span className="relative block h-9 w-px overflow-hidden bg-paper/20">
+        <span className="relative block h-9 w-px overflow-hidden bg-paper/25">
           <motion.span
-            className="absolute inset-x-0 top-0 h-1/2 bg-paper/70"
+            className="absolute inset-x-0 top-0 h-1/2 bg-paper/80"
             animate={{ y: ["-100%", "200%"] }}
             transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
           />

@@ -63,7 +63,7 @@ function BrandLoader() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: EASE.outExpo }}
       >
-        Conscious Omnium
+        Conscius Omnium™
       </motion.span>
       <motion.span
         className="mt-4 h-px w-14 origin-left bg-paper/30"

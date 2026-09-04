@@ -2,13 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import type {
-  Collection,
-  HomeContent,
-  SiteSettings,
-  Work,
-} from "@/lib/types";
-import { DISCIPLINE_LABELS, type Discipline } from "@/lib/types";
+import type { Collection, HomeContent, SiteSettings } from "@/lib/types";
 import { homeDefaults } from "@/lib/content/defaults/home";
 import { EASE } from "@/lib/motion";
 import { blurFor } from "@/lib/content/blur";
@@ -18,7 +12,6 @@ import { Parallax } from "@/components/motion/parallax";
 import { Reveal, StaggerItem, StaggerList } from "@/components/motion/reveal";
 import { TextReveal } from "@/components/motion/text-reveal";
 import { Eyebrow, Rule, TextLink } from "@/components/ui/primitives";
-import { useCursor } from "@/components/site/cursor";
 import { EditableText } from "@/components/editor/editable-text";
 import { EditableImage } from "@/components/editor/editable-image";
 import { RepeatableList } from "@/components/editor/repeatable-list";
@@ -70,92 +63,6 @@ export function Intro({
             </Reveal>
           </div>
         </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── 04 · Disciplines ─────────────────────────────────────── */
-
-type DisciplineCard = {
-  discipline: Discipline;
-  work: Work;
-  blurb: string;
-};
-
-export function Disciplines({
-  cards,
-  copy = homeDefaults.disciplines,
-}: {
-  cards: DisciplineCard[];
-  copy?: HomeContent["disciplines"];
-}) {
-  const { setCursor, reset } = useCursor();
-  const works = useEditableData<Work>("works", []);
-  const workIndex = (slug: string) => works.findIndex((w) => w.slug === slug);
-  return (
-    <section className="border-y border-line bg-paper-dim/50 py-24 md:py-36">
-      <div className="u-container">
-        <Reveal className="max-w-2xl">
-          <Eyebrow>
-            <EditableText bind="home.disciplines.eyebrow">{copy.eyebrow}</EditableText>
-          </Eyebrow>
-          <EditableText
-            as="h2"
-            bind="home.disciplines.heading"
-            className="mt-5 font-display text-[clamp(1.8rem,1.1rem+2.8vw,3.4rem)] font-light leading-[1.12]"
-          >
-            {copy.heading}
-          </EditableText>
-          <EditableText
-            as="p"
-            bind="home.disciplines.body"
-            multiline
-            className="mt-5 max-w-md text-[0.92rem] leading-relaxed text-ink-soft"
-          >
-            {copy.body}
-          </EditableText>
-        </Reveal>
-
-        <StaggerList className="mt-16 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-          {cards.map(({ discipline, work, blurb }) => {
-            const wi = workIndex(work.slug);
-            return (
-            <StaggerItem key={discipline} as="article">
-              <Link
-                href={`/work?discipline=${discipline}`}
-                className="group block"
-                onPointerEnter={() => setCursor("view")}
-                onPointerLeave={reset}
-              >
-                <EditableImage bind={wi >= 0 ? `@works.${wi}.coverImage` : "home.disciplines.__none"} folder="work">
-                  <ArtImage
-                    src={work.coverImage}
-                    alt={work.images[0]?.alt ?? work.title}
-                    ratio="5 / 4"
-                    fill
-                    sizes="(min-width:1024px) 30vw, (min-width:640px) 45vw, 100vw"
-                    hoverZoom
-                    placeholder={blurFor(work.coverImage) ? "blur" : "empty"}
-                    blurDataURL={blurFor(work.coverImage)}
-                  />
-                </EditableImage>
-                <h3 className="mt-5 font-display text-[1.4rem] font-normal text-ink">
-                  {DISCIPLINE_LABELS[discipline]}
-                </h3>
-                <EditableText
-                  as="p"
-                  bind={`home.disciplines.blurbs.${discipline}`}
-                  multiline
-                  className="mt-2 max-w-xs text-[0.82rem] leading-relaxed text-ink-mute"
-                >
-                  {blurb}
-                </EditableText>
-              </Link>
-            </StaggerItem>
-            );
-          })}
-        </StaggerList>
       </div>
     </section>
   );
@@ -246,7 +153,7 @@ export function CollectionsRail({
             {copy.heading}
           </EditableText>
         </div>
-        <TextLink href="/work">
+        <TextLink href="/gallery">
           <EditableText bind="home.collections.linkLabel">{copy.linkLabel}</EditableText>
         </TextLink>
       </Reveal>
@@ -264,7 +171,7 @@ export function CollectionsRail({
         >
           {(c, i) => (
             <StaggerItem as="article" data-unpublished={editing && !c.published ? "" : undefined}>
-              <Link href={`/work/collection/${c.slug}`} className="group block">
+              <Link href={`/gallery/collection/${c.slug}`} className="group block">
                 <EditableImage bind={`@collections.${i}.coverImage`} folder="collection">
                   {c.coverImage ? (
                     <ArtImage

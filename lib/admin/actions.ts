@@ -45,7 +45,7 @@ function fail(e: z.ZodError): ActionResult {
 }
 
 function revalidateSite(...paths: string[]) {
-  ["/", "/work", "/about", "/studio", "/exhibitions", ...paths].forEach((p) =>
+  ["/", "/gallery", "/about", "/studio", "/exhibitions", ...paths].forEach((p) =>
     revalidatePath(p),
   );
 }
@@ -138,7 +138,7 @@ export async function saveWork(
   if (existingId) {
     const { error } = await supabase.from("works").update(row as never).eq("id", existingId);
     if (error) return { ok: false, error: error.message };
-    revalidateSite(`/work/${row.slug}`);
+    revalidateSite(`/gallery/${row.slug}`);
     return { ok: true, message: "Saved", id: existingId };
   }
 
@@ -148,7 +148,7 @@ export async function saveWork(
     .select("id")
     .maybeSingle<{ id: string }>();
   if (error) return { ok: false, error: error.message };
-  revalidateSite(`/work/${row.slug}`);
+  revalidateSite(`/gallery/${row.slug}`);
   return { ok: true, message: "Created", id: data?.id };
 }
 
@@ -172,7 +172,7 @@ export async function updateWorkImages(
   if (error) return { ok: false, error: error.message };
   // The work detail page is ISR-cached (revalidate = 3600), so it must be
   // purged explicitly or edits won't show until the hour is up.
-  revalidateSite(...(data?.slug ? [`/work/${data.slug}`] : []));
+  revalidateSite(...(data?.slug ? [`/gallery/${data.slug}`] : []));
   return { ok: true, message: "Images updated" };
 }
 
@@ -269,7 +269,7 @@ export async function saveCollection(
     ? await supabase.from("collections").update(row as never).eq("id", id).select("id").maybeSingle<{ id: string }>()
     : await supabase.from("collections").insert(row as never).select("id").maybeSingle<{ id: string }>();
   if (error) return { ok: false, error: error.message };
-  revalidateSite(`/work/collection/${row.slug}`);
+  revalidateSite(`/gallery/collection/${row.slug}`);
   return { ok: true, message: "Saved", id: data?.id ?? id ?? undefined };
 }
 
@@ -475,9 +475,9 @@ export async function saveSettings(formData: FormData): Promise<ActionResult> {
     contact_copy: { heading: v.contactHeading, supporting: v.contactSupporting },
     seo: {
       defaultTitle: v.seoDefaultTitle,
-      titleTemplate: "%s — Conscious Omnium",
+      titleTemplate: "%s — Conscius Omnium™",
       description: v.seoDescription,
-      ogImage: "/work/the-black-taj-mahal.jpg",
+      ogImage: "/gallery/states-of-attention/the-light-attracts-everything.jpg",
     },
     updated_at: new Date().toISOString(),
   };
@@ -567,7 +567,7 @@ const SLUG_PATH: Record<string, string> = {
   home: "/",
   about: "/about",
   studio: "/studio",
-  work: "/work",
+  work: "/gallery",
   exhibitions: "/exhibitions",
   contact: "/contact",
 };
@@ -692,12 +692,20 @@ export async function publishSite(payload: {
       credit: s.footerCredit ?? "",
     };
   }
+  if (s.logo !== undefined || s.logoInverted !== undefined) {
+    extra.header = { logo: s.logo ?? "", logoInverted: s.logoInverted ?? "" };
+  }
   if (Object.keys(extra).length > 2) {
     const { error } = await supabase
       .from("site_settings")
       .upsert(extra as never, { onConflict: "id" });
     if (error) {
-      if (isMissingColumn(error, "theme") || isMissingColumn(error, "footer")) chromeSkipped = true;
+      if (
+        isMissingColumn(error, "theme") ||
+        isMissingColumn(error, "footer") ||
+        isMissingColumn(error, "header")
+      )
+        chromeSkipped = true;
       else return { ok: false, error: `theme: ${error.message}` };
     }
   }

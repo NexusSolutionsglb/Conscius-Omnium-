@@ -11,7 +11,7 @@ export default async function WorksListPage() {
     <>
       <PageHeader
         title="Works"
-        description="Every piece across every discipline. Order here is the order on /work."
+        description="Every piece across every discipline. Order here is the order on /gallery."
         action={
           <Link
             href="/admin/works/new"

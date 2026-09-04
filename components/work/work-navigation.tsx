@@ -27,7 +27,7 @@ export function WorkNavigation({
         work ? (
           <Link
             key={dir}
-            href={`/work/${work.slug}`}
+            href={`/gallery/${work.slug}`}
             onPointerEnter={() => setCursor(dir)}
             onPointerLeave={reset}
             className={`group flex flex-col gap-1 bg-paper px-1 py-8 transition-colors hover:bg-paper-dim sm:px-6 ${

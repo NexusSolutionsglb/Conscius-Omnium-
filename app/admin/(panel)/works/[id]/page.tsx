@@ -18,7 +18,7 @@ export default async function EditWorkPage({
     <>
       <PageHeader
         title={work.title}
-        description={`/work/${work.slug}`}
+        description={`/gallery/${work.slug}`}
         back={{ href: "/admin/works", label: "Works" }}
       />
       <WorkEditor

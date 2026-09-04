@@ -15,7 +15,7 @@ export default async function EditCollectionPage({
     <>
       <PageHeader
         title={collection.title}
-        description={`/work/collection/${collection.slug}`}
+        description={`/gallery/collection/${collection.slug}`}
         back={{ href: "/admin/collections", label: "Collections" }}
       />
       <CollectionForm collection={collection} />

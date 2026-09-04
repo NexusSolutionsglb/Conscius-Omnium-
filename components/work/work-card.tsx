@@ -48,7 +48,7 @@ export function WorkCard({
       className={cn("group/card", className)}
     >
       <Link
-        href={`/work/${work.slug}`}
+        href={`/gallery/${work.slug}`}
         className="block focus-visible:outline-offset-8"
         onPointerEnter={() => setCursor("view")}
         onPointerLeave={reset}

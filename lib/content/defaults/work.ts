@@ -1,9 +1,9 @@
 import type { WorkIndexContent } from "@/lib/types";
 
-/** Default editable copy for `/work` — verbatim from `app/(site)/work/page.tsx`. */
+/** Default editable copy for `/gallery` — verbatim from `app/(site)/gallery/page.tsx`. */
 export const workIndexDefaults: WorkIndexContent = {
-  eyebrow: "Conscious Omnium",
-  heading: "Selected\nWork",
+  eyebrow: "Conscius Omnium™",
+  heading: "The\nGallery",
   intro:
-    "A practice that moves between built space, the photographed miniature, the render and the screen — {count} works, none of them forced to be the same kind of thing.",
+    "{count} paintings across four series — Black Canvas, Duality, States of Attention and States of Awareness. Each one begins in meditation and ends wherever the attention took it.",
 };

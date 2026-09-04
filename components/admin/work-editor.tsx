@@ -163,7 +163,7 @@ export function WorkEditor({
                 )
               }
               onBlur={(e) => setSlugVal(slugify(e.target.value))}
-              hint={`the-work-name → conscious-omnium.com/work/${slugVal || "the-work-name"}`}
+              hint={`the-work-name → conscious-omnium.com/gallery/${slugVal || "the-work-name"}`}
               error={err("slug")}
             />
             <div className="grid gap-4 sm:grid-cols-3">
@@ -365,14 +365,14 @@ export function WorkEditor({
               <Field label="Currency" name="currency" defaultValue={work?.currency ?? "INR"} required />
             </div>
             <Toggle label="Show price publicly" name="priceVisible" defaultChecked={work?.priceVisible} />
-            <Field label="Accent hex" name="accent" defaultValue={work?.accent ?? ""} placeholder="#8a6f4e" />
+            <Field label="Accent hex" name="accent" defaultValue={work?.accent ?? ""} placeholder="#4a4a4a" />
           </div>
         </Card>
 
         <div className="flex items-center gap-3">
           <SubmitButton>{isNew ? "Create work" : "Save changes"}</SubmitButton>
           {work && (
-            <a href={`/work/${work.slug}`} target="_blank" rel="noopener noreferrer" className="text-[12px] text-neutral-500 hover:underline">
+            <a href={`/gallery/${work.slug}`} target="_blank" rel="noopener noreferrer" className="text-[12px] text-neutral-500 hover:underline">
               Preview ↗
             </a>
           )}

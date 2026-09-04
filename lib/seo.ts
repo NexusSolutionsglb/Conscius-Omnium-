@@ -132,7 +132,7 @@ export function workJsonLd(work: Work) {
     "@context": "https://schema.org",
     "@type": isVisualArt ? "VisualArtwork" : "CreativeWork",
     name: work.title,
-    url: absoluteUrl(`/work/${work.slug}`),
+    url: absoluteUrl(`/gallery/${work.slug}`),
     image: absoluteUrl(work.coverImage),
     abstract: work.summary,
     ...(work.description.length ? { description: work.description.join(" ") } : {}),

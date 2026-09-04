@@ -9,7 +9,7 @@ import { WhatsAppFloat } from "@/components/site/whatsapp-button";
 import { ErrorState, NOT_FOUND_SUGGESTIONS } from "@/components/site/error-state";
 
 export const metadata: Metadata = {
-  title: "Page not found — Conscious Omnium",
+  title: "Page not found — Conscius Omnium™",
   description:
     "That page isn't here. Return to the work of Shivjeet Potdar — architecture, miniatures, photography, production design and film.",
   robots: { index: false, follow: true },

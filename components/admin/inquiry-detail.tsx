@@ -57,7 +57,7 @@ export function InquiryDetail({ inquiry }: { inquiry: Inquiry }) {
           </dl>
           {inquiry.workSlug && (
             <a
-              href={`/work/${inquiry.workSlug}`}
+              href={`/gallery/${inquiry.workSlug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-3 inline-block text-[12px] text-neutral-500 hover:underline"

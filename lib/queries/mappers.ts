@@ -159,16 +159,20 @@ export function mapProfile(row: ProfileRow): Profile {
 
 export function mapSettings(row: SiteSettingsRow): SiteSettings {
   const fallbackNav = [
-    { label: "Work", href: "/work" },
     { label: "About", href: "/about" },
+    { label: "Gallery", href: "/gallery" },
     { label: "Studio", href: "/studio" },
-    { label: "Exhibitions", href: "/exhibitions" },
     { label: "Contact", href: "/contact" },
   ];
+  const header = asObject<{ logo?: string; logoInverted?: string }>(
+    (row as { header?: unknown }).header,
+  );
   return {
     brand: row.brand,
     brandLine: row.brand_line,
     tagline: row.tagline,
+    logo: normalizeImageUrl(header.logo) || null,
+    logoInverted: normalizeImageUrl(header.logoInverted) || null,
     nav: asArray<SiteSettings["nav"][number]>(row.nav).length
       ? asArray<SiteSettings["nav"][number]>(row.nav)
       : fallbackNav,

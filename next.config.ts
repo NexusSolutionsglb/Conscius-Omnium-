@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 /**
  * Supabase Storage is the production image host. We allow its public object URL
  * pattern so `next/image` can optimise remote artwork. When SUPABASE isn't
- * configured the site serves bundled images from /public/work instead.
+ * configured the site serves bundled images from /public/gallery instead.
  */
 const supabaseHost = (() => {
   try {
@@ -44,6 +44,17 @@ const nextConfig: NextConfig = {
     // Optimised derivatives are content-addressed; keep them a good while.
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },
+  /**
+   * The index used to live at /work; it is the Gallery now. Old links —
+   * shared posts, indexed pages, printed cards — are moved on permanently.
+   */
+  async redirects() {
+    return [
+      { source: "/work", destination: "/gallery", permanent: true },
+      { source: "/work/:path*", destination: "/gallery/:path*", permanent: true },
+    ];
+  },
+
   async headers() {
     return [
       {
@@ -70,7 +81,7 @@ const nextConfig: NextConfig = {
       {
         // Bundled portfolio imagery — stable filenames, safe to cache hard at
         // the edge while still revalidating in the background.
-        source: "/work/:path*",
+        source: "/gallery/:path*",
         headers: [
           {
             key: "Cache-Control",

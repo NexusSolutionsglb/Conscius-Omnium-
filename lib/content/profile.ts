@@ -1,19 +1,22 @@
 import type { Profile } from "@/lib/types";
 
 /**
- * Facts from the monograph's profile page. The biography is written
- * only from the visual timeline in that same document ("his story").
+ * Verbatim from `WEBSITE DESIGN MATERIAL/pages/about/about text.pptx`
+ * (artist-bio text box) and the cover page of `SP 10 260626.pdf`
+ * (contact details). Nothing here is invented — see that source for
+ * the exact wording.
  */
 export const profileSeed: Profile = {
   name: "Shivjeet Potdar",
-  roles: ["Architect", "Interior Designer", "Production Designer", "Filmmaker"],
-  headline: "Architecture, image, and the fading boundary between reality and fiction.",
+  roles: ["Artist", "Architect", "Production Designer", "Filmmaker"],
+  headline: "To turn attention inward through art.",
   statement:
-    "Architecture is a homogenous blend of art and science — science is the body, art is its soul.",
+    "Art is not simply an object to be seen. It is a space in which awareness can happen.",
   bio: [
-    "Shivjeet Potdar works across architecture, interiors, production design and film. The practice began, by his own account, as a child drawing mythology and wanting to live in it — then wanting to be an artist, then deciding science was more useful, then building an electric dynamo and wanting to be a scientist, and finally refusing to give up either.",
-    "Architecture became the place the two could hold hands. Much of the work since has circled a single question: what to do with the ruin, the eco-void, the monument, the dead quarry — how to build in a way that reclaims a place rather than erases it. It moves fluidly between a plaster miniature photographed until it becomes a world, a 3D render set back into a real landscape, a built pavilion of bent steel, and a title card for a feature film.",
-    "More recently the work has moved toward the boundary between reality and fiction — production design, character design, and the beginnings of filmmaking.",
+    "Shivjeet Potdar is an architect, filmmaker, and self-taught artist whose practice explores consciousness, perception, duality, and the relationship between the inner and outer worlds.",
+    "Trained in architecture at RV College of Architecture, Bengaluru, and in Production Design at the Film and Television Institute of India (FTII), Pune, Shivjeet approaches art through space, form, symbolism, and narrative.",
+    "His paintings often emerge from questions rather than answers — about identity, awareness, existence, and the nature of reality. Drawing from meditation, philosophy, geometry, and everyday human experience, he creates works that invite the viewer not merely to look, but to observe.",
+    "His practice moves between painting, sculpture, spatial design, and visual storytelling. Whether on canvas, an everyday object, or within a film set, the intention remains the same: to turn attention inward through art.",
   ],
   education: [
     {
@@ -25,10 +28,13 @@ export const profileSeed: Profile = {
       institution: "Film and Television Institute of India, Pune",
     },
   ],
-  email: "architectshivjeet@gmail.com",
+  email: "shivjeetpotdar@gmail.com",
   phone: "+91 99729 10950",
   whatsapp: "919972910950",
   location: "Bengaluru, India",
-  portrait: null,
-  social: [],
+  portrait: "/profile/shivjeet-potdar.jpg",
+  social: [
+    { label: "Instagram", href: "https://instagram.com/conscius_omnium" },
+    { label: "YouTube", href: "https://youtube.com/@shivjeetpotdar" },
+  ],
 };

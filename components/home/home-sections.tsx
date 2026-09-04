@@ -5,19 +5,16 @@ import type {
   BlockBase,
   Collection,
   CustomBlock,
-  Discipline,
   HomeContent,
   HomeSectionKey,
   Profile,
   SiteSettings,
-  TimelineEntry,
   Work,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { sectionStyleClass } from "@/lib/editor/section-style";
 import {
   useEditable,
-  useEditableData,
   useEditableProfile,
   useEditableSettings,
   useEditorMode,
@@ -26,31 +23,20 @@ import { AddSectionBar } from "@/components/editor/add-section-bar";
 import { Hero } from "./hero";
 import { FeaturedWork } from "./featured-work";
 import { CustomBlockView } from "./custom-block";
-import { CollectionsRail, ContactCta, Disciplines, Intro, StudioPreview } from "./sections";
-import { TimelineStrip } from "@/components/timeline/timeline";
-
-type DisciplineCard = { discipline: Discipline; work: Work; blurb: string };
+import { CollectionsRail, ContactCta, Intro, StudioPreview } from "./sections";
 
 export function HomeSections({
   serverContent,
   profile,
   settings,
-  heroWork,
-  works,
   featured,
-  disciplineCards,
-  timeline,
   collections,
   studioImage,
 }: {
   serverContent: HomeContent;
   profile: Profile;
   settings: SiteSettings;
-  heroWork: Work | null;
-  works: Work[];
   featured: Work[];
-  disciplineCards: DisciplineCard[];
-  timeline: TimelineEntry[];
   collections: Collection[];
   studioImage: string;
 }) {
@@ -60,8 +46,6 @@ export function HomeSections({
   const hidden = useEditable("home", "hidden", serverContent.hidden);
   const intro = useEditable("home", "intro", serverContent.intro);
   const featuredCopy = useEditable("home", "featured", serverContent.featured);
-  const disciplines = useEditable("home", "disciplines", serverContent.disciplines);
-  const timelineCopy = useEditable("home", "timeline", serverContent.timeline);
   const studioPreview = useEditable("home", "studioPreview", serverContent.studioPreview);
   const collectionsCopy = useEditable("home", "collections", serverContent.collections);
   const contactCta = useEditable("home", "contactCta", serverContent.contactCta);
@@ -85,27 +69,9 @@ export function HomeSections({
   };
   const bio = useEditableProfile("bio", profile.bio);
 
-  const liveWorks = useEditableData<Work>("works", works);
-
-  // Resolve the hero's featured work live so changing it in the editor updates
-  // the background image without a publish.
-  const resolvedHeroWork =
-    (liveHero.workSlug && liveWorks.find((w) => w.slug === liveHero.workSlug)) ||
-    heroWork ||
-    liveWorks.find((w) => w.featured) ||
-    liveWorks[0] ||
-    null;
-
-  const cards = disciplineCards.map((c) => ({
-    ...c,
-    blurb: disciplines.blurbs[c.discipline] ?? c.blurb,
-  }));
-
   const nodes: Record<HomeSectionKey, ReactNode> = {
     intro: <Intro bio={bio} settings={liveSettings} copy={intro} />,
     featured: <FeaturedWork works={featured} copy={featuredCopy} />,
-    disciplines: <Disciplines cards={cards} copy={disciplines} />,
-    timeline: <TimelineStrip entries={timeline} copy={timelineCopy} />,
     studioPreview: <StudioPreview image={studioImage} copy={studioPreview} />,
     collections: <CollectionsRail collections={collections} copy={collectionsCopy} />,
     contactCta: (
@@ -130,7 +96,7 @@ export function HomeSections({
 
   return (
     <>
-      <Hero hero={liveSettings.hero} work={resolvedHeroWork} />
+      <Hero hero={liveSettings.hero} />
       {visible.map((key, idx) => {
         const overrideCls = key.startsWith("block:") ? "" : sectionStyleClass(sectionStyles[key]);
         const node = renderNode(key);

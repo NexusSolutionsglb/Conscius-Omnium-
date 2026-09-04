@@ -26,7 +26,7 @@ const q = (v: unknown): string => {
 
 const lines: string[] = [
   "-- ═══════════════════════════════════════════════════════════════",
-  "--  CONSCIOUS OMNIUM — seed data (generated from lib/content)",
+  "--  CONSCIUS OMNIUM — seed data (generated from lib/content)",
   "--  Run AFTER 0001_init.sql. Safe to re-run.",
   "-- ═══════════════════════════════════════════════════════════════",
   "",
@@ -53,6 +53,20 @@ lines.push(
 on conflict (id) do update set
   brand = excluded.brand, brand_line = excluded.brand_line, tagline = excluded.tagline, nav = excluded.nav,
   hero = excluded.hero, footer_note = excluded.footer_note, contact_copy = excluded.contact_copy, seo = excluded.seo;`,
+  "",
+);
+
+// site_settings.header — the centre navbar logo. Needs 0003_site_chrome.sql;
+// wrapped so seed.sql still runs on a database that only has 0001 applied.
+lines.push(
+  `DO $$
+BEGIN
+  UPDATE public.site_settings
+  SET header = ${q({ logo: settingsSeed.logo, logoInverted: settingsSeed.logoInverted })}
+  WHERE id = 'default';
+EXCEPTION WHEN undefined_column THEN
+  RAISE NOTICE 'site_settings.header does not exist yet — run supabase/migrations/0003_site_chrome.sql, then re-run this block to pick up the logo.';
+END $$;`,
   "",
 );
 

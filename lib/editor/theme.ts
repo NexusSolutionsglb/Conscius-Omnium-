@@ -81,12 +81,12 @@ export const THEME_DEFAULTS: Required<
     | "containerWidth"
   >
 > = {
-  colorPaper: "#f7f4ef",
-  colorInk: "#1a1613",
-  colorInkSoft: "#443d35",
-  colorInkMute: "#7a7167",
-  colorAccent: "#8a6f4e",
-  colorAccentDeep: "#6f5940",
+  colorPaper: "#ffffff",
+  colorInk: "#111111",
+  colorInkSoft: "#3a3a3a",
+  colorInkMute: "#7a7a7a",
+  colorAccent: "#4a4a4a",
+  colorAccentDeep: "#262626",
   fontDisplay: "fraunces",
   fontSans: "inter",
   typeScale: 1,

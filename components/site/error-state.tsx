@@ -41,8 +41,8 @@ export function ErrorState({
         <Link href={action?.href ?? "/"} className="u-btn">
           {action?.label ?? "Return home"}
         </Link>
-        <Link href="/work" className="u-btn u-btn--ghost">
-          View the work
+        <Link href="/gallery" className="u-btn u-btn--ghost">
+          View the gallery
         </Link>
       </div>
 
@@ -77,7 +77,7 @@ export function ErrorState({
 
 /** The signposts shown on every 404 — one entry per top-level destination. */
 export const NOT_FOUND_SUGGESTIONS: ErrorStateLink[] = [
-  { label: "Selected Work", href: "/work", hint: "Architecture, miniatures, photography, film" },
+  { label: "Gallery", href: "/gallery", hint: "The paintings — Black Canvas, Duality, States of Attention, States of Awareness" },
   { label: "About", href: "/about", hint: "The practice and the person behind it" },
   { label: "Studio & Process", href: "/studio", hint: "How the work is actually made" },
   { label: "Contact", href: "/contact", hint: "Commissions, collaborations, enquiries" },

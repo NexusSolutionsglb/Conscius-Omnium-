@@ -3,7 +3,7 @@ import { isSupabaseConfigured } from "@/lib/env";
 import { SetupNotice } from "@/components/admin/setup-notice";
 
 export const metadata: Metadata = {
-  title: "Studio CMS — Conscious Omnium",
+  title: "Studio CMS — Conscius Omnium™",
   robots: { index: false, follow: false },
 };
 

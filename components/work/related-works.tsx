@@ -17,7 +17,7 @@ export function RelatedWorks({ works }: { works: Work[] }) {
       <StaggerList className="mt-10 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
         {works.map((work) => (
           <Reveal key={work.slug} as="article">
-            <Link href={`/work/${work.slug}`} className="group block">
+            <Link href={`/gallery/${work.slug}`} className="group block">
               <ArtImage
                 src={work.coverImage}
                 alt={work.images[0]?.alt ?? work.title}

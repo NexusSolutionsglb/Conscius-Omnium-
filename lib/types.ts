@@ -1,5 +1,5 @@
 /**
- * Domain model for Conscious Omnium.
+ * Domain model for Conscius Omnium.
  *
  * One primary content entity — `Work` — spans every discipline in
  * Shivjeet's practice (art, architecture, production design, film…).
@@ -212,6 +212,9 @@ export interface HeroConfig {
   workSlug: string | null;
   /** Fallback / override image if no work is chosen. */
   image?: string | null;
+  /** Full-bleed background video (muted/looped); falls back to a plain
+   *  colour field when unset. */
+  video?: string | null;
   showMeta: boolean;
 }
 
@@ -219,6 +222,11 @@ export interface SiteSettings {
   brand: string;
   brandLine: string;
   tagline: string;
+  /** Wordmark image shown over a light/solid header — falls back to the
+   *  text `brand` when unset. */
+  logo?: string | null;
+  /** Wordmark image shown over a dark/transparent header (e.g. the hero). */
+  logoInverted?: string | null;
   nav: { label: string; href: string }[];
   hero: HeroConfig;
   footerNote: string;
@@ -369,8 +377,6 @@ export type CustomBlockType = CustomBlock["type"];
 export type HomeSectionKey =
   | "intro"
   | "featured"
-  | "disciplines"
-  | "timeline"
   | "studioPreview"
   | "collections"
   | "contactCta";

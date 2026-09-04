@@ -17,8 +17,8 @@ export default function GlobalError({
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "#f7f4ef",
-          color: "#1a1613",
+          background: "#ffffff",
+          color: "#111111",
           fontFamily: "Georgia, serif",
           textAlign: "center",
           padding: "2rem",
@@ -27,7 +27,7 @@ export default function GlobalError({
         <h1 style={{ fontWeight: 400, fontSize: "1.7rem" }}>
           Something went wrong.
         </h1>
-        <p style={{ fontFamily: "system-ui, sans-serif", color: "#7a7167", marginTop: "0.75rem" }}>
+        <p style={{ fontFamily: "system-ui, sans-serif", color: "#7a7a7a", marginTop: "0.75rem" }}>
           The site hit an unexpected error{error?.digest ? ` (${error.digest})` : ""}.
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "2rem" }}>
@@ -39,10 +39,10 @@ export default function GlobalError({
               fontSize: "0.7rem",
               letterSpacing: "0.2em",
               textTransform: "uppercase",
-              background: "#1a1613",
-              color: "#f7f4ef",
+              background: "#111111",
+              color: "#ffffff",
               padding: "0.9rem 1.8rem",
-              border: "1px solid #1a1613",
+              border: "1px solid #111111",
               cursor: "pointer",
             }}
           >
@@ -58,9 +58,9 @@ export default function GlobalError({
               fontSize: "0.7rem",
               letterSpacing: "0.2em",
               textTransform: "uppercase",
-              color: "#1a1613",
+              color: "#111111",
               padding: "0.9rem 1.8rem",
-              border: "1px solid rgba(26,22,19,0.26)",
+              border: "1px solid rgba(17,17,17,0.26)",
               textDecoration: "none",
             }}
           >

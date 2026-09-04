@@ -9,7 +9,7 @@ export const revalidate = 86400;
 export const metadata: Metadata = buildMetadata({
   title: "Privacy Policy",
   description:
-    "How Conscious Omnium — the studio of Shivjeet Potdar — collects, uses, stores and protects the information you share through this website and its enquiry form.",
+    "How Conscius Omnium™ — the studio of Shivjeet Potdar — collects, uses, stores and protects the information you share through this website and its enquiry form.",
   path: "/privacy",
 });
 
@@ -27,7 +27,7 @@ export default async function PrivacyPage() {
       <LegalPage
         eyebrow="Privacy Policy"
         title="Privacy Policy"
-        intro="Conscious Omnium is a small studio, not a data business. This page sets out exactly what this website collects, why it collects it, where it is kept, and how to have it removed."
+        intro="Conscius Omnium™ is a small studio, not a data business. This page sets out exactly what this website collects, why it collects it, where it is kept, and how to have it removed."
         contactEmail={profile.email}
         contactLocation={profile.location}
         sections={[
@@ -39,7 +39,7 @@ export default async function PrivacyPage() {
                 <p>
                   This policy applies to this website and to enquiries sent
                   through it. The site is operated by {profile.name}, working as
-                  Conscious Omnium, from {profile.location}.
+                  Conscius Omnium™, from {profile.location}.
                 </p>
                 <p>
                   For the purposes of applicable data-protection law — including

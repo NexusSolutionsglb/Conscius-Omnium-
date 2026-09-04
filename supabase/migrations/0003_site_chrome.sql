@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════
---  CONSCIOUS OMNIUM — 0003 · theme + chrome for the visual editor
+--  CONSCIUS OMNIUM — 0003 · theme + chrome for the visual editor
 --  Adds editable theme tokens (colours / fonts / spacing) and gives
 --  header + footer their own JSON blobs. All optional — an empty
 --  object means "use the built-in defaults", so the site is unchanged

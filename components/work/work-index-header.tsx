@@ -1,11 +1,8 @@
 "use client";
 
-import { Suspense } from "react";
-import type { Discipline, WorkIndexContent } from "@/lib/types";
+import type { WorkIndexContent } from "@/lib/types";
 import { Reveal } from "@/components/motion/reveal";
 import { Eyebrow } from "@/components/ui/primitives";
-import { WorkFilter } from "@/components/work/work-filter";
-import { WorkSearch } from "@/components/work/work-search";
 import { EditableText } from "@/components/editor/editable-text";
 import { EditableHeading } from "@/components/editor/editable-heading";
 import { useEditable, useEditorMode } from "@/components/editor/use-editable";
@@ -13,16 +10,9 @@ import { useEditable, useEditorMode } from "@/components/editor/use-editable";
 export function WorkIndexHeader({
   serverContent,
   total,
-  disciplines,
-  counts,
-  resultCount,
 }: {
   serverContent: WorkIndexContent;
   total: number;
-  disciplines: Discipline[];
-  counts: Record<string, number>;
-  /** How many works survive the current search + filter. */
-  resultCount: number;
 }) {
   const mode = useEditorMode();
   const eyebrow = useEditable("work", "eyebrow", serverContent.eyebrow);
@@ -46,20 +36,6 @@ export function WorkIndexHeader({
         <EditableText as="p" bind="work.intro" multiline>
           {introText}
         </EditableText>
-      </Reveal>
-
-      <Reveal
-        delay={0.15}
-        className="mt-10 flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between lg:gap-12"
-      >
-        <Suspense fallback={<div className="h-6 flex-1" />}>
-          <div className="flex-1">
-            <WorkFilter disciplines={disciplines} total={total} counts={counts} />
-          </div>
-        </Suspense>
-        <Suspense fallback={<div className="h-11 w-full max-w-sm" />}>
-          <WorkSearch resultCount={resultCount} />
-        </Suspense>
       </Reveal>
     </header>
   );

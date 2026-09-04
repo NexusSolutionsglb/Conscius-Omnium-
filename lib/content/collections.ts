@@ -1,69 +1,58 @@
 import type { Collection } from "@/lib/types";
 
 /**
- * Series drawn from the portfolio itself. Every work is assigned to at
- * most one. Copy describes only what the works have in common — no
- * invented history.
+ * The four real painting series, supplied by the client directly
+ * (photographs + the artist's own descriptions). Each description below
+ * only restates what the artist wrote for the individual works in the
+ * series — nothing about the series as a whole is invented.
  */
 export const collectionsSeed: Collection[] = [
   {
-    id: "col-ruin",
-    slug: "ruin-and-remembrance",
-    title: "Ruin & Remembrance",
+    id: "col-black-canvas",
+    slug: "black-canvas",
+    title: "Black Canvas",
     description:
-      "Work that sits with decay — the Deccan forts, the bombed walls, the monuments half-returned to ground — and asks what it means to hold, conserve or resurrect a place without embalming it.",
-    period: "Ongoing",
-    coverImage: "/work/the-formalin-man.jpg",
+      "Five works in oil pastel — and, for the last, acrylic and chalk powder — on black paper. Each begins the same way: a seated meditation on the breath, attention returning again and again to whatever the mind offers up along the way.",
+    period: "2026",
+    coverImage: "/gallery/black-canvas/shape-of-belief.jpg",
     featured: true,
     published: true,
     sortOrder: 1,
   },
   {
-    id: "col-miniature",
-    slug: "miniature-worlds",
-    title: "Miniature Worlds",
+    id: "col-states-of-attention",
+    slug: "states-of-attention",
+    title: "States of Attention",
     description:
-      "Landscapes and cities built at the scale of a table — plaster, box board, mirror, fern — then photographed until the seam between model and world disappears.",
-    period: "Ongoing",
-    coverImage: "/work/the-lost-city.jpg",
+      "Five works made across consecutive early-morning sessions, each beginning in meditation and each returning to the same accidental subject — bees drawn to a terrace light at 3 a.m. — as observation moved from distraction toward stillness.",
+    period: "2026",
+    coverImage: "/gallery/states-of-attention/the-light-attracts-everything.jpg",
     featured: true,
     published: true,
     sortOrder: 2,
   },
   {
-    id: "col-spatial",
-    slug: "building-and-spatial-practice",
-    title: "Building & Spatial Practice",
+    id: "col-duality",
+    slug: "duality",
+    title: "Duality",
     description:
-      "Realised and speculative architecture — a pavilion of bent steel, a house that breathes in a dry climate, a tower that grows out of a quarry it is trying to heal.",
-    period: "2017 — ongoing",
-    coverImage: "/work/natures-rage-render.jpg",
+      "Paired opposites, worked in acrylic on ivory paper. On the first of these, The Burden of Goodness, the artist writes: “The painting ultimately asks: who are you beyond the need to be good, bad, right, or wrong?”",
+    period: "Ongoing",
+    coverImage: "/gallery/duality/the-burden-of-goodness.jpg",
     featured: true,
     published: true,
     sortOrder: 3,
   },
   {
-    id: "col-screen",
-    slug: "screen-myth-and-mark",
-    title: "Screen, Myth & Mark",
+    id: "col-states-of-awareness",
+    slug: "states-of-awareness",
+    title: "States of Awareness",
     description:
-      "Production design, title cards, posters and identities — where a Kannada feature, a Prime Original and a coffee house are all folded back into Indian myth.",
-    period: "Ongoing",
-    coverImage: "/work/lore-tools.jpg",
-    featured: false,
+      "The Nilgai series — five paintings following one continuous journey: a bird's passage from the nest, through the weight of a newly formed self, to a stillness observed in a forest clearing, and finally into perspective and bliss.",
+    period: "2026",
+    coverImage: "/gallery/states-of-awareness/the-observer.jpg",
+    featured: true,
     published: true,
     sortOrder: 4,
-  },
-  {
-    id: "col-paint",
-    slug: "paint-and-line",
-    title: "Paint & Line",
-    description:
-      "The quiet register of the practice — an abstract Shiva emerging from a blue cosmos, an entire seascape reduced to four lines.",
-    period: "Ongoing",
-    coverImage: "/work/shiva.jpg",
-    featured: false,
-    published: true,
-    sortOrder: 5,
   },
 ];

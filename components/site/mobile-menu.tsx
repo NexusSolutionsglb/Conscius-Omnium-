@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
@@ -88,9 +89,19 @@ export function MobileMenu({
           aria-label="Site menu"
         >
           <div className="u-container flex h-16 shrink-0 items-center justify-between">
-            <span className="font-display text-[0.95rem] uppercase tracking-[0.2em]">
-              {settings.brand}
-            </span>
+            {settings.logoInverted ? (
+              <Image
+                src={settings.logoInverted}
+                alt={settings.brand}
+                width={1600}
+                height={381}
+                className="h-7 w-auto object-contain"
+              />
+            ) : (
+              <span className="font-display text-[0.95rem] uppercase tracking-[0.2em]">
+                {settings.brand}
+              </span>
+            )}
             <button
               ref={closeRef}
               type="button"

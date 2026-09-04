@@ -42,7 +42,7 @@ export function WorkIndex({ works }: { works: Work[] }) {
   return <RhythmGrid works={works} />;
 }
 
-function EditableWorkGrid({ works }: { works: Work[] }) {
+export function EditableWorkGrid({ works }: { works: Work[] }) {
   return (
     <div className="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
       <RepeatableList
@@ -54,7 +54,7 @@ function EditableWorkGrid({ works }: { works: Work[] }) {
         addClassName="py-3 sm:col-span-2 lg:col-span-3"
         listBind="@works"
         kind="work"
-        itemLabel={(w) => w.title || "Work"}
+        itemLabel={(w) => w.title || "Artwork"}
       >
         {(work, i) => (
           <article data-unpublished={work.status === "published" ? undefined : ""}>

@@ -14,7 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, changeFrequency: "monthly", priority: 1 },
-    { url: `${base}/work`, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/gallery`, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/about`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/studio`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/exhibitions`, changeFrequency: "monthly", priority: 0.6 },
@@ -24,14 +24,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const workRoutes: MetadataRoute.Sitemap = works.map((w) => ({
-    url: `${base}/work/${w.slug}`,
+    url: `${base}/gallery/${w.slug}`,
     lastModified: w.updatedAt ? new Date(w.updatedAt) : undefined,
     changeFrequency: "monthly",
     priority: w.featured ? 0.8 : 0.6,
   }));
 
   const collectionRoutes: MetadataRoute.Sitemap = collections.map((c) => ({
-    url: `${base}/work/collection/${c.slug}`,
+    url: `${base}/gallery/collection/${c.slug}`,
     changeFrequency: "monthly",
     priority: 0.5,
   }));

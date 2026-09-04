@@ -12,7 +12,7 @@ export const revalidate = 3600;
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getPage("about");
   return buildMetadata({
-    title: page.seo?.title ? page.seo.title.replace(" — Conscious Omnium", "") : "About",
+    title: page.seo?.title ? page.seo.title.replace(" — Conscius Omnium™", "") : "About",
     description: page.seo?.description ?? page.intro ?? undefined,
     path: "/about",
     type: "profile",
@@ -27,7 +27,8 @@ export default async function AboutPage() {
     getAboutContent(),
   ]);
 
-  const portraitFallback = featured[0]?.coverImage ?? "/work/the-formalin-man.jpg";
+  const portraitFallback =
+    featured[0]?.coverImage ?? "/gallery/states-of-awareness/the-observer.jpg";
 
   return (
     <>

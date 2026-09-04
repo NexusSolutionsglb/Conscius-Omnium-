@@ -137,7 +137,7 @@ export function StudioView({ serverContent }: { serverContent: StudioContent }) 
           >
             {endCta.heading}
           </EditableText>
-          <Link href="/work" className="u-btn mt-8">
+          <Link href="/gallery" className="u-btn mt-8">
             <EditableText bind="studio.endCta.linkLabel">{endCta.linkLabel}</EditableText>
           </Link>
         </Reveal>

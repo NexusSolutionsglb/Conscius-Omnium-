@@ -138,7 +138,7 @@ export function ContactView({
         </Reveal>
       </div>
 
-      <div className="md:col-span-7 md:border-l md:border-line md:pl-14">
+      <div id="enquiry-form" className="scroll-mt-28 md:col-span-7 md:border-l md:border-line md:pl-14">
         <Reveal>
           <p className="u-eyebrow mb-8">
             <EditableText bind="contact.formEyebrow">{content.formEyebrow}</EditableText>

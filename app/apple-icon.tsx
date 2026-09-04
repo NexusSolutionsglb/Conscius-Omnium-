@@ -18,16 +18,16 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#14110e",
+          background: "#0c0c0c",
         }}
       >
         <svg width="180" height="180" viewBox="0 0 64 64">
-          <g fill="none" stroke="#f7f4ef" strokeWidth="1.4">
+          <g fill="none" stroke="#ffffff" strokeWidth="1.4">
             <circle cx="32" cy="32" r="19" />
             <rect x="18.5" y="18.5" width="27" height="27" />
             <path d="M13 34c6-9 12-9 19 0s13 9 19 0" strokeLinecap="round" />
           </g>
-          <circle cx="32" cy="14" r="1.6" fill="#f7f4ef" />
+          <circle cx="32" cy="14" r="1.6" fill="#ffffff" />
         </svg>
       </div>
     ),

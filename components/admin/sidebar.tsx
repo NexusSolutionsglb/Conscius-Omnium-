@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -45,7 +46,7 @@ export function AdminSidebar({ email }: { email: string | null }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="fixed left-3 top-3 z-50 rounded-md border border-neutral-300 bg-white px-3 py-2 text-xs font-medium lg:hidden"
+        className="fixed left-3 top-3 z-50 rounded-md border border-line-strong bg-paper px-3 py-2 text-xs font-medium lg:hidden"
         aria-label="Toggle menu"
       >
         Menu
@@ -53,15 +54,19 @@ export function AdminSidebar({ email }: { email: string | null }) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-neutral-200 bg-white transition-transform lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-line bg-paper transition-transform lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="border-b border-neutral-200 px-5 py-5">
-          <p className="font-serif text-sm font-semibold tracking-[0.16em] text-neutral-900">
-            CONSCIOUS OMNIUM
-          </p>
-          <p className="mt-0.5 text-[11px] uppercase tracking-[0.14em] text-neutral-400">
+        <div className="border-b border-line px-5 py-5">
+          <Image
+            src="/logo/mark-black.png"
+            alt="Conscius Omnium™"
+            width={1600}
+            height={381}
+            className="h-6 w-auto object-contain"
+          />
+          <p className="mt-2 text-[11px] uppercase tracking-[0.14em] text-ink-faint">
             Studio CMS
           </p>
         </div>
@@ -69,7 +74,7 @@ export function AdminSidebar({ email }: { email: string | null }) {
         <nav className="flex-1 overflow-y-auto px-3 py-4">
           {NAV.map((section) => (
             <div key={section.group} className="mb-5">
-              <p className="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-400">
+              <p className="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-faint">
                 {section.group}
               </p>
               {section.items.map((item) => {
@@ -85,8 +90,8 @@ export function AdminSidebar({ email }: { email: string | null }) {
                     className={cn(
                       "block rounded-md px-2 py-1.5 text-[13px] transition-colors",
                       active
-                        ? "bg-neutral-900 text-white"
-                        : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900",
+                        ? "bg-ink text-paper"
+                        : "text-ink-soft hover:bg-paper-dim hover:text-ink",
                     )}
                   >
                     {item.label}
@@ -97,21 +102,21 @@ export function AdminSidebar({ email }: { email: string | null }) {
           ))}
         </nav>
 
-        <div className="border-t border-neutral-200 px-3 py-3">
+        <div className="border-t border-line px-3 py-3">
           <Link
             href="/"
             target="_blank"
-            className="block rounded-md px-2 py-1.5 text-[12px] text-neutral-500 hover:bg-neutral-100"
+            className="block rounded-md px-2 py-1.5 text-[12px] text-ink-mute hover:bg-paper-dim"
           >
             View site ↗
           </Link>
-          <p className="truncate px-2 pt-2 text-[11px] text-neutral-400" title={email ?? ""}>
+          <p className="truncate px-2 pt-2 text-[11px] text-ink-faint" title={email ?? ""}>
             {email}
           </p>
           <form action={adminSignOut}>
             <button
               type="submit"
-              className="mt-1 w-full rounded-md px-2 py-1.5 text-left text-[12px] text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+              className="mt-1 w-full rounded-md px-2 py-1.5 text-left text-[12px] text-ink-mute hover:bg-paper-dim hover:text-ink"
             >
               Sign out
             </button>

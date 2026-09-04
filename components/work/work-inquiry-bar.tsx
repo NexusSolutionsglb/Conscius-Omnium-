@@ -43,7 +43,7 @@ export function WorkInquiryBar({
       <div className="mt-7 flex flex-wrap gap-3">
         <InquiryDialog
           work={{ slug: work.slug, title: work.title, year: work.year, medium: work.medium }}
-          triggerLabel={notForSale ? "Enquire about this work" : "Enquire about this work"}
+          triggerLabel={notForSale ? "Enquire about this work" : "Enquire to purchase"}
           defaultType={notForSale ? "general" : "purchase"}
         />
         <a href={waHref} target="_blank" rel="noopener noreferrer" className="u-btn u-btn--ghost">

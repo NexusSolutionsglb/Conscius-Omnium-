@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════
---  CONSCIOUS OMNIUM — initial schema
+--  CONSCIUS OMNIUM — initial schema
 --  Single-tenant studio site: any authenticated user is the admin.
 --  The public (anon) role can read published content and create
 --  enquiries, nothing else.
@@ -48,7 +48,7 @@ create table public.profile (
 -- ─── site_settings (singleton) ────────────────────────────────────
 create table public.site_settings (
   id            text primary key default 'default',
-  brand         text not null default 'Conscious Omnium',
+  brand         text not null default 'Conscius Omnium',
   brand_line    text not null default 'Shivjeet Potdar',
   tagline       text not null default '',
   nav           jsonb not null default '[]'::jsonb,

@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════
---  CONSCIOUS OMNIUM — 0002 · page content for the visual editor
+--  CONSCIUS OMNIUM — 0002 · page content for the visual editor
 --  Adds a typed `content` JSON blob to every managed page and ensures
 --  a row exists for the pages that previously had no DB record
 --  (home, work, exhibitions). RLS is unchanged: the existing

@@ -9,26 +9,26 @@
 
 @theme {
   /* — Surfaces ———————————————————————————————— */
-  --color-paper: #f7f4ef; /* warm ivory ground */
+  --color-paper: #ffffff; /* true white ground */
   /* Recessed surfaces are DERIVED from the ground so a theme override of
      --color-paper (Admin → Settings → Theme) stays chromatically coherent
      instead of leaving warm panels stranded on a cool page. */
   --color-paper-dim: color-mix(in oklab, var(--color-paper) 95%, var(--color-ink)); /* recessed sections */
   --color-paper-deep: color-mix(in oklab, var(--color-paper) 90%, var(--color-ink)); /* hairline fills */
-  --color-ink: #1a1613; /* near-black display type */
-  --color-ink-soft: #443d35; /* body copy — 9.7:1 */
-  --color-ink-mute: #665d54; /* captions, meta — 5.9:1 */
-  --color-ink-faint: #756c62; /* timestamps, tertiary — 4.7:1 */
+  --color-ink: #111111; /* near-black display type */
+  --color-ink-soft: #3a3a3a; /* body copy */
+  --color-ink-mute: #626262; /* captions, meta */
+  --color-ink-faint: #7a7a7a; /* timestamps, tertiary */
 
   /* — Dark mode surfaces (used for immersive / viewer contexts) — */
-  --color-obsidian: #14110e;
-  --color-obsidian-soft: #1e1a16;
+  --color-obsidian: #0c0c0c;
+  --color-obsidian-soft: #181818;
 
-  /* — Accent — a single restrained bronze, drawn from the
-       portfolio's recurring ochre. Works are free to override
-       via --work-accent. ——————————————————————————— */
-  --color-accent: #8a6f4e;
-  --color-accent-deep: #6f5940;
+  /* — Accent — a neutral graphite, used sparingly (hover states,
+       small emphasis) rather than as a decorative colour. Works are
+       free to override via --work-accent. ——————————————— */
+  --color-accent: #4a4a4a;
+  --color-accent-deep: #262626;
 
   /* — Lines ——————————————————————————————————— */
   --color-line: color-mix(in oklab, var(--color-ink) 14%, transparent);
@@ -355,6 +355,16 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  /* Hide the scrollbar on a horizontally-scrolling strip (artwork image
+     scroller) while keeping it fully scrollable/swipeable. */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
   }
 }
 

@@ -36,7 +36,7 @@ export function CollectionForm({ collection }: { collection: Collection | null }
               required
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
-              hint="/work/collection/<slug>"
+              hint="/gallery/collection/<slug>"
               error={err.slug?.[0]}
             />
             <TextArea label="Description" name="description" required defaultValue={collection?.description} rows={4} error={err.description?.[0]} />

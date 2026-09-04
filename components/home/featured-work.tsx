@@ -18,7 +18,7 @@ import { newWork } from "@/lib/editor/new-entities";
 
 /**
  * Home featured work — a deliberately asymmetric editorial sequence,
- * distinct from the /work index. Up to five works: one full-bleed, an
+ * distinct from the /gallery index. Up to five works: one full-bleed, an
  * offset pair, a wide, and a held-left standard.
  */
 export function FeaturedWork({
@@ -51,7 +51,7 @@ export function FeaturedWork({
               {copy.heading}
             </EditableText>
           </div>
-          <TextLink href="/work">
+          <TextLink href="/gallery">
             <EditableText bind="home.featured.linkLabel">{copy.linkLabel}</EditableText>
           </TextLink>
         </Reveal>
@@ -66,7 +66,7 @@ export function FeaturedWork({
             addClassName="py-3 sm:col-span-2 lg:col-span-3"
             listBind="@works"
             kind="work"
-            itemLabel={(w) => w.title || "Work"}
+            itemLabel={(w) => w.title || "Artwork"}
           >
             {(w, i) => (
               <article>
@@ -123,14 +123,14 @@ export function FeaturedWork({
             {copy.heading}
           </EditableText>
         </div>
-        <TextLink href="/work">
+        <TextLink href="/gallery">
           <EditableText bind="home.featured.linkLabel">{copy.linkLabel}</EditableText>
         </TextLink>
       </Reveal>
 
       {/* Lead — full width */}
       <Reveal>
-        <Link href={`/work/${lead.slug}`} className="group block" {...linkProps}>
+        <Link href={`/gallery/${lead.slug}`} className="group block" {...linkProps}>
           <ArtImage
             src={lead.coverImage}
             alt={lead.images[0]?.alt ?? lead.title}
@@ -150,7 +150,7 @@ export function FeaturedWork({
         <div className="mt-24 grid gap-x-12 gap-y-16 md:grid-cols-2">
           {[a, b].map((work, i) => (
             <Reveal key={work.slug} className={i === 1 ? "md:pt-28" : undefined}>
-              <Link href={`/work/${work.slug}`} className="group block" {...linkProps}>
+              <Link href={`/gallery/${work.slug}`} className="group block" {...linkProps}>
                 <ArtImage
                   src={work.coverImage}
                   alt={work.images[0]?.alt ?? work.title}
@@ -171,7 +171,7 @@ export function FeaturedWork({
       {/* Wide */}
       {c && (
         <Reveal className="mt-24 ml-auto w-full lg:w-[82%]">
-          <Link href={`/work/${c.slug}`} className="group block" {...linkProps}>
+          <Link href={`/gallery/${c.slug}`} className="group block" {...linkProps}>
             <ArtImage
               src={c.coverImage}
               alt={c.images[0]?.alt ?? c.title}
@@ -190,7 +190,7 @@ export function FeaturedWork({
       {/* Held left */}
       {d && (
         <Reveal className="mt-24 w-full lg:w-[62%]">
-          <Link href={`/work/${d.slug}`} className="group block" {...linkProps}>
+          <Link href={`/gallery/${d.slug}`} className="group block" {...linkProps}>
             <ArtImage
               src={d.coverImage}
               alt={d.images[0]?.alt ?? d.title}

@@ -148,7 +148,7 @@ function SchemaField({ field, bind }: { field: FieldSpec; bind: string }) {
         <span className="flex items-center gap-2">
           <input
             type="color"
-            value={typeof value === "string" && value ? value : "#8a6f4e"}
+            value={typeof value === "string" && value ? value : "#4a4a4a"}
             onChange={(e) => set(e.target.value)}
             className="h-7 w-10 cursor-pointer rounded border border-neutral-300"
           />

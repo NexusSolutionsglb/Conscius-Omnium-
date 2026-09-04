@@ -17,7 +17,7 @@ export function whatsappLink(message: string, toNumber?: string): string {
 }
 
 /** Generic "chat on WhatsApp" from the contact page / global button. */
-export function whatsappGeneralMessage(brand = "Conscious Omnium"): string {
+export function whatsappGeneralMessage(brand = "Conscius Omnium™"): string {
   return [
     `Hello Shivjeet,`,
     ``,
@@ -43,7 +43,7 @@ export function whatsappWorkMessage(
   ];
   if (work.year) lines.push(`Year: ${work.year}`);
   if (work.medium) lines.push(`Medium: ${work.medium}`);
-  lines.push(`Link: ${siteUrl}/work/${work.slug}`);
+  lines.push(`Link: ${siteUrl}/gallery/${work.slug}`);
   lines.push(``);
   if (visitor?.name) lines.push(`Name: ${visitor.name}`);
   if (visitor?.email) lines.push(`Email: ${visitor.email}`);

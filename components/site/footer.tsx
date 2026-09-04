@@ -1,10 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { Profile, SiteSettings } from "@/lib/types";
 import { whatsappGeneralMessage, whatsappLink } from "@/lib/whatsapp";
 import { Reveal } from "@/components/motion/reveal";
 import { EditableText } from "@/components/editor/editable-text";
+import { EditableImage } from "@/components/editor/editable-image";
 import { RepeatableList } from "@/components/editor/repeatable-list";
 import {
   useEditableProfile,
@@ -41,6 +43,7 @@ export function Footer({
       base.footerCopyright ?? FOOTER_COPYRIGHT_DEFAULT,
     ),
     footerCredit: useEditableSettings("footerCredit", base.footerCredit ?? FOOTER_CREDIT_DEFAULT),
+    logo: useEditableSettings("logo", base.logo),
   };
   const profile: Profile = {
     ...baseProfile,
@@ -71,9 +74,21 @@ export function Footer({
       <div className="u-container py-16 md:py-20">
         <Reveal className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr]">
           <div>
-            <p className="font-display text-sm uppercase tracking-[0.24em] text-ink">
-              {settings.brand}
-            </p>
+            <EditableImage bind="@settings.logo" folder="branding">
+              {settings.logo ? (
+                <Image
+                  src={settings.logo}
+                  alt={settings.brand}
+                  width={1600}
+                  height={381}
+                  className="h-7 w-auto object-contain"
+                />
+              ) : (
+                <p className="font-display text-sm uppercase tracking-[0.24em] text-ink">
+                  {settings.brand}
+                </p>
+              )}
+            </EditableImage>
             <p className="u-eyebrow mt-2">{settings.brandLine}</p>
             <p className="mt-5 max-w-xs text-[0.82rem] leading-relaxed text-ink-mute">
               <EditableText bind="@settings.footerNote" multiline>

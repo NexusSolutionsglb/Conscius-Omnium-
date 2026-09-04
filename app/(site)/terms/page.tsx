@@ -10,7 +10,7 @@ export const revalidate = 86400;
 export const metadata: Metadata = buildMetadata({
   title: "Terms & Conditions",
   description:
-    "The terms on which Conscious Omnium — the studio of Shivjeet Potdar — makes this website and its contents available, including copyright, permitted use and how enquiries are treated.",
+    "The terms on which Conscius Omnium™ — the studio of Shivjeet Potdar — makes this website and its contents available, including copyright, permitted use and how enquiries are treated.",
   path: "/terms",
 });
 

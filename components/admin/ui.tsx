@@ -26,16 +26,16 @@ export function PageHeader({
       {back && (
         <Link
           href={back.href}
-          className="mb-3 inline-block text-[12px] text-neutral-500 hover:text-neutral-900"
+          className="mb-3 inline-block text-[12px] text-ink-mute hover:text-ink"
         >
           ← {back.label}
         </Link>
       )}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl text-neutral-900">{title}</h1>
+          <h1 className="font-display text-2xl font-normal text-ink">{title}</h1>
           {description && (
-            <p className="mt-1 max-w-xl text-[13px] text-neutral-500">{description}</p>
+            <p className="mt-1 max-w-xl text-[13px] text-ink-mute">{description}</p>
           )}
         </div>
         {action}
@@ -54,10 +54,10 @@ export function Card({
   title?: string;
 }) {
   return (
-    <section className={cn("rounded-xl border border-neutral-200 bg-white", className)}>
+    <section className={cn("rounded-xl border border-line bg-paper", className)}>
       {title && (
-        <header className="border-b border-neutral-200 px-5 py-3">
-          <h2 className="text-[12px] font-semibold uppercase tracking-[0.12em] text-neutral-500">
+        <header className="border-b border-line px-5 py-3">
+          <h2 className="text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-mute">
             {title}
           </h2>
         </header>
@@ -76,10 +76,10 @@ export function Button({
   variant?: "primary" | "secondary" | "danger" | "ghost";
 } & InputHTMLAttributes<HTMLButtonElement>) {
   const styles = {
-    primary: "bg-neutral-900 text-white hover:bg-neutral-700",
-    secondary: "border border-neutral-300 bg-white text-neutral-800 hover:bg-neutral-50",
-    danger: "border border-red-200 bg-white text-red-600 hover:bg-red-50",
-    ghost: "text-neutral-500 hover:text-neutral-900",
+    primary: "bg-ink text-paper hover:bg-accent-deep",
+    secondary: "border border-line-strong bg-paper text-ink-soft hover:bg-paper-dim",
+    danger: "border border-red-200 bg-paper text-red-600 hover:bg-red-50",
+    ghost: "text-ink-mute hover:text-ink",
   };
   return (
     <button
@@ -108,7 +108,7 @@ export function SubmitButton({
       type="submit"
       disabled={pending}
       className={cn(
-        "inline-flex items-center rounded-md bg-neutral-900 px-4 py-2 text-[12.5px] font-medium text-white transition-colors hover:bg-neutral-700 disabled:opacity-50",
+        "inline-flex items-center rounded-md bg-ink px-4 py-2 text-[12.5px] font-medium text-paper transition-colors hover:bg-accent-deep disabled:opacity-50",
         className,
       )}
     >
@@ -118,9 +118,9 @@ export function SubmitButton({
 }
 
 const labelCls =
-  "flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.12em] text-neutral-500";
+  "flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.12em] text-ink-mute";
 const inputCls =
-  "mt-1 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-[13.5px] text-neutral-900 outline-none transition-colors focus:border-neutral-900";
+  "mt-1 w-full rounded-md border border-line-strong bg-paper px-3 py-2 text-[13.5px] text-ink outline-none transition-colors focus:border-ink";
 
 export function Field({
   label,
@@ -231,9 +231,9 @@ export function EmptyState({
   children?: ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-neutral-300 bg-white px-6 py-16 text-center">
-      <p className="font-serif text-lg text-neutral-800">{title}</p>
-      {children && <div className="mt-2 text-[13px] text-neutral-500">{children}</div>}
+    <div className="rounded-xl border border-dashed border-line-strong bg-paper px-6 py-16 text-center">
+      <p className="font-display text-lg text-ink">{title}</p>
+      {children && <div className="mt-2 text-[13px] text-ink-mute">{children}</div>}
     </div>
   );
 }

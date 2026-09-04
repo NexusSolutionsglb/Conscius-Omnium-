@@ -8,7 +8,7 @@ export default async function CollectionsListPage() {
     <>
       <PageHeader
         title="Collections"
-        description="Series that group works on /work."
+        description="Series that group works on /gallery."
         action={
           <Link href="/admin/collections/new" className="rounded-md bg-neutral-900 px-4 py-2 text-[12.5px] font-medium text-white hover:bg-neutral-700">
             + New collection

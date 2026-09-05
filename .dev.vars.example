@@ -1,0 +1,33 @@
+# ─────────────────────────────────────────────────────────────
+#  CONSCIUS OMNIUM — Cloudflare local dev vars
+#  Copy to `.dev.vars` for `npm run cf:preview` (a real Workers runtime,
+#  via wrangler) — plain `npm run dev` still reads `.env.local` as usual.
+#  Same values as `.env.example`; see that file for what each one does.
+#
+#  This is LOCAL ONLY. For the deployed Worker, set these in the
+#  Cloudflare dashboard (Workers & Pages → conscious-omnium → Settings →
+#  Variables and Secrets) — plain values as "Variables", the two marked
+#  secret below as "Secrets" (or `npx wrangler secret put <NAME>`), never
+#  committed here or in wrangler.jsonc.
+# ─────────────────────────────────────────────────────────────
+
+NEXT_PUBLIC_SITE_URL=http://localhost:8788
+
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+# SECRET — service role / secret key, server-only.
+SUPABASE_SERVICE_ROLE_KEY=
+
+# SECRET.
+RESEND_API_KEY=
+RESEND_FROM="Conscious Omnium <studio@consciusomnium.com>"
+INQUIRY_NOTIFY_EMAIL=
+
+NEXT_PUBLIC_WHATSAPP_NUMBER=919972910950
+
+NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=
+
+NEXT_PUBLIC_GA_ID=
+NEXT_PUBLIC_PLAUSIBLE_DOMAIN=
+
+REVALIDATE_SECRET=

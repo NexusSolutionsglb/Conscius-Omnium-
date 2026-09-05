@@ -19,6 +19,12 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   images: {
+    // Cloudflare Workers can't run the sharp-based Node optimizer next/image
+    // uses elsewhere, so images are served as-is here. Flip this back to
+    // `false` (and uncomment the `images` binding in wrangler.jsonc) once
+    // Cloudflare Images is enabled for the zone — that restores on-the-fly
+    // device-size variants via Cloudflare's own resizing instead.
+    unoptimized: true,
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
       ...(supabaseHost
@@ -103,3 +109,11 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// Cloudflare deploy (via `@opennextjs/cloudflare`): emulates the Workers
+// runtime — its bindings (R2 cache, Images) — under plain `next dev`, so
+// local dev doesn't need a full `wrangler dev`/preview build to work. A
+// no-op everywhere else (Vercel, Node hosting, `next build`), so it's safe
+// to leave in unconditionally.
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+initOpenNextCloudflareForDev();

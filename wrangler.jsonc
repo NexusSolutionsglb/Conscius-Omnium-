@@ -1,0 +1,46 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Worker/project name shown in the Cloudflare dashboard — change if you
+  // want a different subdomain (<name>.<your-subdomain>.workers.dev).
+  "name": "conscious-omnium",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-04-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+
+  // Lets a Worker request re-enter itself (used by the OpenNext runtime
+  // for on-demand ISR revalidation). Keep the service name in sync with
+  // "name" above.
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "conscious-omnium"
+    }
+  ],
+
+  // Optional: persists the ISR/data cache across requests instead of
+  // recomputing on every cold start. Create the bucket first —
+  //   npx wrangler r2 bucket create conscious-omnium-cache
+  // — then uncomment this and the matching line in open-next.config.ts.
+  "r2_buckets": [
+    // {
+    //   "binding": "NEXT_INC_CACHE_R2_BUCKET",
+    //   "bucket_name": "conscious-omnium-cache"
+    // }
+  ],
+
+  // OPTIONAL: routes next/image through Cloudflare's own image resizing
+  // instead of serving originals unoptimised (see `images.unoptimized` in
+  // next.config.ts). Requires enabling Cloudflare Images for this zone
+  // first (Cloudflare dashboard → Images) — it is a paid, opt-in product,
+  // so this stays off until you turn it on deliberately. To enable: turn
+  // Images on, uncomment this block, and flip `unoptimized` back to false
+  // in next.config.ts.
+  // "images": {
+  //   "binding": "IMAGES"
+  // }
+}

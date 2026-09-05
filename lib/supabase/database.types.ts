@@ -123,6 +123,10 @@ export type ProfileRow = Timestamps & {
   bio: Json;
   education: Json;
   email: string;
+  /** Purpose-specific addresses (added in 0004) — absent on older databases. */
+  enquiry_email?: string | null;
+  info_email?: string | null;
+  studio_email?: string | null;
   phone: string;
   whatsapp: string;
   location: string;
@@ -159,6 +163,8 @@ export type InquiryRow = {
   preferred_contact: string | null;
   work_slug: string | null;
   work_title: string | null;
+  /** Which form the enquiry came from (added in 0005). */
+  source?: string | null;
   status: string;
   created_at: string;
   updated_at: string;
@@ -192,6 +198,31 @@ export type MediaRow = {
  * partials so excess-property checks on writes still work.
  */
 type Indexed<T> = T & Record<string, unknown>;
+export type NewsletterSubscriberRow = Timestamps & {
+  id: string;
+  email: string;
+  name: string | null;
+  status: string;
+  source: string | null;
+  token: string;
+  subscribed_at: string;
+  unsubscribed_at: string | null;
+}
+
+export type NewsletterCampaignRow = Timestamps & {
+  id: string;
+  subject: string;
+  preheader: string | null;
+  intro: string | null;
+  body: Json;
+  cta_label: string | null;
+  cta_href: string | null;
+  status: string;
+  sent_at: string | null;
+  sent_count: number;
+  failed_count: number;
+}
+
 type TableShape<Row> = {
   Row: Indexed<Row>;
   Insert: Partial<Row> & Record<string, unknown>;
@@ -215,9 +246,21 @@ export interface Database {
       inquiries: TableShape<InquiryRow>;
       inquiry_notes: TableShape<InquiryNoteRow>;
       media: TableShape<MediaRow>;
+      newsletter_subscribers: TableShape<NewsletterSubscriberRow>;
+      newsletter_campaigns: TableShape<NewsletterCampaignRow>;
     };
     Views: Empty;
-    Functions: Empty;
+    Functions: {
+      /** Upserts a subscriber; reports whether this was new, a return, or a repeat. */
+      newsletter_subscribe: {
+        Args: { p_email: string; p_name?: string | null; p_source?: string | null };
+        Returns: { outcome: string; token: string }[];
+      };
+      newsletter_unsubscribe: {
+        Args: { p_token: string };
+        Returns: { outcome: string; email: string | null }[];
+      };
+    };
     Enums: Empty;
     CompositeTypes: Empty;
   };

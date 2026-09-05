@@ -19,6 +19,7 @@ function mapInquiry(row: InquiryRow, notes: InquiryNoteRow[] = []): Inquiry {
     preferredContact: row.preferred_contact as Inquiry["preferredContact"],
     workSlug: row.work_slug,
     workTitle: row.work_title,
+    source: (row.source as Inquiry["source"]) ?? null,
     status: row.status as InquiryStatus,
     notes: [...notes]
       .sort((a, b) => a.created_at.localeCompare(b.created_at))

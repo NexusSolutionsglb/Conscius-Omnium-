@@ -1,4 +1,5 @@
 import type { Profile } from "@/lib/types";
+import { CONTACT_EMAILS } from "@/lib/contact-emails";
 
 /**
  * Verbatim from `WEBSITE DESIGN MATERIAL/pages/about/about text.pptx`
@@ -29,6 +30,9 @@ export const profileSeed: Profile = {
     },
   ],
   email: "shivjeetpotdar@gmail.com",
+  enquiryEmail: CONTACT_EMAILS.enquiry,
+  infoEmail: CONTACT_EMAILS.info,
+  studioEmail: CONTACT_EMAILS.studio,
   phone: "+91 99729 10950",
   whatsapp: "919972910950",
   location: "Bengaluru, India",

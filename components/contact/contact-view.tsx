@@ -2,6 +2,7 @@
 
 import type { ContactContent, Profile, SiteSettings } from "@/lib/types";
 import { whatsappGeneralMessage, whatsappLink } from "@/lib/whatsapp";
+import { contactEmails } from "@/lib/contact-emails";
 import { Reveal } from "@/components/motion/reveal";
 import { Eyebrow } from "@/components/ui/primitives";
 import { InquiryForm } from "@/components/forms/inquiry-form";
@@ -29,7 +30,17 @@ export function ContactView({
     eyebrow: useEditable("contact", "eyebrow", serverContent.eyebrow),
     formEyebrow: useEditable("contact", "formEyebrow", serverContent.formEyebrow),
     whatsappLabel: useEditable("contact", "whatsappLabel", serverContent.whatsappLabel),
-    emailLabel: useEditable("contact", "emailLabel", serverContent.emailLabel),
+    enquiryEmailLabel: useEditable(
+      "contact",
+      "enquiryEmailLabel",
+      serverContent.enquiryEmailLabel,
+    ),
+    infoEmailLabel: useEditable("contact", "infoEmailLabel", serverContent.infoEmailLabel),
+    studioEmailLabel: useEditable(
+      "contact",
+      "studioEmailLabel",
+      serverContent.studioEmailLabel,
+    ),
     phoneLabel: useEditable("contact", "phoneLabel", serverContent.phoneLabel),
     whatsappRowLabel: useEditable("contact", "whatsappRowLabel", serverContent.whatsappRowLabel),
     locationLabel: useEditable("contact", "locationLabel", serverContent.locationLabel),
@@ -38,7 +49,9 @@ export function ContactView({
   const contactCopy = useEditableSettings("contactCopy", settings.contactCopy);
   const profile: Profile = {
     ...baseProfile,
-    email: useEditableProfile("email", baseProfile.email),
+    enquiryEmail: useEditableProfile("enquiryEmail", baseProfile.enquiryEmail),
+    infoEmail: useEditableProfile("infoEmail", baseProfile.infoEmail),
+    studioEmail: useEditableProfile("studioEmail", baseProfile.studioEmail),
     phone: useEditableProfile("phone", baseProfile.phone),
     location: useEditableProfile("location", baseProfile.location),
     social: useEditableProfile("social", baseProfile.social),
@@ -46,6 +59,7 @@ export function ContactView({
   };
 
   const waHref = whatsappLink(whatsappGeneralMessage(settings.brand), profile.whatsapp);
+  const emails = contactEmails(profile);
 
   return (
     <div className="u-container grid gap-16 pb-24 pt-36 md:grid-cols-12 md:gap-10 md:pb-32 md:pt-44">
@@ -66,12 +80,49 @@ export function ContactView({
         </Reveal>
 
         <Reveal delay={0.15} className="mt-12 flex flex-col gap-6">
-          <Detail label={<EditableText bind="contact.emailLabel">{content.emailLabel}</EditableText>}>
+          {/* Enquiries, commissions and bookings. */}
+          <Detail
+            label={
+              <EditableText bind="contact.enquiryEmailLabel">
+                {content.enquiryEmailLabel}
+              </EditableText>
+            }
+          >
             <a
-              href={`mailto:${profile.email}`}
+              href={`mailto:${emails.enquiry}`}
               className="mt-1 inline-block text-[0.95rem] text-ink transition-colors hover:text-accent-deep"
             >
-              <EditableText bind="@profile.email">{profile.email}</EditableText>
+              <EditableText bind="@profile.enquiryEmail">{emails.enquiry}</EditableText>
+            </a>
+          </Detail>
+
+          {/* Anything general. */}
+          <Detail
+            label={
+              <EditableText bind="contact.infoEmailLabel">{content.infoEmailLabel}</EditableText>
+            }
+          >
+            <a
+              href={`mailto:${emails.info}`}
+              className="mt-1 inline-block text-[0.95rem] text-ink transition-colors hover:text-accent-deep"
+            >
+              <EditableText bind="@profile.infoEmail">{emails.info}</EditableText>
+            </a>
+          </Detail>
+
+          {/* Studio, services and project correspondence. */}
+          <Detail
+            label={
+              <EditableText bind="contact.studioEmailLabel">
+                {content.studioEmailLabel}
+              </EditableText>
+            }
+          >
+            <a
+              href={`mailto:${emails.studio}`}
+              className="mt-1 inline-block text-[0.95rem] text-ink transition-colors hover:text-accent-deep"
+            >
+              <EditableText bind="@profile.studioEmail">{emails.studio}</EditableText>
             </a>
           </Detail>
 
@@ -143,7 +194,7 @@ export function ContactView({
           <p className="u-eyebrow mb-8">
             <EditableText bind="contact.formEyebrow">{content.formEyebrow}</EditableText>
           </p>
-          <InquiryForm />
+          <InquiryForm source="contact-page" />
         </Reveal>
       </div>
     </div>

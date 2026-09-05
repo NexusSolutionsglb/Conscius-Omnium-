@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getPage, getStudioContent } from "@/lib/queries/pages";
+import { getProfile } from "@/lib/queries/profile";
 import { buildMetadata, breadcrumbJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/site/json-ld";
 import { StudioView } from "@/components/studio/studio-view";
@@ -16,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function StudioPage() {
-  const content = await getStudioContent();
+  const [content, profile] = await Promise.all([getStudioContent(), getProfile()]);
 
   return (
     <>
@@ -26,7 +27,7 @@ export default async function StudioPage() {
           { name: "Studio", path: "/studio" },
         ])}
       />
-      <StudioView serverContent={content} />
+      <StudioView serverContent={content} profile={profile} />
     </>
   );
 }

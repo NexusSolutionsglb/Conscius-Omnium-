@@ -107,7 +107,7 @@ The enquiry message is assembled **dynamically** from each work's record.
 ### 4 · Analytics (optional)
 
 ```
-NEXT_PUBLIC_PLAUSIBLE_DOMAIN=consciousomnium.com   # or
+NEXT_PUBLIC_PLAUSIBLE_DOMAIN=consciusomnium.com   # or
 NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
 ```
 

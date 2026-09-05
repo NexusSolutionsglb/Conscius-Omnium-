@@ -4,7 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Profile, SiteSettings } from "@/lib/types";
 import { whatsappGeneralMessage, whatsappLink } from "@/lib/whatsapp";
+import { contactEmails } from "@/lib/contact-emails";
 import { Reveal } from "@/components/motion/reveal";
+import { NewsletterForm } from "@/components/forms/newsletter-form";
 import { EditableText } from "@/components/editor/editable-text";
 import { EditableImage } from "@/components/editor/editable-image";
 import { RepeatableList } from "@/components/editor/repeatable-list";
@@ -49,11 +51,12 @@ export function Footer({
     ...baseProfile,
     name: useEditableProfile("name", baseProfile.name),
     roles: useEditableProfile("roles", baseProfile.roles),
-    email: useEditableProfile("email", baseProfile.email),
+    infoEmail: useEditableProfile("infoEmail", baseProfile.infoEmail),
     location: useEditableProfile("location", baseProfile.location),
     social: useEditableProfile("social", baseProfile.social),
     whatsapp: useEditableProfile("whatsapp", baseProfile.whatsapp),
   };
+  const emails = contactEmails(profile);
   const year = new Date().getFullYear();
   const wa = whatsappLink(whatsappGeneralMessage(settings.brand), profile.whatsapp);
 
@@ -113,10 +116,10 @@ export function Footer({
           <div className="flex flex-col gap-2.5">
             <p className="u-eyebrow mb-1.5 text-ink-faint">Contact</p>
             <a
-              href={`mailto:${profile.email}`}
+              href={`mailto:${emails.info}`}
               className="u-tap w-fit text-[0.82rem] text-ink-soft transition-colors hover:text-ink"
             >
-              <EditableText bind="@profile.email">{profile.email}</EditableText>
+              <EditableText bind="@profile.infoEmail">{emails.info}</EditableText>
             </a>
             <a
               href={wa}
@@ -150,6 +153,29 @@ export function Footer({
             </RepeatableList>
             <p className="mt-1 text-[0.82rem] text-ink-mute">
               <EditableText bind="@profile.location">{profile.location}</EditableText>
+            </p>
+          </div>
+        </Reveal>
+
+        {/* The studio letter — general correspondence, so it sends as info@. */}
+        <Reveal className="mt-14 border-t border-line pt-10 md:grid md:grid-cols-[1.4fr_1fr_1fr] md:gap-12">
+          <div className="md:col-span-1">
+            <p className="font-display text-[1.05rem] font-light leading-snug text-ink">
+              Notes from the studio.
+            </p>
+            <p className="mt-2 max-w-xs text-[0.8rem] leading-relaxed text-ink-mute">
+              New paintings, exhibitions and the occasional note on process — sent
+              only when there is something worth sending.
+            </p>
+          </div>
+          <div className="mt-6 md:col-span-2 md:mt-0 md:max-w-sm">
+            <NewsletterForm source="footer" compact />
+            <p className="mt-3 text-[0.68rem] leading-relaxed text-ink-mute">
+              Unsubscribe any time — see the{" "}
+              <Link href="/privacy" className="u-link">
+                Privacy Policy
+              </Link>
+              .
             </p>
           </div>
         </Reveal>

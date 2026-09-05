@@ -20,6 +20,10 @@ const KINDS: ImageKind[] = [
   "render",
 ];
 
+/** Stable empty-array reference — a fresh `[]` per render would make
+ *  `useSyncExternalStore` see a "changed" snapshot on every call and loop. */
+const EMPTY_IMAGES: WorkImage[] = [];
+
 /**
  * Full gallery manager for a work's `images` array. Reorder (drag or ↑↓),
  * add (upload / library), replace, remove, and per-image alt / caption / kind.
@@ -28,7 +32,7 @@ const KINDS: ImageKind[] = [
 export function GalleryEditor({ bind, folder = "work" }: { bind: string; folder?: string }) {
   const api = useEditorStoreApi()!;
   const path = bindToPath(bind);
-  const images = useEditorStore((s) => (getPath<WorkImage[]>(s, path) ?? []) as WorkImage[]);
+  const images = useEditorStore((s) => getPath<WorkImage[]>(s, path) ?? EMPTY_IMAGES);
   const [replaceIdx, setReplaceIdx] = useState<number | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [busy, setBusy] = useState(false);

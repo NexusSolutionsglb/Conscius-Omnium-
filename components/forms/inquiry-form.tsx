@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { INQUIRY_TYPE_LABELS, type InquiryType, type Work } from "@/lib/types";
+import { INQUIRY_TYPE_LABELS, type InquirySource, type InquiryType, type Work } from "@/lib/types";
 import { EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { Field, Select, Textarea } from "./fields";
@@ -13,6 +13,8 @@ type InquiryFormProps = {
   /** Restrict / reorder the type options. */
   types?: InquiryType[];
   defaultType?: InquiryType;
+  /** Which form this is — shown in the internal notification email. */
+  source?: InquirySource;
   compact?: boolean;
   onSuccess?: () => void;
 };
@@ -29,6 +31,7 @@ export function InquiryForm({
   work = null,
   types,
   defaultType,
+  source,
   compact = false,
   onSuccess,
 }: InquiryFormProps) {
@@ -64,6 +67,7 @@ export function InquiryForm({
       preferredContact: String(data.get("preferredContact") ?? "") || undefined,
       workSlug: work?.slug ?? "",
       workTitle: work?.title ?? "",
+      source: source ?? (work ? "work-enquiry" : "contact-page"),
       company: String(data.get("company") ?? ""), // honeypot
       elapsedMs: Date.now() - mountedAt.current,
     };

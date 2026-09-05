@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import type { StudioContent } from "@/lib/types";
+import type { Profile, StudioContent } from "@/lib/types";
+import { contactEmails } from "@/lib/contact-emails";
 import { blurFor } from "@/lib/content/blur";
 import { cn } from "@/lib/utils";
 import { ArtImage } from "@/components/motion/image-reveal";
@@ -12,7 +13,11 @@ import { EditableText } from "@/components/editor/editable-text";
 import { EditableHeading } from "@/components/editor/editable-heading";
 import { EditableImage } from "@/components/editor/editable-image";
 import { RepeatableList } from "@/components/editor/repeatable-list";
-import { useEditable, useEditorMode } from "@/components/editor/use-editable";
+import {
+  useEditable,
+  useEditableProfile,
+  useEditorMode,
+} from "@/components/editor/use-editable";
 
 const NEW_SECTION = () => ({
   id: `studio-${Date.now()}`,
@@ -24,8 +29,17 @@ const NEW_SECTION = () => ({
   layout: "image-right" as const,
 });
 
-export function StudioView({ serverContent }: { serverContent: StudioContent }) {
+export function StudioView({
+  serverContent,
+  profile,
+}: {
+  serverContent: StudioContent;
+  profile: Profile;
+}) {
   const editing = useEditorMode() === "edit";
+  const studioEmail = contactEmails({
+    studioEmail: useEditableProfile("studioEmail", profile.studioEmail),
+  }).studio;
   const hero = useEditable("studio", "hero", serverContent.hero);
   const intro = useEditable("studio", "intro", serverContent.intro);
   const body = useEditable("studio", "body", serverContent.body);
@@ -140,6 +154,18 @@ export function StudioView({ serverContent }: { serverContent: StudioContent }) 
           <Link href="/gallery" className="u-btn mt-8">
             <EditableText bind="studio.endCta.linkLabel">{endCta.linkLabel}</EditableText>
           </Link>
+          {/* Studio, services and project correspondence. */}
+          <p className="mt-10 text-[0.85rem] text-ink-soft">
+            <EditableText bind="studio.endCta.contactLabel">
+              {endCta.contactLabel ?? ""}
+            </EditableText>{" "}
+            <a
+              href={`mailto:${studioEmail}`}
+              className="u-link text-ink transition-colors hover:text-accent-deep"
+            >
+              <EditableText bind="@profile.studioEmail">{studioEmail}</EditableText>
+            </a>
+          </p>
         </Reveal>
       </section>
     </>

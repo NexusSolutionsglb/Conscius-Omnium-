@@ -4,6 +4,7 @@ import { settingsSeed } from "@/lib/content";
 import type { Profile, SiteSettings, Work } from "@/lib/types";
 import { DISCIPLINE_LABELS } from "@/lib/types";
 import { absoluteUrl, truncate } from "@/lib/utils";
+import { contactEmails } from "@/lib/contact-emails";
 
 type BuildMeta = {
   title?: string;
@@ -101,7 +102,7 @@ export function personJsonLd(profile: Profile) {
     "@type": "Person",
     name: profile.name,
     jobTitle: profile.roles.join(", "),
-    email: `mailto:${profile.email}`,
+    email: `mailto:${contactEmails(profile).info}`,
     telephone: profile.phone,
     url: env.siteUrl,
     address: { "@type": "PostalAddress", addressLocality: profile.location },

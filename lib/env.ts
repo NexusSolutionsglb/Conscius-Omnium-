@@ -27,8 +27,12 @@ export const env = {
   resendApiKey: process.env.RESEND_API_KEY ?? "",
   resendFrom:
     process.env.RESEND_FROM || "Conscius Omnium <onboarding@resend.dev>",
-  inquiryNotifyEmail:
-    process.env.INQUIRY_NOTIFY_EMAIL || "shivjeetpotdar@gmail.com",
+  /**
+   * Optional override: pipe EVERY enquiry to one inbox. Leave unset and
+   * `lib/email/routing.ts` routes by enquiry type to enquiry@ / info@ /
+   * studio@ instead.
+   */
+  inquiryNotifyEmail: process.env.INQUIRY_NOTIFY_EMAIL?.trim() ?? "",
 
   whatsappNumber: (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919972910950").replace(
     /[^\d]/g,

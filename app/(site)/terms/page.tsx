@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getProfile } from "@/lib/queries/profile";
 import { buildMetadata, breadcrumbJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/site/json-ld";
+import { contactEmails } from "@/lib/contact-emails";
 import { LegalPage } from "@/components/site/legal-page";
 
 export const revalidate = 86400;
@@ -29,7 +30,7 @@ export default async function TermsPage() {
         eyebrow="Terms & Conditions"
         title="Terms & Conditions"
         intro="This website is a catalogue of the studio's work. These terms set out how it may be used, who owns what appears on it, and what an enquiry does and does not commit either side to."
-        contactEmail={profile.email}
+        contactEmail={contactEmails(profile).info}
         contactLocation={profile.location}
         sections={[
           {

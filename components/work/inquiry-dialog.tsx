@@ -126,6 +126,7 @@ export function InquiryDialog({
                     work={work}
                     types={types}
                     defaultType={defaultType}
+                    source={work ? "work-enquiry" : "collection-enquiry"}
                     compact
                   />
                 </div>

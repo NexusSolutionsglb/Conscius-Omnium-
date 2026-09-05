@@ -36,12 +36,39 @@ export function mapWorkImage(row: WorkImageRow): WorkImage {
   };
 }
 
+/**
+ * A work is edited through two independent fields — "Cover image" and the
+ * "Gallery" array — so it's easy to set one and forget the other. If the
+ * gallery ends up empty, fall back to a single synthetic entry built from
+ * the cover image rather than let the detail page render with no artwork.
+ */
+function withCoverFallback(
+  images: WorkImage[],
+  coverImage: string | null,
+  title: string,
+): WorkImage[] {
+  if (images.length || !coverImage) return images;
+  return [
+    {
+      id: "cover",
+      url: coverImage,
+      alt: title,
+      kind: "cover",
+      caption: null,
+      width: null,
+      height: null,
+      sortOrder: 0,
+    },
+  ];
+}
+
 export function mapWork(row: WorkRow, imageRows: WorkImageRow[] = []): Work {
   const jsonImages = asArray<WorkImage>(row.images).map((im) => ({
     ...im,
     url: normalizeImageUrl(im.url),
   }));
   const seo = asObject<Work["seo"]>(row.seo);
+  const coverImage = normalizeImageUrl(row.cover_image);
   return {
     id: row.id,
     slug: row.slug,
@@ -69,11 +96,15 @@ export function mapWork(row: WorkRow, imageRows: WorkImageRow[] = []): Work {
     priceVisible: row.price_visible,
     featured: row.featured,
     sortOrder: row.sort_order,
-    coverImage: normalizeImageUrl(row.cover_image),
+    coverImage,
     accent: row.accent,
-    images: imageRows.length
-      ? [...imageRows].sort((a, b) => a.sort_order - b.sort_order).map(mapWorkImage)
-      : [...jsonImages].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)),
+    images: withCoverFallback(
+      imageRows.length
+        ? [...imageRows].sort((a, b) => a.sort_order - b.sort_order).map(mapWorkImage)
+        : [...jsonImages].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)),
+      coverImage,
+      row.title,
+    ),
     relatedSlugs: asStringArray(row.related_slugs),
     seo: { ...seo, ogImage: normalizeImageUrl(seo?.ogImage) || null },
     createdAt: row.created_at,
@@ -149,6 +180,9 @@ export function mapProfile(row: ProfileRow): Profile {
     bio: asStringArray(row.bio),
     education: asArray<Profile["education"][number]>(row.education),
     email: row.email,
+    enquiryEmail: row.enquiry_email || null,
+    infoEmail: row.info_email || null,
+    studioEmail: row.studio_email || null,
     phone: row.phone,
     whatsapp: row.whatsapp,
     location: row.location,

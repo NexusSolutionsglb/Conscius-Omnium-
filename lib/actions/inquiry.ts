@@ -7,6 +7,7 @@ import {
 } from "@/lib/supabase/server";
 import { isSupabaseAdminConfigured, isSupabaseConfigured } from "@/lib/env";
 import { sendInquiryEmails } from "@/lib/email/send";
+import { getProfile } from "@/lib/queries/profile";
 import { inquirySchema, type InquiryInput } from "@/lib/validations/inquiry";
 import { INQUIRY_TYPE_LABELS, type Inquiry } from "@/lib/types";
 import { makeRef } from "@/lib/utils";
@@ -19,6 +20,8 @@ export type InquiryResult =
       whatsappUrl: string;
       persisted: boolean;
       emailed: boolean;
+      /** The studio address the notification was routed to. */
+      routedTo: string;
     }
   | { ok: false; error: string; fieldErrors?: Record<string, string[]> };
 
@@ -36,6 +39,14 @@ function rateLimit(key: string): boolean {
   }
   entry.count += 1;
   return entry.count <= MAX_PER_WINDOW;
+}
+
+/** True when the `source` column hasn't been added yet (migration 0005). */
+function isMissingSourceColumn(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  if (error.code === "PGRST204" || error.code === "42703") return true;
+  const m = (error.message ?? "").toLowerCase();
+  return m.includes("source") && (m.includes("does not exist") || m.includes("schema cache"));
 }
 
 export async function submitInquiry(raw: unknown): Promise<InquiryResult> {
@@ -82,6 +93,7 @@ export async function submitInquiry(raw: unknown): Promise<InquiryResult> {
     preferredContact: input.preferredContact ?? null,
     workSlug: input.workSlug || null,
     workTitle: input.workTitle || null,
+    source: input.source ?? (input.workSlug ? "work-enquiry" : "contact-page"),
     status: "new",
     notes: [],
     createdAt: now,
@@ -112,34 +124,45 @@ export async function submitInquiry(raw: unknown): Promise<InquiryResult> {
       preferred_contact: inquiry.preferredContact,
       work_slug: inquiry.workSlug,
       work_title: inquiry.workTitle,
+      source: inquiry.source,
       status: "new" as const,
     };
     // The hand-authored Database type doesn't fully satisfy postgrest-js's
     // insert generic; the column shape is guaranteed by the migration.
-    if (hasServiceRole) {
-      const { data, error } = await supabase
-        .from("inquiries")
-        .insert(insertRow as never)
-        .select("id")
-        .maybeSingle<{ id: string }>();
-      if (!error) {
-        if (data?.id) inquiry.id = data.id;
-        persisted = true;
-      } else if (process.env.NODE_ENV !== "production") {
-        console.warn("[inquiry] persist failed:", error.message);
+    //
+    // `source` arrived in 0005 — on a database that predates it, drop the
+    // column and save the enquiry anyway rather than losing it.
+    const insert = async (row: Record<string, unknown>) => {
+      if (hasServiceRole) {
+        const { data, error } = await supabase
+          .from("inquiries")
+          .insert(row as never)
+          .select("id")
+          .maybeSingle<{ id: string }>();
+        return { id: data?.id, error };
       }
-    } else {
       // Anon INSERT — RLS blocks the readback, so don't chain .select().
-      const { error } = await supabase.from("inquiries").insert(insertRow as never);
-      if (!error) persisted = true;
-      else if (process.env.NODE_ENV !== "production") {
-        console.warn("[inquiry] persist failed:", error.message);
-      }
+      const { error } = await supabase.from("inquiries").insert(row as never);
+      return { id: undefined, error };
+    };
+
+    let result = await insert(insertRow);
+    if (result.error && isMissingSourceColumn(result.error)) {
+      const { source: _source, ...withoutSource } = insertRow;
+      result = await insert(withoutSource);
+    }
+    if (!result.error) {
+      if (result.id) inquiry.id = result.id;
+      persisted = true;
+    } else if (process.env.NODE_ENV !== "production") {
+      console.warn("[inquiry] persist failed:", result.error.message);
     }
   }
 
-  // 2. Email (never throws).
-  const emails = await sendInquiryEmails(inquiry);
+  // 2. Email (never throws). The notification is routed by enquiry type to
+  //    enquiry@ / info@ / studio@ — see `lib/email/routing.ts`.
+  const profile = await getProfile().catch(() => null);
+  const emails = await sendInquiryEmails(inquiry, profile);
   const emailed = emails.admin.ok || emails.visitor.ok;
 
   // 3. WhatsApp continuation link (share, not API).
@@ -155,5 +178,5 @@ export async function submitInquiry(raw: unknown): Promise<InquiryResult> {
     }),
   );
 
-  return { ok: true, ref, whatsappUrl, persisted, emailed };
+  return { ok: true, ref, whatsappUrl, persisted, emailed, routedTo: emails.inbox };
 }

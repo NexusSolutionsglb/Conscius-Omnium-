@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getProfile } from "@/lib/queries/profile";
 import { buildMetadata, breadcrumbJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/site/json-ld";
+import { contactEmails } from "@/lib/contact-emails";
 import { LegalPage } from "@/components/site/legal-page";
 
 export const revalidate = 86400;
@@ -28,7 +29,7 @@ export default async function PrivacyPage() {
         eyebrow="Privacy Policy"
         title="Privacy Policy"
         intro="Conscius Omnium™ is a small studio, not a data business. This page sets out exactly what this website collects, why it collects it, where it is kept, and how to have it removed."
-        contactEmail={profile.email}
+        contactEmail={contactEmails(profile).info}
         contactLocation={profile.location}
         sections={[
           {

@@ -41,38 +41,52 @@ export function WorkImageViewer({ images }: { images: WorkImage[] }) {
   if (!images.length) return null;
 
   const current = images[index] ?? images[0];
+  const currentWidth = current.width ?? 2200;
+  const currentHeight = current.height ?? 1500;
   const go = (dir: 1 | -1) =>
     setIndex((i) => (i + dir + images.length) % images.length);
 
   return (
     <div className="u-container">
       <div className="relative mx-auto flex max-w-5xl justify-center">
-        {/* Stage — the mount hugs the artwork, whatever shape it is */}
+        {/* Stage — the mount hugs the artwork, whatever shape it is.
+            Sizing lives HERE, on the button, not on `ArtImage`'s own
+            wrapper: a shrink-wrapping ancestor takes its width from the
+            `<img>`'s intrinsic size, which the browser bases on whichever
+            responsive resource happens to be downloaded (e.g. 768px at
+            this viewport) rather than the CSS-computed rendered size —
+            the two silently disagree, leaving a gap between the frame and
+            the picture. Instead the button gets `aspect-ratio` directly
+            with BOTH width and height left `auto`, bounded only by
+            `max-width` (the page) and `max-height` (below) — the browser's
+            native "largest box satisfying the ratio within both bounds"
+            resolution then picks height-bound sizing for an ordinary photo
+            (snug, matches the old fixed-height look exactly) and
+            width-bound sizing for an unusually wide or tall one (a banner,
+            a panorama), shrinking it to fit instead of overflowing the
+            page — with no fixed dimension fighting the ratio either way. */}
         <button
           type="button"
           onClick={() => open(images, index)}
           onPointerEnter={() => setCursor("open", "Open")}
           onPointerLeave={reset}
-          className="u-artframe inline-block max-w-full"
+          className="u-artframe block w-full h-auto self-start md:mx-auto md:w-auto md:max-w-full md:h-auto md:max-h-[clamp(20rem,75vh,54rem)]"
+          style={{ aspectRatio: `${currentWidth} / ${currentHeight}` }}
           aria-label={`Open full screen: ${current.alt}`}
         >
           <ArtImage
             key={current.id}
             src={current.url}
             alt={current.alt}
-            width={current.width ?? 2200}
-            height={current.height ?? 1500}
+            width={currentWidth}
+            height={currentHeight}
             fit="contain"
-            // The stage is a fixed height and takes its width from this
-            // image's own proportions, so the mount hugs a portrait as
-            // closely as a landscape and nothing is ever cut off.
-            ratio={`${current.width ?? 2200} / ${current.height ?? 1500}`}
             priority={index === 0}
             noReveal
             sizes="(min-width:1024px) 60vw, 92vw"
             placeholder={blurFor(current.url) ? "blur" : "empty"}
             blurDataURL={blurFor(current.url)}
-            wrapperClassName="w-full h-auto md:w-auto md:h-[clamp(20rem,75vh,54rem)]"
+            wrapperClassName="w-full h-full"
           />
         </button>
 

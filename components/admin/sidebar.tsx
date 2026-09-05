@@ -33,7 +33,11 @@ const NAV: { group: string; items: { label: string; href: string }[] }[] = [
   },
   {
     group: "Enquiries",
-    items: [{ label: "Inbox", href: "/admin/inquiries" }],
+    items: [
+      { label: "Inbox", href: "/admin/inquiries" },
+      { label: "Newsletter", href: "/admin/newsletter" },
+      { label: "Email routing", href: "/admin/emails" },
+    ],
   },
 ];
 

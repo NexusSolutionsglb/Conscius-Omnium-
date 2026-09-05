@@ -1,15 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { EditablePageSlug } from "@/lib/content/defaults";
 import type { EditorSnapshot } from "@/lib/editor/types";
-import { publishSite } from "@/lib/admin/actions";
+import { publishSite, refreshSitePreview } from "@/lib/admin/actions";
 import { EditorStoreProvider, useEditorStore, useEditorStoreApi } from "./editor-store-context";
 import { EditorTopbar } from "./editor-topbar";
 import { InspectorPanel } from "./inspector-panel";
 import { SettingsPanel } from "./settings-panel";
 import { DEVICE_WIDTH } from "@/lib/editor/types";
+
+/** Where each editable page slug actually lives on the public site. */
+const PREVIEW_PATH: Record<EditablePageSlug, string> = {
+  home: "/",
+  about: "/about",
+  studio: "/studio",
+  work: "/gallery",
+  exhibitions: "/exhibitions",
+  contact: "/contact",
+};
 
 export function EditorShell({
   slug,
@@ -20,12 +30,18 @@ export function EditorShell({
 }) {
   return (
     <EditorStoreProvider initial={snapshot}>
-      <ShellInner slug={slug} />
+      <ShellInner slug={slug} snapshot={snapshot} />
     </EditorStoreProvider>
   );
 }
 
-function ShellInner({ slug }: { slug: EditablePageSlug }) {
+function ShellInner({
+  slug,
+  snapshot,
+}: {
+  slug: EditablePageSlug;
+  snapshot: EditorSnapshot;
+}) {
   const api = useEditorStoreApi()!;
   const router = useRouter();
   const device = useEditorStore((s) => s.device);
@@ -36,6 +52,62 @@ function ShellInner({ slug }: { slug: EditablePageSlug }) {
   const [publishing, setPublishing] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // The frame is mounted only once the cached public render has been purged,
+  // so it never opens on a stale copy of the page.
+  const [previewReady, setPreviewReady] = useState(false);
+
+  const reloadFrame = useCallback(() => {
+    try {
+      iframeRef.current?.contentWindow?.location.reload();
+    } catch {
+      /* the frame may not have loaded yet */
+    }
+  }, []);
+
+  // Purge the ISR-cached public pages before framing them.
+  useEffect(() => {
+    let alive = true;
+    refreshSitePreview().finally(() => {
+      if (alive) setPreviewReady(true);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  /**
+   * Adopt every fresh server snapshot (first load, `router.refresh()`, after a
+   * publish). Edits made in this session survive; everything untouched — works,
+   * collections, gallery images changed in the admin panel or the database —
+   * is taken from the new snapshot instead of an old local draft.
+   */
+  const signature = useMemo(() => JSON.stringify(snapshot), [snapshot]);
+  const seeded = useRef<string | null>(null);
+  useEffect(() => {
+    if (seeded.current === null) {
+      seeded.current = signature; // the store was created from this snapshot
+      return;
+    }
+    if (seeded.current === signature) return;
+    seeded.current = signature;
+    api.getState().seed(snapshot);
+    reloadFrame();
+  }, [api, signature, snapshot, reloadFrame]);
+
+  /** Throw away the local draft and pull the live content back in. */
+  const reloadFromLive = useCallback(async () => {
+    if (
+      api.getState().dirty &&
+      !confirm("Discard your unsaved draft and reload the live content?")
+    )
+      return;
+    api.getState().discardDraft();
+    await refreshSitePreview();
+    router.refresh();
+    reloadFrame();
+    setToast("Reloaded the live content");
+    setTimeout(() => setToast(null), 5000);
+  }, [api, router, reloadFrame]);
 
   // Warn before leaving with unsaved changes.
   useEffect(() => {
@@ -72,13 +144,13 @@ function ShellInner({ slug }: { slug: EditablePageSlug }) {
       api.getState().markPublished();
       setToast(res.message || "Published to the live site");
       // Re-render the iframe against the freshly published content.
-      iframeRef.current?.contentWindow?.location.reload();
+      reloadFrame();
       router.refresh();
     } else {
       setToast(res.error || "Publish failed");
     }
     setTimeout(() => setToast(null), 5000);
-  }, [api, router]);
+  }, [api, router, reloadFrame]);
 
   const width = DEVICE_WIDTH[device];
   const showInspector = !settingsOpen && mode === "edit" && selection?.kind === "section";
@@ -91,6 +163,7 @@ function ShellInner({ slug }: { slug: EditablePageSlug }) {
         onPublish={publish}
         settingsOpen={settingsOpen}
         onToggleSettings={() => setSettingsOpen((v) => !v)}
+        onReloadFromLive={reloadFromLive}
       />
 
       <div className="relative flex flex-1 overflow-hidden">
@@ -99,12 +172,18 @@ function ShellInner({ slug }: { slug: EditablePageSlug }) {
             className="h-full bg-white shadow-xl ring-1 ring-black/10 transition-[width] duration-200"
             style={{ width: width ? `${width}px` : "100%", maxWidth: "100%" }}
           >
-            <iframe
-              ref={iframeRef}
-              title="Site preview"
-              src={`/${slug === "home" ? "" : slug}?__edit=1`}
-              className="h-full w-full border-0"
-            />
+            {previewReady ? (
+              <iframe
+                ref={iframeRef}
+                title="Site preview"
+                src={`${PREVIEW_PATH[slug]}?__edit=1`}
+                className="h-full w-full border-0"
+              />
+            ) : (
+              <div className="grid h-full place-items-center text-[12px] text-neutral-400">
+                Loading the live page…
+              </div>
+            )}
           </div>
         </div>
 

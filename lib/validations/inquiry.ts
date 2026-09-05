@@ -34,6 +34,10 @@ export const inquirySchema = z.object({
   preferredContact: z.enum(["email", "phone", "whatsapp"]).optional(),
   workSlug: z.string().trim().max(120).optional().or(z.literal("")),
   workTitle: z.string().trim().max(240).optional().or(z.literal("")),
+  /** Which form this came from — shown in the internal notification. */
+  source: z
+    .enum(["contact-page", "work-enquiry", "collection-enquiry", "api"])
+    .optional(),
   // Honeypot — must stay empty. Bots fill it in.
   company: z.string().max(0).optional().or(z.literal("")),
   // Time-to-submit guard (ms since form mount). Too fast = bot.

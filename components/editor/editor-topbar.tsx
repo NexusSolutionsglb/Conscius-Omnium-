@@ -11,7 +11,7 @@ const PAGE_LABELS: Record<EditablePageSlug, string> = {
   home: "Home",
   about: "About",
   studio: "Studio",
-  work: "Work",
+  work: "Gallery",
   exhibitions: "Exhibitions",
   contact: "Contact",
 };
@@ -28,12 +28,14 @@ export function EditorTopbar({
   onPublish,
   settingsOpen,
   onToggleSettings,
+  onReloadFromLive,
 }: {
   slug: EditablePageSlug;
   publishing: boolean;
   onPublish: () => void;
   settingsOpen: boolean;
   onToggleSettings: () => void;
+  onReloadFromLive: () => void;
 }) {
   const router = useRouter();
   const api = useEditorStoreApi()!;
@@ -114,6 +116,14 @@ export function EditorTopbar({
         )}
       >
         Theme &amp; nav
+      </button>
+
+      <button
+        onClick={onReloadFromLive}
+        title="Discard the local draft and load the current live content"
+        className="rounded px-2 py-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+      >
+        Reload live content
       </button>
 
       <button

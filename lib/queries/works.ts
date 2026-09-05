@@ -5,6 +5,7 @@ import { worksSeed } from "@/lib/content";
 import type { Discipline, Work } from "@/lib/types";
 import { fromAuthedDbOr, fromDbOr, type ReadClient } from "./_shared";
 import { mapWork } from "./mappers";
+import { resolveImageDimensions } from "./media-dimensions";
 import type { WorkRow } from "@/lib/supabase/database.types";
 
 const bySort = (a: Work, b: Work) => a.sortOrder - b.sortOrder;
@@ -20,7 +21,32 @@ async function fetchWorkRows(
   const { data, error } = await query;
   if (error) throw error;
   if (!data) return null;
-  return (data as unknown as WorkRow[]).map((row) => mapWork(row));
+  const works = (data as unknown as WorkRow[]).map((row) => mapWork(row));
+  return backfillImageDimensions(works);
+}
+
+/**
+ * Fill in any `WorkImage` missing width/height from the media library, so
+ * the gallery cards, hero viewer and lightbox always frame the image by its
+ * real proportions instead of a guessed fallback ratio.
+ */
+async function backfillImageDimensions(works: Work[]): Promise<Work[]> {
+  const missingUrls = works.flatMap((w) =>
+    w.images.filter((im) => !im.width || !im.height).map((im) => im.url),
+  );
+  if (!missingUrls.length) return works;
+
+  const dims = await resolveImageDimensions(missingUrls);
+  if (!dims.size) return works;
+
+  return works.map((w) => ({
+    ...w,
+    images: w.images.map((im) => {
+      if (im.width && im.height) return im;
+      const found = dims.get(im.url);
+      return found ? { ...im, ...found } : im;
+    }),
+  }));
 }
 
 /** All published works, portfolio order. */

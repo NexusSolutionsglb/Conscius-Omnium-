@@ -398,6 +398,20 @@ export async function deleteInquiry(id: string): Promise<ActionResult> {
   return { ok: true, message: "Deleted" };
 }
 
+/* ───────────────────── editor preview ─────────────────── */
+
+/**
+ * Purge the cached public pages the visual editor frames. The site routes are
+ * ISR-cached (`revalidate = 3600`), so without this the editor could open on
+ * an hour-old render — showing yesterday's gallery images while the live site
+ * has already moved on. Called when the editor mounts and on "Reload".
+ */
+export async function refreshSitePreview(): Promise<ActionResult> {
+  await requireAdmin();
+  revalidateSite("/contact", "/privacy", "/terms");
+  return { ok: true, message: "Preview refreshed" };
+}
+
 /* ───────────────────────── profile ────────────────────── */
 
 export async function saveProfile(formData: FormData): Promise<ActionResult> {
@@ -436,6 +450,9 @@ export async function saveProfile(formData: FormData): Promise<ActionResult> {
     bio: toParagraphs(v.bio),
     education,
     email: v.email,
+    enquiry_email: v.enquiryEmail,
+    info_email: v.infoEmail,
+    studio_email: v.studioEmail,
     phone: v.phone,
     whatsapp: v.whatsapp,
     location: v.location,
@@ -443,10 +460,34 @@ export async function saveProfile(formData: FormData): Promise<ActionResult> {
     social,
     updated_at: new Date().toISOString(),
   };
-  const { error } = await supabase.from("profile").upsert(row as never, { onConflict: "id" });
+  const { error, skippedEmails } = await upsertProfileRow(supabase, row);
   if (error) return { ok: false, error: error.message };
   revalidateSite("/contact");
-  return { ok: true, message: "Profile saved" };
+  return {
+    ok: true,
+    message: skippedEmails
+      ? "Profile saved (enquiry/info/studio addresses skipped — run migration 0004)"
+      : "Profile saved",
+  };
+}
+
+/** The three purpose-specific address columns arrived in migration 0004. On a
+ *  database that predates it, save everything else rather than failing. */
+const PROFILE_EMAIL_COLUMNS = ["enquiry_email", "info_email", "studio_email"] as const;
+
+async function upsertProfileRow(
+  supabase: Awaited<ReturnType<typeof db>>,
+  row: Record<string, unknown>,
+): Promise<{ error: { message: string } | null; skippedEmails: boolean }> {
+  const { error } = await supabase.from("profile").upsert(row as never, { onConflict: "id" });
+  if (!error) return { error: null, skippedEmails: false };
+  if (!PROFILE_EMAIL_COLUMNS.some((c) => isMissingColumn(error, c))) {
+    return { error, skippedEmails: false };
+  }
+  const trimmed = { ...row };
+  PROFILE_EMAIL_COLUMNS.forEach((c) => delete trimmed[c]);
+  const retry = await supabase.from("profile").upsert(trimmed as never, { onConflict: "id" });
+  return { error: retry.error, skippedEmails: !retry.error };
 }
 
 /* ───────────────────────── settings ───────────────────── */
@@ -711,9 +752,7 @@ export async function publishSite(payload: {
   }
 
   if (payload.profile) {
-    const { error } = await supabase
-      .from("profile")
-      .upsert(profileRow(payload.profile as never) as never, { onConflict: "id" });
+    const { error } = await upsertProfileRow(supabase, profileRow(payload.profile as never));
     if (error) return { ok: false, error: `profile: ${error.message}` };
   }
 

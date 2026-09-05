@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Inquiry } from "@/lib/types";
-import { INQUIRY_TYPE_LABELS } from "@/lib/types";
+import { INQUIRY_SOURCE_LABELS, INQUIRY_TYPE_LABELS } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { whatsappInquiryMessage, whatsappLink } from "@/lib/whatsapp";
 import { addInquiryNote, deleteInquiry, updateInquiryStatus } from "@/lib/admin/actions";
@@ -39,6 +39,7 @@ export function InquiryDetail({ inquiry }: { inquiry: Inquiry }) {
     ["Budget", inquiry.budget],
     ["Prefers", inquiry.preferredContact],
     ["Received", formatDate(inquiry.createdAt, { dateStyle: "medium", timeStyle: "short" })],
+    ["Source", inquiry.source ? INQUIRY_SOURCE_LABELS[inquiry.source] : null],
   ];
 
   return (

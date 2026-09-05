@@ -26,5 +26,6 @@ export const studioDefaults: StudioContent = {
     eyebrow: "See it applied",
     heading: "Every method, in the work itself.",
     linkLabel: "View selected work",
+    contactLabel: "Studio, services and project enquiries —",
   },
 };

@@ -1,12 +1,14 @@
 import { getProfile } from "@/lib/queries/profile";
 import { saveProfile } from "@/lib/admin/actions";
 import { fromParagraphs } from "@/lib/utils";
+import { contactEmails } from "@/lib/contact-emails";
 import { PageHeader, Card, Field, TextArea } from "@/components/admin/ui";
 import { EntityForm } from "@/components/admin/entity-form";
 import { ImageField } from "@/components/admin/image-field";
 
 export default async function ProfilePage() {
   const p = await getProfile();
+  const emails = contactEmails(p);
   return (
     <>
       <PageHeader
@@ -30,8 +32,13 @@ export default async function ProfilePage() {
                 hint="One per line — Qualification | Institution"
               />
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Email" name="email" type="email" required defaultValue={p.email} error={err.email?.[0]} />
+                <Field label="Email" name="email" type="email" required defaultValue={p.email} hint="The artist's own address — used for admin records" error={err.email?.[0]} />
                 <Field label="Phone" name="phone" required defaultValue={p.phone} error={err.phone?.[0]} />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Field label="Enquiries email" name="enquiryEmail" type="email" required defaultValue={emails.enquiry} hint="Enquiries, commissions, bookings" error={err.enquiryEmail?.[0]} />
+                <Field label="General email" name="infoEmail" type="email" required defaultValue={emails.info} hint="Footer, About, legal pages" error={err.infoEmail?.[0]} />
+                <Field label="Studio email" name="studioEmail" type="email" required defaultValue={emails.studio} hint="Studio, services, projects" error={err.studioEmail?.[0]} />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="WhatsApp number" name="whatsapp" required defaultValue={p.whatsapp} hint="Digits only, with country code" error={err.whatsapp?.[0]} />

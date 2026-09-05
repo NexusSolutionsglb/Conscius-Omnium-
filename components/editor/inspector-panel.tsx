@@ -14,6 +14,10 @@ import { useEditorStore, useEditorStoreApi } from "./editor-store-context";
 import { ImageDialog } from "./image-dialog";
 import { GalleryEditor } from "./gallery-editor";
 
+/** Stable empty-object reference — a fresh `{}` per render would make
+ *  `useSyncExternalStore` see a "changed" snapshot on every call and loop. */
+const EMPTY_BLOCKS: Record<string, CustomBlock> = {};
+
 const LABELS: Record<string, string> = {
   eyebrow: "Eyebrow",
   heading: "Heading",
@@ -40,7 +44,7 @@ function label(key: string) {
 export function InspectorPanel() {
   const selection = useEditorStore((s) => s.selection);
   const blocks = useEditorStore((s) =>
-    selection?.slug === "home" ? (s.pages.home.blocks ?? {}) : {},
+    selection?.slug === "home" ? (s.pages.home.blocks ?? EMPTY_BLOCKS) : EMPTY_BLOCKS,
   );
   if (!selection || selection.kind !== "section") return null;
 

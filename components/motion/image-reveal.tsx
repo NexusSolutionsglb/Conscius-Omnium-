@@ -12,6 +12,9 @@ type ArtImageProps = Omit<ImageProps, "onLoad"> & {
   /** Disable the clip-wipe reveal (e.g. above the fold with priority). */
   noReveal?: boolean;
   wrapperClassName?: string;
+  /** Extra inline styles for the wrapper — e.g. a `--img-ratio` custom
+   *  property for a CSS rule keyed off `wrapperClassName`. */
+  wrapperStyle?: React.CSSProperties;
   /** Slight zoom on hover — for cards. */
   hoverZoom?: boolean;
   /**
@@ -36,6 +39,7 @@ export function ArtImage({
   ratio,
   noReveal = false,
   wrapperClassName,
+  wrapperStyle,
   hoverZoom = false,
   fit = "cover",
   className,
@@ -70,7 +74,7 @@ export function ArtImage({
         hoverZoom && "group/art",
         wrapperClassName,
       )}
-      style={ratio ? { aspectRatio: ratio } : undefined}
+      style={{ ...(ratio ? { aspectRatio: ratio } : undefined), ...wrapperStyle }}
     >
       <motion.div
         className={cn(

@@ -11,7 +11,13 @@ import { blockId, newBlock } from "./new-entities";
 import { getPath, setPath, reorderPath } from "./paths";
 import type { Device, EditorMode, EditorSelection, EditorSnapshot } from "./types";
 
-const DRAFT_KEY = "co-editor-draft-v2";
+const DRAFT_KEY = "co-editor-draft-v3";
+/** Drafts from earlier schemas — cleared on load so they can never be restored
+ *  over content that has moved on since. */
+const LEGACY_DRAFT_KEYS = ["co-editor-draft", "co-editor-draft-v2"];
+const DRAFT_FORMAT = 3;
+/** A draft older than this is abandoned rather than merged over live content. */
+const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const HISTORY_LIMIT = 50;
 
 export interface EditorStore extends EditorSnapshot {
@@ -94,18 +100,111 @@ function isDirty(cur: EditorSnapshot, base: EditorSnapshot): boolean {
   return JSON.stringify(pick(cur)) !== JSON.stringify(pick(base));
 }
 
-function readDraft(): EditorSnapshot | null {
+/**
+ * The units a draft is diffed and merged by. Anything the admin has not
+ * touched is taken from the freshly-loaded server snapshot, so gallery images
+ * and other records edited elsewhere (admin panel, SQL, another browser) are
+ * never masked by an old local draft. `pages` is split per page so editing
+ * one page does not pin the other five to their old copy.
+ */
+type MergeUnit = string;
+
+function mergeUnits(s: EditorSnapshot): MergeUnit[] {
+  const pages = Object.keys(s.pages ?? {}).map((slug) => `pages.${slug}`);
+  return [...pages, ...SNAPSHOT_KEYS.filter((k) => k !== "pages")];
+}
+
+function unitValue(s: EditorSnapshot, unit: MergeUnit): unknown {
+  if (unit.startsWith("pages.")) {
+    return (s.pages as unknown as Record<string, unknown>)?.[unit.slice(6)];
+  }
+  return (s as unknown as Record<string, unknown>)[unit];
+}
+
+function setUnitValue(target: EditorSnapshot, unit: MergeUnit, value: unknown) {
+  if (unit.startsWith("pages.")) {
+    (target.pages as unknown as Record<string, unknown>)[unit.slice(6)] = value;
+    return;
+  }
+  (target as unknown as Record<string, unknown>)[unit] = value;
+}
+
+/** The units in which `cur` differs from `base` — i.e. the admin's real edits. */
+function touchedUnits(cur: EditorSnapshot, base: EditorSnapshot): MergeUnit[] {
+  const units = new Set([...mergeUnits(cur), ...mergeUnits(base)]);
+  return [...units].filter(
+    (u) => JSON.stringify(unitValue(cur, u)) !== JSON.stringify(unitValue(base, u)),
+  );
+}
+
+interface StoredDraft {
+  v: number;
+  savedAt: number;
+  /** Units the draft changed relative to the snapshot it was started from. */
+  touched: MergeUnit[];
+  data: EditorSnapshot;
+}
+
+function readStoredDraft(): StoredDraft | null {
   if (typeof window === "undefined") return null;
   try {
+    LEGACY_DRAFT_KEYS.forEach((k) => window.localStorage.removeItem(k));
     const raw = window.localStorage.getItem(DRAFT_KEY);
-    return raw ? (JSON.parse(raw) as EditorSnapshot) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as StoredDraft;
+    if (
+      !parsed ||
+      parsed.v !== DRAFT_FORMAT ||
+      !Array.isArray(parsed.touched) ||
+      !draftShapeOk(parsed.data)
+    ) {
+      clearDraft();
+      return null;
+    }
+    if (!Number.isFinite(parsed.savedAt) || Date.now() - parsed.savedAt > DRAFT_MAX_AGE_MS) {
+      clearDraft();
+      return null;
+    }
+    return parsed;
   } catch {
     return null;
   }
 }
-function writeDraft(s: EditorSnapshot) {
+
+/**
+ * Rebuild the working state: the live server snapshot, with the draft's
+ * touched units laid back over it. Returns `null` when there is nothing to
+ * restore, so the editor simply opens on live content.
+ */
+function restoreDraft(base: EditorSnapshot): EditorSnapshot | null {
+  const stored = readStoredDraft();
+  if (!stored) return null;
+  const touched = stored.touched.filter(
+    (u) => JSON.stringify(unitValue(stored.data, u)) !== JSON.stringify(unitValue(base, u)),
+  );
+  if (!touched.length) {
+    clearDraft();
+    return null;
+  }
+  const merged = snapshot(base);
+  touched.forEach((u) => setUnitValue(merged, u, clone(unitValue(stored.data, u))));
+  return merged;
+}
+
+function writeDraft(s: EditorSnapshot, base: EditorSnapshot) {
   try {
-    window.localStorage.setItem(DRAFT_KEY, JSON.stringify(pick(s)));
+    const touched = touchedUnits(s, base);
+    if (!touched.length) {
+      clearDraft();
+      return;
+    }
+    const payload: StoredDraft = {
+      v: DRAFT_FORMAT,
+      savedAt: Date.now(),
+      touched,
+      data: pick(s),
+    };
+    window.localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
   } catch {
     /* quota / private mode */
   }
@@ -120,15 +219,15 @@ function clearDraft() {
 
 export function createEditorStore(initial: EditorSnapshot) {
   const base = snapshot(initial);
-  const draft = readDraft();
-  const startDirty = !!draft && draftShapeOk(draft) && isDirty(draft, base);
-  const start = startDirty ? (draft as EditorSnapshot) : base;
+  const restored = restoreDraft(base);
+  const startDirty = !!restored;
+  const start = restored ?? base;
 
   return createStore<EditorStore>((set, get) => {
     const apply = (next: EditorSnapshot) => {
       const state = get();
       const past = [...state.past, snapshot(pick(state))].slice(-HISTORY_LIMIT);
-      writeDraft(next);
+      writeDraft(next, state.baseline);
       set({
         ...pick(next),
         past,
@@ -152,16 +251,31 @@ export function createEditorStore(initial: EditorSnapshot) {
       past: [],
       future: [],
 
+      /**
+       * Adopt a freshly-loaded server snapshot. Units the admin has edited in
+       * this session (or in a saved draft) are carried over; everything else
+       * — gallery images, works, collections changed anywhere else — is taken
+       * from the new snapshot, so the editor never shows stale content.
+       */
       seed: (snap) => {
         const b = snapshot(snap);
-        const d = readDraft();
-        const useDraft = d && draftShapeOk(d) && isDirty(d, b);
+        const state = get();
+        const cur = snapshot(pick(state));
+        const merged = snapshot(b);
+        // Anything the admin changed since the last seed — the live draft is
+        // already folded into `cur`, so this one diff covers both.
+        touchedUnits(cur, state.baseline).forEach((u) =>
+          setUnitValue(merged, u, clone(unitValue(cur, u))),
+        );
+        const dirty = isDirty(merged, b);
+        if (dirty) writeDraft(merged, b);
+        else clearDraft();
         set({
-          ...pick(useDraft ? (d as EditorSnapshot) : b),
+          ...pick(merged),
           baseline: b,
           past: [],
           future: [],
-          dirty: !!useDraft,
+          dirty,
         });
       },
 
@@ -308,7 +422,7 @@ export function createEditorStore(initial: EditorSnapshot) {
         const { past } = get();
         if (!past.length) return;
         const prev = past[past.length - 1];
-        writeDraft(prev);
+        writeDraft(prev, get().baseline);
         set({
           ...pick(prev),
           past: past.slice(0, -1),
@@ -320,7 +434,7 @@ export function createEditorStore(initial: EditorSnapshot) {
         const { future } = get();
         if (!future.length) return;
         const nextSnap = future[0];
-        writeDraft(nextSnap);
+        writeDraft(nextSnap, get().baseline);
         set({
           ...pick(nextSnap),
           past: [...get().past, snapshot(pick(get()))].slice(-HISTORY_LIMIT),

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { AboutContent, Profile, TimelineEntry } from "@/lib/types";
 import { blurFor } from "@/lib/content/blur";
+import { contactEmails } from "@/lib/contact-emails";
 import { Reveal } from "@/components/motion/reveal";
 import { Eyebrow, Rule } from "@/components/ui/primitives";
 import { Timeline } from "@/components/timeline/timeline";
@@ -39,7 +40,7 @@ export function AboutView({
     roles: useEditableProfile("roles", profile.roles),
     statement: useEditableProfile("statement", profile.statement),
     education: useEditableProfile("education", profile.education),
-    email: useEditableProfile("email", profile.email),
+    infoEmail: useEditableProfile("infoEmail", profile.infoEmail),
     phone: useEditableProfile("phone", profile.phone),
     location: useEditableProfile("location", profile.location),
     portrait: useEditableProfile<string | null | undefined>("portrait", profile.portrait),
@@ -225,8 +226,8 @@ export function AboutView({
           </RepeatableList>
         </div>
         <div className="mt-10 flex flex-wrap gap-x-10 gap-y-2 text-[0.85rem] text-ink-soft">
-          <a href={`mailto:${p.email}`} className="u-link">
-            <EditableText bind="@profile.email">{p.email}</EditableText>
+          <a href={`mailto:${contactEmails(p).info}`} className="u-link">
+            <EditableText bind="@profile.infoEmail">{contactEmails(p).info}</EditableText>
           </a>
           <span>
             <EditableText bind="@profile.phone">{p.phone}</EditableText>

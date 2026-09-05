@@ -194,7 +194,15 @@ export interface Profile {
   statement: string;
   bio: string[];
   education: { qualification: string; institution: string; detail?: string }[];
+  /** The artist's own address. Kept private-ish: the site publishes the three
+   *  purpose-specific addresses below instead. */
   email: string;
+  /** Enquiries, commissions and bookings — the contact form's inbox. */
+  enquiryEmail?: string | null;
+  /** General information — footer, about, legal pages, structured data. */
+  infoEmail?: string | null;
+  /** Studio, services and project correspondence. */
+  studioEmail?: string | null;
   phone: string;
   whatsapp: string;
   location: string;
@@ -281,6 +289,20 @@ export interface InquiryNote {
   createdAt: string;
 }
 
+/** Which form an enquiry came from — shown in the internal notification. */
+export type InquirySource =
+  | "contact-page"
+  | "work-enquiry"
+  | "collection-enquiry"
+  | "api";
+
+export const INQUIRY_SOURCE_LABELS: Record<InquirySource, string> = {
+  "contact-page": "Contact page form",
+  "work-enquiry": "Artwork enquiry dialog",
+  "collection-enquiry": "Collection enquiry",
+  api: "API / direct submission",
+};
+
 export interface Inquiry {
   id: string;
   ref: string;
@@ -294,8 +316,55 @@ export interface Inquiry {
   preferredContact?: "email" | "phone" | "whatsapp" | null;
   workSlug?: string | null;
   workTitle?: string | null;
+  /** The form this arrived through. */
+  source?: InquirySource | null;
   status: InquiryStatus;
   notes: InquiryNote[];
+  createdAt: string;
+}
+
+/* ─── newsletter ────────────────────────────────────────────────── */
+
+export type SubscriberStatus = "subscribed" | "unsubscribed";
+
+export interface NewsletterSubscriber {
+  id: string;
+  email: string;
+  name?: string | null;
+  status: SubscriberStatus;
+  /** Where they signed up — footer, contact page, admin import… */
+  source?: string | null;
+  subscribedAt: string;
+  unsubscribedAt?: string | null;
+  createdAt: string;
+}
+
+export type CampaignStatus = "draft" | "sent";
+
+/** One block of a newsletter issue. `heading` is optional; `body` is prose. */
+export interface CampaignSection {
+  id: string;
+  heading?: string | null;
+  body: string;
+  imageUrl?: string | null;
+  imageCaption?: string | null;
+  linkLabel?: string | null;
+  linkHref?: string | null;
+}
+
+export interface NewsletterCampaign {
+  id: string;
+  subject: string;
+  /** Inbox preview line. */
+  preheader?: string | null;
+  intro?: string | null;
+  sections: CampaignSection[];
+  ctaLabel?: string | null;
+  ctaHref?: string | null;
+  status: CampaignStatus;
+  sentAt?: string | null;
+  sentCount: number;
+  failedCount: number;
   createdAt: string;
 }
 
@@ -423,6 +492,8 @@ export interface PageCtaCopy {
   eyebrow: string;
   heading: string;
   linkLabel: string;
+  /** Optional lead-in for a contact address shown beneath the CTA. */
+  contactLabel?: string;
 }
 
 export interface AboutBodySection {
@@ -482,8 +553,10 @@ export interface ContactContent {
   formEyebrow: string;
   /** WhatsApp button label */
   whatsappLabel: string;
-  /** Contact-detail row labels */
-  emailLabel: string;
+  /** Contact-detail row labels — one per purpose-specific address */
+  enquiryEmailLabel: string;
+  infoEmailLabel: string;
+  studioEmailLabel: string;
   phoneLabel: string;
   whatsappRowLabel: string;
   locationLabel: string;

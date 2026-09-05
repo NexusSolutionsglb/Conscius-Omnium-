@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { motion, useMotionValueEvent, useScroll } from "motion/react";
 import type { Profile, SiteSettings } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { IS_DRAFT_REVIEW } from "@/lib/draft-mode";
 import { Magnetic } from "@/components/motion/magnetic";
 import { EditableText } from "@/components/editor/editable-text";
 import { EditableImage } from "@/components/editor/editable-image";
@@ -66,7 +67,10 @@ export function Header({
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
         data-solid={solid}
         className={cn(
-          "u-no-print fixed inset-x-0 top-0 z-[120] transition-colors duration-500",
+          // Sits below the draft-review banner while that's up (see
+          // `draft-banner.tsx` — the two heights must match).
+          "u-no-print fixed inset-x-0 z-[120] transition-colors duration-500",
+          IS_DRAFT_REVIEW ? "top-9" : "top-0",
           solid
             ? "bg-paper/88 text-ink backdrop-blur-md"
             : "bg-transparent text-paper",

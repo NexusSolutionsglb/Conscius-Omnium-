@@ -5,6 +5,7 @@ import type { Profile, SiteSettings, Work } from "@/lib/types";
 import { DISCIPLINE_LABELS } from "@/lib/types";
 import { absoluteUrl, truncate } from "@/lib/utils";
 import { contactEmails } from "@/lib/contact-emails";
+import { IS_DRAFT_REVIEW } from "@/lib/draft-mode";
 
 type BuildMeta = {
   title?: string;
@@ -34,7 +35,10 @@ export function buildMetadata({
   imageHeight,
   imageAlt,
   type = "website",
-  noIndex = false,
+  // While the site is a client-review draft, every page defaults to
+  // noindex regardless of what each call site passes — a real launch date
+  // isn't set yet, so nothing here should reach search results.
+  noIndex = IS_DRAFT_REVIEW,
   publishedTime,
 }: BuildMeta): Metadata {
   const s = settingsSeed;

@@ -12,6 +12,31 @@
     "binding": "ASSETS"
   },
 
+  // Serves the real domain directly off this Worker (in addition to the
+  // <name>.<subdomain>.workers.dev URL, which stays live too). Requires
+  // the zone to already be on Cloudflare (nameservers pointed here) —
+  // `wrangler deploy` provisions the DNS record + certificate for these
+  // automatically once that's true.
+  "routes": [
+    { "pattern": "consciusomnium.com", "custom_domain": true },
+    { "pattern": "www.consciusomnium.com", "custom_domain": true }
+  ],
+
+  // Non-secret runtime values the deployed Worker reads from `process.env`.
+  // NEXT_PUBLIC_* ones are ALSO inlined into the build at build time (that
+  // happens regardless of this file — see the deploy workflow), but are
+  // listed here too so the Worker's own config is self-contained. The two
+  // actual secrets (SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY) are NOT
+  // here — they were pushed with `wrangler secret put` instead, so they
+  // stay encrypted and out of this committed file.
+  "vars": {
+    "NEXT_PUBLIC_SITE_URL": "https://consciusomnium.com",
+    "NEXT_PUBLIC_SUPABASE_URL": "https://mjvvyqxblcqssoctinoq.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_zPotOUPRW-B6jFBbEHU1sQ_LKnWCcYG",
+    "NEXT_PUBLIC_WHATSAPP_NUMBER": "919972910950",
+    "RESEND_FROM": "Conscious Omnium <studio@consciusomnium.com>"
+  },
+
   // Lets a Worker request re-enter itself (used by the OpenNext runtime
   // for on-demand ISR revalidation). Keep the service name in sync with
   // "name" above.

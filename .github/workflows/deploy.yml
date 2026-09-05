@@ -1,0 +1,52 @@
+name: Deploy to Cloudflare Workers
+
+# Push-to-deploy for the Worker, since Cloudflare's Git-connected "Pages"
+# flow can't run the OpenNext adapter's output — this replaces that.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # NEXT_PUBLIC_* values are inlined into the client bundle at BUILD
+      # time, so they must be present here — not just as a Worker secret,
+      # which only affects the *running* Worker, after the build already
+      # happened. Add each as a GitHub Actions repo secret (Settings →
+      # Secrets and variables → Actions) even though most aren't sensitive;
+      # a secret and a plain variable both surface as env vars here either
+      # way, so secrets keep this simpler.
+      - name: Build
+        run: npm run cf:build
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_WHATSAPP_NUMBER: ${{ secrets.NEXT_PUBLIC_WHATSAPP_NUMBER }}
+          NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ secrets.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }}
+          NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID }}
+          NEXT_PUBLIC_PLAUSIBLE_DOMAIN: ${{ secrets.NEXT_PUBLIC_PLAUSIBLE_DOMAIN }}
+
+      # Server-only secrets (SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, …)
+      # are NOT set here — they're runtime values for the deployed Worker,
+      # pushed once via `npx wrangler secret put <NAME>` (or the Cloudflare
+      # dashboard) and persisted on Cloudflare's side. A normal deploy never
+      # touches them.
+      - name: Deploy
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

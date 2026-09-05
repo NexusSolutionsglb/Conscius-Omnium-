@@ -14,6 +14,7 @@ import {
   workJsonLd,
 } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/utils";
+import { IS_DRAFT_REVIEW } from "@/lib/draft-mode";
 import { Reveal } from "@/components/motion/reveal";
 import { ShareBar } from "@/components/site/share-bar";
 import { JsonLd } from "@/components/site/json-ld";
@@ -57,7 +58,7 @@ export async function generateMetadata({
     imageAlt: work.images[0]?.alt || work.title,
     type: "article",
     publishedTime: work.publishedAt,
-    noIndex: work.status !== "published",
+    noIndex: IS_DRAFT_REVIEW || work.status !== "published",
   });
 }
 

@@ -127,22 +127,19 @@ export function HeroVideo({ override }: { override?: string | null }) {
     v.muted = true;
     v.volume = 0;
 
-    if (!reducedRef.current) {
-      void v.play().catch(() => {});
-      // Some visitors (return visits, granted autoplay) can hear it right away.
-      const tryImmediate = async () => {
-        try {
-          v.muted = false;
-          await v.play();
-          hasGestureRef.current = true;
-          ensureTicking();
-        } catch {
-          v.muted = true;
-          v.volume = 0;
-        }
-      };
-      void tryImmediate();
-    }
+    // Muted autoplay. Mobile browsers frequently won't start until there is
+    // buffered data (and can drop the first attempt), so keep nudging it on
+    // the load milestones. Sound is never forced here — it only comes up on a
+    // real gesture, via `tick()`.
+    const kick = () => {
+      if (reducedRef.current) return;
+      v.muted = true;
+      v.play().catch(() => {});
+    };
+    kick();
+    v.addEventListener("loadedmetadata", kick);
+    v.addEventListener("loadeddata", kick);
+    v.addEventListener("canplay", kick);
 
     const onGesture = () => {
       hasGestureRef.current = true;
@@ -190,6 +187,9 @@ export function HeroVideo({ override }: { override?: string | null }) {
       cancelAnimationFrame(rafRef.current);
       clearTimeout(lenisTimer);
       runningRef.current = false;
+      v.removeEventListener("loadedmetadata", kick);
+      v.removeEventListener("loadeddata", kick);
+      v.removeEventListener("canplay", kick);
       window.removeEventListener("pointerdown", onGesture);
       window.removeEventListener("keydown", onGesture);
       window.removeEventListener("touchstart", onGesture);
@@ -225,8 +225,20 @@ export function HeroVideo({ override }: { override?: string | null }) {
       >
         {!failed ? (
           <video
-            ref={videoRef}
-            className="absolute inset-0 h-full w-full object-cover"
+            ref={(el) => {
+              videoRef.current = el;
+              // React doesn't reflect `muted` to the DOM attribute, and iOS
+              // Safari only autoplays when the attribute is there. `defaultMuted`
+              // writes the attribute; also belt in the inline hints old iOS
+              // WebViews still look for.
+              if (el) {
+                el.defaultMuted = true;
+                el.muted = true;
+                el.setAttribute("playsinline", "");
+                el.setAttribute("webkit-playsinline", "");
+              }
+            }}
+            className="absolute inset-0 block h-full w-full object-cover"
             autoPlay
             muted
             loop

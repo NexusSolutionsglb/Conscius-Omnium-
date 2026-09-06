@@ -80,7 +80,7 @@ export function Analytics({
         <div
           role="dialog"
           aria-label="Analytics consent"
-          className="u-no-print fixed inset-x-3 bottom-3 z-[150] border border-line-strong bg-paper p-5 shadow-[0_18px_50px_rgba(26,22,19,0.14)] sm:inset-x-auto sm:bottom-6 sm:left-6 sm:max-w-sm"
+          className="u-no-print fixed inset-x-3 bottom-3 z-[150] border border-line-strong bg-paper p-5 shadow-[0_14px_40px_-14px_rgba(0,0,0,0.22)] sm:inset-x-auto sm:bottom-6 sm:left-6 sm:max-w-sm"
         >
           <p className="u-eyebrow">Analytics</p>
           <p className="mt-2.5 text-[0.82rem] leading-relaxed text-ink-soft">

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Fraunces, Inter, Questrial } from "next/font/google";
 import { getProfile } from "@/lib/queries/profile";
 import { getSettings } from "@/lib/queries/settings";
 import { buildMetadata, personJsonLd, websiteJsonLd } from "@/lib/seo";
@@ -29,6 +29,19 @@ const inter = Inter({
   preload: true,
 });
 
+// Century Gothic is the house face but it is a licensed desktop font, so it
+// can only be *used* where the reader already has it (Windows/Office, most
+// Adobe installs). Questrial is the closest geometric Google face — same
+// single-storey `a`, same circular bowls — and stands in everywhere else, so
+// the site reads identically whether or not Century Gothic is present.
+const questrial = Questrial({
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  variable: "--font-questrial",
+  preload: true,
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(env.siteUrl),
   ...buildMetadata({ path: "/" }),
@@ -48,8 +61,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7f4ef" },
-    { media: "(prefers-color-scheme: dark)", color: "#14110e" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#ffffff" },
   ],
   colorScheme: "light",
 };
@@ -62,7 +75,7 @@ export default async function RootLayout({
   const [profile, settings] = await Promise.all([getProfile(), getSettings()]);
 
   return (
-    <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>
+    <html lang="en" className={`${questrial.variable} ${fraunces.variable} ${inter.variable}`}>
       <body>
         <a
           href="#main"

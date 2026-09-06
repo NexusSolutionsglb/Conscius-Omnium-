@@ -9,6 +9,8 @@ import type { Profile, SiteSettings } from "@/lib/types";
 import { EASE } from "@/lib/motion";
 import { lockScroll } from "@/lib/client";
 import { FOOTER_LEGAL_LINKS } from "@/lib/content/defaults/footer";
+import { contactEmails } from "@/lib/contact-emails";
+import { SocialGlyph } from "./social-icons";
 import { getLenis } from "./smooth-scroll";
 
 const FOCUSABLE =
@@ -163,16 +165,34 @@ export function MobileMenu({
             className="u-container shrink-0 pb-[max(1.75rem,env(safe-area-inset-bottom))] pt-6"
           >
             {profile && (
+              // The published address, not the artist's private one — the
+              // footer and the contact page both show `info@`.
               <a
-                href={`mailto:${profile.email}`}
+                href={`mailto:${contactEmails(profile).info}`}
                 className="inline-flex min-h-[44px] items-center text-[0.85rem] text-paper/70 transition-colors hover:text-paper"
               >
-                {profile.email}
+                {contactEmails(profile).info}
               </a>
             )}
             <p className="u-eyebrow mt-1 text-paper/50">{settings.brandLine}</p>
             <p className="mt-1 text-xs text-paper/40">{settings.tagline}</p>
-            <div className="mt-4 flex flex-wrap gap-x-6 text-[0.72rem] text-paper/40">
+            {profile && profile.social.length > 0 && (
+              <div className="mt-4 flex flex-wrap items-center gap-x-3">
+                {profile.social.map((s) => (
+                  <a
+                    key={s.href}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    className="flex h-11 w-11 items-center justify-center text-paper/55 transition-colors hover:text-paper"
+                  >
+                    <SocialGlyph label={s.label} href={s.href} className="h-5 w-5" />
+                  </a>
+                ))}
+              </div>
+            )}
+            <div className="mt-2 flex flex-wrap gap-x-6 text-[0.72rem] text-paper/40">
               {FOOTER_LEGAL_LINKS.map((item) => (
                 <Link
                   key={item.href}

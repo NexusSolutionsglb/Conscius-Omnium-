@@ -121,3 +121,11 @@ export function clamp(value: number, min = 0, max = 1): number {
 export function isExternal(href: string): boolean {
   return /^(https?:)?\/\//.test(href) || href.startsWith("mailto:") || href.startsWith("tel:");
 }
+
+/** Split a list into fixed-size groups, e.g. a series into gallery rows. */
+export function chunk<T>(items: T[], size: number): T[][] {
+  if (size < 1) return [items];
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+  return out;
+}

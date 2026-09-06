@@ -28,7 +28,7 @@ export function WhatsAppFloat({ href }: { href: string }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"
-      className="u-no-print fixed bottom-5 right-5 z-[110] flex h-12 w-12 items-center justify-center rounded-full bg-ink text-paper shadow-[0_8px_30px_rgba(26,22,19,0.25)] md:bottom-7 md:right-7"
+      className="u-no-print fixed bottom-5 right-5 z-[110] flex h-12 w-12 items-center justify-center rounded-full bg-ink text-paper shadow-[0_6px_20px_-6px_rgba(0,0,0,0.30)] md:bottom-7 md:right-7"
       initial={{ opacity: 0, scale: 0.6 }}
       animate={{ opacity: visible ? 1 : 0, scale: visible ? 1 : 0.6 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}

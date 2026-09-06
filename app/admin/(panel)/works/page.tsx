@@ -10,20 +10,20 @@ export default async function WorksListPage() {
   return (
     <>
       <PageHeader
-        title="Works"
-        description="Every piece across every discipline. Order here is the order on /gallery."
+        title="Artworks"
+        description="Every piece across every discipline. Assign one to a series to place it on the gallery wall."
         action={
           <Link
             href="/admin/works/new"
             className="rounded-md bg-neutral-900 px-4 py-2 text-[12.5px] font-medium text-white hover:bg-neutral-700"
           >
-            + New work
+            + New artwork
           </Link>
         }
       />
 
       {works.length === 0 ? (
-        <EmptyState title="No works yet">
+        <EmptyState title="No artworks yet">
           <Link href="/admin/works/new" className="underline">
             Add the first one
           </Link>

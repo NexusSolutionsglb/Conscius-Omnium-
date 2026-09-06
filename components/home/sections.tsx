@@ -30,7 +30,7 @@ export function Intro({
   copy?: HomeContent["intro"];
 }) {
   return (
-    <section className="u-container py-24 md:py-36">
+    <section className="u-container py-28 md:py-44">
       <div className="grid gap-14 md:grid-cols-12">
         <Reveal className="md:col-span-3">
           <Eyebrow>
@@ -43,7 +43,7 @@ export function Intro({
           <TextReveal
             as="p"
             text={settings.hero.heading.replace(/\n/g, " ")}
-            className="font-display text-[clamp(1.6rem,1rem+2.4vw,2.9rem)] font-light leading-[1.22] text-ink"
+            className="font-display text-[clamp(1.6rem,1rem+2.4vw,2.9rem)] leading-[1.3] text-ink"
           />
           <div className="mt-10 grid gap-8 md:grid-cols-2">
             <Reveal className="u-prose text-[0.92rem] leading-[1.75]">
@@ -78,7 +78,7 @@ export function StudioPreview({
   copy?: HomeContent["studioPreview"];
 }) {
   return (
-    <section className="u-container py-24 md:py-36">
+    <section className="u-container py-28 md:py-44">
       <div className="grid items-center gap-12 md:grid-cols-2 md:gap-20">
         <Reveal className="order-2 md:order-1">
           <Eyebrow>
@@ -88,7 +88,7 @@ export function StudioPreview({
             as="h2"
             bind="home.studioPreview.heading"
             linebreaks
-            className="mt-5 font-display text-[clamp(1.8rem,1.1rem+2.6vw,3.2rem)] font-light leading-[1.14]"
+            className="mt-5 font-display text-[clamp(1.8rem,1.1rem+2.6vw,3.2rem)] leading-[1.2]"
           >
             {copy.heading}
           </EditableText>
@@ -139,7 +139,7 @@ export function CollectionsRail({
   if (!editing && !shown.length) return null;
 
   return (
-    <section className="u-container py-24 md:py-32">
+    <section className="u-container py-28 md:py-44">
       <Reveal className="flex items-end justify-between gap-6">
         <div>
           <Eyebrow>
@@ -148,7 +148,7 @@ export function CollectionsRail({
           <EditableText
             as="h2"
             bind="home.collections.heading"
-            className="mt-4 font-display text-[clamp(1.6rem,1rem+2.2vw,2.8rem)] font-light"
+            className="mt-4 font-display text-[clamp(1.6rem,1rem+2.2vw,2.8rem)]"
           >
             {copy.heading}
           </EditableText>
@@ -157,7 +157,7 @@ export function CollectionsRail({
           <EditableText bind="home.collections.linkLabel">{copy.linkLabel}</EditableText>
         </TextLink>
       </Reveal>
-      <StaggerList className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      <StaggerList className="mt-14 grid gap-x-10 gap-y-16 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-14">
         <RepeatableList
           slug="work"
           path="collections"
@@ -171,29 +171,32 @@ export function CollectionsRail({
         >
           {(c, i) => (
             <StaggerItem as="article" data-unpublished={editing && !c.published ? "" : undefined}>
-              <Link href={`/gallery/collection/${c.slug}`} className="group block">
+              <Link href={`/gallery/collection/${c.slug}`} className="group/art block">
                 <EditableImage bind={`@collections.${i}.coverImage`} folder="collection">
                   {c.coverImage ? (
-                    <ArtImage
-                      src={c.coverImage}
-                      alt={c.title}
-                      ratio="3 / 2"
-                      fill
-                      sizes="(min-width:1024px) 30vw, 45vw"
-                      hoverZoom
-                      placeholder={blurFor(c.coverImage) ? "blur" : "empty"}
-                      blurDataURL={blurFor(c.coverImage)}
-                    />
+                    <div className="u-plate u-artframe u-artframe--lift">
+                      <ArtImage
+                        src={c.coverImage}
+                        alt={c.title}
+                        width={2200}
+                        height={2200}
+                        fit="cover"
+                        sizes="(min-width:1024px) 30vw, 45vw"
+                        placeholder={blurFor(c.coverImage) ? "blur" : "empty"}
+                        blurDataURL={blurFor(c.coverImage)}
+                        wrapperClassName="h-full w-full"
+                      />
+                    </div>
                   ) : editing ? (
-                    <div className="grid aspect-[3/2] place-items-center bg-neutral-100 text-[12px] text-neutral-400">
+                    <div className="grid aspect-square place-items-center bg-neutral-100 text-[12px] text-neutral-400">
                       Click to add a cover
                     </div>
                   ) : null}
                 </EditableImage>
-                <h3 className="mt-4 font-display text-[1.3rem] text-ink">
+                <h3 className="mt-5 font-display text-[1.2rem] text-ink">
                   <EditableText bind={`@collections.${i}.title`}>{c.title}</EditableText>
                 </h3>
-                <p className="mt-2 line-clamp-2 max-w-xs text-[0.82rem] leading-relaxed text-ink-mute">
+                <p className="mt-2.5 line-clamp-2 max-w-xs text-[0.82rem] leading-relaxed text-ink-mute">
                   <EditableText bind={`@collections.${i}.description`} multiline>
                     {c.description}
                   </EditableText>
@@ -219,7 +222,7 @@ export function ContactCta({
   copy?: HomeContent["contactCta"];
 }) {
   return (
-    <section className="u-invert relative overflow-hidden bg-obsidian py-28 text-paper md:py-40">
+    <section className="u-invert relative overflow-hidden bg-obsidian py-32 text-paper md:py-48">
       <div className="u-container relative z-10 text-center">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -233,7 +236,7 @@ export function ContactCta({
           <EditableText
             as="h2"
             bind="@settings.contactCopy.heading"
-            className="mx-auto mt-6 max-w-3xl font-display text-[clamp(2rem,1.2rem+3.6vw,4rem)] font-light leading-[1.08]"
+            className="mx-auto mt-6 max-w-3xl font-display text-[clamp(2rem,1.2rem+3.6vw,4rem)] leading-[1.12]"
           >
             {heading}
           </EditableText>
@@ -248,7 +251,7 @@ export function ContactCta({
           <Link
             href="/contact"
             className={cn(
-              "mt-10 inline-flex items-center gap-3 bg-paper px-9 py-4 text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-ink transition-transform hover:-translate-y-0.5",
+              "mt-10 inline-flex items-center gap-3 bg-paper px-9 py-4 text-[0.6875rem] uppercase tracking-[0.2em] text-ink transition-transform hover:-translate-y-0.5",
             )}
           >
             <EditableText bind="home.contactCta.ctaLabel">{copy.ctaLabel}</EditableText>

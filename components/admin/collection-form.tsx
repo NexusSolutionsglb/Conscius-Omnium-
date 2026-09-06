@@ -15,7 +15,7 @@ export function CollectionForm({ collection }: { collection: Collection | null }
   return (
     <EntityForm
       action={(fd) => saveCollection(collection?.id ?? null, fd)}
-      submitLabel={isNew ? "Create collection" : "Save"}
+      submitLabel={isNew ? "Create series" : "Save series"}
       redirectTo={isNew ? "/admin/collections" : undefined}
       deleteAction={collection ? () => deleteCollection(collection.id) : undefined}
     >
@@ -45,7 +45,7 @@ export function CollectionForm({ collection }: { collection: Collection | null }
               <Field label="Sort order" name="sortOrder" type="number" required defaultValue={collection?.sortOrder ?? 100} />
             </div>
             <ImageField
-              label="Cover image"
+              label="Series cover"
               name="coverImage"
               folder="projects"
               defaultValue={collection?.coverImage ?? ""}

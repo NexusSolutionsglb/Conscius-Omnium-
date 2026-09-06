@@ -34,9 +34,12 @@ const KIND_OPTS = ["cover", "gallery", "detail", "installation", "process", "dra
 export function WorkEditor({
   work,
   collections,
+  defaultCollectionSlug = null,
 }: {
   work: Work | null;
   collections: { slug: string; title: string }[];
+  /** Pre-selects the series when the editor is opened from one. */
+  defaultCollectionSlug?: string | null;
 }) {
   const router = useRouter();
   const isNew = !work;
@@ -216,7 +219,6 @@ export function WorkEditor({
             />
             <TextArea label="Artist statement" name="statement" defaultValue={work?.statement ?? ""} rows={2} />
             <TextArea label="Concept" name="concept" defaultValue={work?.concept ?? ""} rows={2} />
-            <TextArea label="Process" name="process" defaultValue={work?.process ?? ""} rows={2} />
           </div>
         </Card>
 
@@ -283,6 +285,18 @@ export function WorkEditor({
               </div>
             ))}
           </div>
+          {/* Video — the "Watch the process" player on the artwork page. */}
+          <div className="mt-5 border-t border-neutral-100 pt-4">
+            <Field
+              label="Process video — YouTube link"
+              name="process"
+              type="url"
+              defaultValue={work?.process ?? ""}
+              placeholder="https://youtu.be/xxxxxxxxxxx"
+              hint="Paste the YouTube link (youtu.be/… or youtube.com/watch?v=…). It appears on this artwork's page under “Watch the process”. Leave blank for no video."
+            />
+          </div>
+
           <div className="mt-3 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <UploadButton
@@ -338,10 +352,10 @@ export function WorkEditor({
             />
             <Toggle label="Featured" name="featured" defaultChecked={work?.featured} hint="Shows on the home page" />
             <SelectField
-              label="Collection"
+              label="Series"
               name="collectionSlug"
               options={[{ value: "", label: "None" }, ...collections.map((c) => ({ value: c.slug, label: c.title }))]}
-              defaultValue={work?.collectionSlug ?? ""}
+              defaultValue={work?.collectionSlug ?? defaultCollectionSlug ?? ""}
             />
           </div>
         </Card>

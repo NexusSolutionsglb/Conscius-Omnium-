@@ -22,13 +22,13 @@ export function WorkIndexHeader({
   const introText = mode === "edit" ? intro : intro.replace("{count}", String(total));
 
   return (
-    <header className="u-container pb-14 pt-36 md:pb-20 md:pt-44">
+    <header className="u-container pb-20 pt-36 md:pb-28 md:pt-44">
       <Eyebrow>
         <EditableText bind="work.eyebrow">{eyebrow}</EditableText>
       </Eyebrow>
       <EditableHeading
         bind="work.heading"
-        className="mt-5 font-display text-[clamp(2.6rem,1.4rem+5vw,6rem)] font-light leading-[0.98]"
+        className="mt-5 font-display text-[clamp(2.4rem,1.4rem+4.2vw,5rem)] leading-[1.02]"
       >
         {heading}
       </EditableHeading>

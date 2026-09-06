@@ -41,9 +41,15 @@
   --color-line: color-mix(in oklab, var(--color-ink) 14%, transparent);
   --color-line-strong: color-mix(in oklab, var(--color-ink) 26%, transparent);
 
-  /* — Type ———————————————————————————————————— */
-  --font-display: var(--font-fraunces), "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif;
-  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* — Type ————————————————————————————————————
+     Century Gothic is the house face. It ships with Windows/Office and
+     most Adobe installs; `--font-questrial` (loaded in app/layout.tsx) is
+     a geometric Google face used as the web fallback so the page reads
+     the same everywhere. One family for display and body — the hierarchy
+     comes from size, spacing and colour, never from weight. */
+  --font-century: "Century Gothic", CenturyGothic, "Apple Gothic", "URW Gothic", "URW Gothic L", var(--font-questrial), Futura, "Trebuchet MS", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-century);
+  --font-sans: var(--font-century);
 
   /* — Motion ——————————————————————————————————— */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -51,7 +57,9 @@
   --ease-out-soft: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
   /* — Layout ——————————————————————————————————— */
-  --container-page: 1560px;
+  --container-page: 97.5rem;
+  /* 1560px at the 16px root — expressed in rem so the whole page scales
+     together on very large displays (see the >=1600px rule in Base). */
 
   /* — Editorial type scale (fluid) ————————————————— */
   --text-eyebrow: 0.6875rem;
@@ -74,6 +82,34 @@
     text-rendering: optimizeLegibility;
     font-feature-settings: "kern" 1;
     scroll-behavior: smooth;
+  }
+
+  /* ─── One design, every display ──────────────────────────────
+     Breakpoints alone make a site look like a *different* design on
+     every monitor: the same composition sits cramped at 1280 and
+     marooned at 1920, because the fluid clamps have long since hit
+     their ceilings while the screen kept growing.
+
+     Scaling the root instead scales every rem on the page at once —
+     type, spacing, gutters and the container together — so from a
+     1280 laptop up to a 4K display the layout keeps identical
+     proportions and simply renders larger. 1.25vw is exactly 16px at
+     1280, so the scale starts where it stands today and grows from
+     there with no jump.
+
+     The `vh` term is the guard for wide-but-short screens (an
+     ultrawide, a 1366×768 laptop): height, not width, is what runs
+     out first there, so whichever axis is tighter sets the size.
+
+     Below 1280 the layout genuinely has to change — a three-up wall
+     cannot be a three-up wall on a phone — so the ordinary
+     breakpoints take over and the root stays at 16px.
+
+     Admin pins itself back to 16px; see app/admin/layout.tsx. */
+  @media (min-width: 1280px) {
+    html {
+      font-size: clamp(16px, min(1.25vw, 2.6vh), 52px);
+    }
   }
 
   /* Lenis smooth-scroll owns scrolling once mounted */
@@ -108,11 +144,14 @@
   h4 {
     font-family: var(--font-display);
     color: var(--color-ink);
-    font-weight: 340;
-    letter-spacing: -0.012em;
-    line-height: 1.08;
+    /* Century Gothic has no light cut — 400 is its natural voice. Anything
+       heavier is synthesised and reads as shouting. */
+    font-weight: 400;
+    letter-spacing: 0.004em;
+    line-height: 1.12;
     text-wrap: balance;
   }
+
 
   /* Dark surfaces: headings and body take the light foreground. */
   .u-invert,
@@ -230,16 +269,15 @@
 
   /* ─── Artwork "on the wall" treatment ───────────────────────
      A photographed painting should sit off the page like a physical
-     print rather than lie flat on it: a tight contact shadow at the
-     edge, a mid shadow for the body of the work, and a wide, very
-     soft one for the room it hangs in. The paper ground behind it
-     reads as the mount. */
+     print rather than lie flat on it. The drop is deliberately quiet:
+     a tight contact shadow at the edge and one soft, wide bloom for the
+     room it hangs in — enough depth to read as an object, never enough
+     to become the decoration itself. No borders, ever. */
   .u-artframe {
     box-shadow:
-      0 2px 6px rgba(0, 0, 0, 0.70),
-      0 8px 20px rgba(0, 0, 0, 0.65),
-      0 24px 60px rgba(0, 0, 0, 0.55),
-      0 60px 120px rgba(0, 0, 0, 0.45);
+      0 1px 2px color-mix(in oklab, var(--color-ink) 7%, transparent),
+      0 10px 26px -12px color-mix(in oklab, var(--color-ink) 22%, transparent),
+      0 28px 56px -28px color-mix(in oklab, var(--color-ink) 20%, transparent);
     transition:
       box-shadow 0.6s var(--ease-out-expo),
       transform 0.6s var(--ease-out-expo);
@@ -247,18 +285,18 @@
 
   .u-artframe--lift:hover,
   .u-artframe--lift:focus-visible {
-    transform: translateY(-12px);
+    transform: translateY(-6px);
     box-shadow:
-      0 6px 16px rgba(0, 0, 0, 0.75),
-      0 24px 50px rgba(0, 0, 0, 0.65),
-      0 70px 140px rgba(0, 0, 0, 0.50);
+      0 2px 4px color-mix(in oklab, var(--color-ink) 9%, transparent),
+      0 18px 38px -14px color-mix(in oklab, var(--color-ink) 26%, transparent),
+      0 44px 80px -34px color-mix(in oklab, var(--color-ink) 22%, transparent);
   }
 
   /* Thumbnail scale — the same light, a shorter drop. */
   .u-artframe--sm {
     box-shadow:
-      0 1px 1px color-mix(in oklab, var(--color-ink) 10%, transparent),
-      0 4px 10px -4px color-mix(in oklab, var(--color-ink) 24%, transparent);
+      0 1px 1px color-mix(in oklab, var(--color-ink) 6%, transparent),
+      0 4px 10px -5px color-mix(in oklab, var(--color-ink) 18%, transparent);
     transition:
       box-shadow 0.4s var(--ease-out-expo),
       transform 0.4s var(--ease-out-expo);
@@ -267,8 +305,29 @@
   .u-artframe--sm:hover {
     transform: translateY(-2px);
     box-shadow:
-      0 1px 2px color-mix(in oklab, var(--color-ink) 12%, transparent),
-      0 8px 18px -6px color-mix(in oklab, var(--color-ink) 30%, transparent);
+      0 1px 2px color-mix(in oklab, var(--color-ink) 8%, transparent),
+      0 8px 18px -8px color-mix(in oklab, var(--color-ink) 22%, transparent);
+  }
+
+  /* ─── Gallery system ────────────────────────────────────────
+     One ratio for every plate on the wall — series covers and the
+     artworks inside them — so the whole gallery reads as one hang
+     rather than a pile of differently-shaped cards.
+
+     The plate IS the artwork: the image fills it edge to edge, so
+     nothing shows but the painting. No mount, no paper margin, no
+     border — the shadow falls from the image itself. The uncropped
+     work is always one click away on its own page. */
+  .u-plate {
+    position: relative;
+    aspect-ratio: var(--plate-ratio, 1 / 1);
+    overflow: hidden;
+  }
+
+  .u-plate img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   /* Hairline rule that draws itself in */

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   getAdjacentWorks,
@@ -6,6 +7,7 @@ import {
   getRelatedWorks,
   getWorkBySlug,
 } from "@/lib/queries/works";
+import { getCollectionBySlug } from "@/lib/queries/collections";
 import { env } from "@/lib/env";
 import { AVAILABILITY_LABELS, DISCIPLINE_LABELS } from "@/lib/types";
 import {
@@ -71,9 +73,10 @@ export default async function WorkDetailPage({
   const work = await getWorkBySlug(slug);
   if (!work) notFound();
 
-  const [{ prev, next }, related] = await Promise.all([
+  const [{ prev, next }, related, series] = await Promise.all([
     getAdjacentWorks(slug),
     getRelatedWorks(slug, 3),
+    work.collectionSlug ? getCollectionBySlug(work.collectionSlug) : null,
   ]);
 
   return (
@@ -83,12 +86,15 @@ export default async function WorkDetailPage({
         data={breadcrumbJsonLd([
           { name: "Home", path: "/" },
           { name: "Gallery", path: "/gallery" },
+          ...(series
+            ? [{ name: series.title, path: `/gallery/collection/${series.slug}` }]
+            : []),
           { name: work.title, path: `/gallery/${work.slug}` },
         ])}
       />
 
       <article className="pb-8">
-        <WorkHero work={work} />
+        <WorkHero work={work} series={series} />
 
         {/* Description */}
         {work.description.length > 0 && (
@@ -125,7 +131,7 @@ export default async function WorkDetailPage({
             <div>
               <Reveal>
                 <p className="u-eyebrow mb-5">Catalogue</p>
-                <WorkMeta work={work} />
+                <WorkMeta work={work} series={series} />
               </Reveal>
               <Reveal className="mt-10">
                 <WorkInquiryBar work={work} whatsappNumber={env.whatsappNumber} />
@@ -149,11 +155,28 @@ export default async function WorkDetailPage({
           </div>
         </div>
 
-        {/* Availability line */}
+        {/* Availability line + the way back to where they came from */}
         <div className="u-container mt-24">
           <p className="text-center text-[0.75rem] uppercase tracking-[0.2em] text-ink-faint">
             {work.title} — {AVAILABILITY_LABELS[work.availability]}
           </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
+            <Link
+              href={series ? `/gallery/collection/${series.slug}` : "/gallery"}
+              className="u-link inline-flex items-center gap-2.5 text-[0.6875rem] uppercase tracking-[0.2em]"
+            >
+              <span aria-hidden className="text-ink-faint">&larr;</span>
+              {series ? `Back to ${series.title}` : "Back to the gallery"}
+            </Link>
+            {series && (
+              <Link
+                href="/gallery"
+                className="u-link text-[0.6875rem] uppercase tracking-[0.2em] text-ink-mute"
+              >
+                All series
+              </Link>
+            )}
+          </div>
         </div>
       </article>
 

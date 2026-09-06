@@ -118,10 +118,23 @@ export const getRelatedWorks = cache(
   },
 );
 
-/** Previous / next in portfolio order, wrapping. */
+/**
+ * Previous / next, wrapping. A work that belongs to a series steps through
+ * *that series* — the visitor arrived from a series and should be able to
+ * walk it end to end without leaving it. Everything else falls back to
+ * portfolio order.
+ */
 export const getAdjacentWorks = cache(
   async (slug: string): Promise<{ prev: Work | null; next: Work | null }> => {
-    const works = await getPublishedWorks();
+    const all = await getPublishedWorks();
+    const current = all.find((w) => w.slug === slug);
+    if (!current) return { prev: null, next: null };
+
+    const scope = current.collectionSlug
+      ? all.filter((w) => w.collectionSlug === current.collectionSlug)
+      : all;
+    const works = scope.length > 1 ? scope : all;
+
     const index = works.findIndex((w) => w.slug === slug);
     if (index === -1) return { prev: null, next: null };
     return {

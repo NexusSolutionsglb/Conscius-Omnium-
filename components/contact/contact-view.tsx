@@ -62,7 +62,7 @@ export function ContactView({
   const emails = contactEmails(profile);
 
   return (
-    <div className="u-container grid gap-16 pb-24 pt-36 md:grid-cols-12 md:gap-10 md:pb-32 md:pt-44">
+    <div className="u-container grid gap-16 pb-32 pt-36 md:grid-cols-12 md:gap-10 md:pb-44 md:pt-44">
       <div className="md:col-span-5 md:pr-8">
         <Eyebrow>
           <EditableText bind="contact.eyebrow">{content.eyebrow}</EditableText>

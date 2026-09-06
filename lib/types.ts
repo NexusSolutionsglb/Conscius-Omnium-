@@ -594,3 +594,16 @@ export interface PageContentMap {
   exhibitions: ExhibitionsContent;
   contact: ContactContent;
 }
+
+/**
+ * A Series as the gallery presents it: the collection record plus every
+ * published artwork that belongs to it. `Gallery → Series → Artworks →
+ * Artwork detail` is the site's whole navigation spine, so the shape the
+ * pages consume is defined once, here.
+ */
+export interface Series extends Collection {
+  works: Work[];
+  /** The plate shown on the series card — the collection cover if one is
+   *  set, otherwise the first artwork's cover. */
+  plateImage: string | null;
+}

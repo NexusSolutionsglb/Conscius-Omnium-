@@ -2,6 +2,10 @@ import type { ThemeTokens } from "@/lib/types";
 
 /** Curated font stacks the editor offers for display + body. Keys are stored. */
 export const FONT_CHOICES: Record<string, { label: string; stack: string }> = {
+  century: {
+    label: "Century Gothic (house face)",
+    stack: "var(--font-century)",
+  },
   fraunces: {
     label: "Fraunces (default serif)",
     stack: 'var(--font-fraunces), "Iowan Old Style", Palatino, "Times New Roman", serif',
@@ -60,7 +64,10 @@ export function themeToCss(theme: ThemeTokens | undefined | null): string {
   }
 
   if (theme.containerWidth) {
-    put("--container-page", `${Math.max(900, Math.min(2200, theme.containerWidth))}px`);
+    // In rem, so a saved width still rides the large-display root scale
+    // in globals.css instead of pinning the page to a fixed pixel box.
+    const width = Math.max(900, Math.min(2200, theme.containerWidth));
+    put("--container-page", `${width / 16}rem`);
   }
 
   return v.length ? `:root{\n${v.join("\n")}\n}` : "";
@@ -87,8 +94,8 @@ export const THEME_DEFAULTS: Required<
   colorInkMute: "#7a7a7a",
   colorAccent: "#4a4a4a",
   colorAccentDeep: "#262626",
-  fontDisplay: "fraunces",
-  fontSans: "inter",
+  fontDisplay: "century",
+  fontSans: "century",
   typeScale: 1,
   containerWidth: 1560,
 };

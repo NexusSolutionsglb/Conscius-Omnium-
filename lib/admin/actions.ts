@@ -273,6 +273,54 @@ export async function saveCollection(
   return { ok: true, message: "Saved", id: data?.id ?? id ?? undefined };
 }
 
+/**
+ * Move an artwork into a series (or out of every series, with `null`).
+ * Used by the series editor's "artworks in this series" panel so a whole
+ * series can be assembled without opening each work.
+ */
+export async function setWorkCollection(
+  workId: string,
+  collectionSlug: string | null,
+): Promise<ActionResult> {
+  const supabase = await db();
+  const { data, error } = await supabase
+    .from("works")
+    .update({
+      collection_slug: collectionSlug,
+      updated_at: new Date().toISOString(),
+    } as never)
+    .eq("id", workId)
+    .select("slug")
+    .maybeSingle<{ slug: string }>();
+  if (error) return { ok: false, error: error.message };
+  revalidateSite(
+    ...(data?.slug ? [`/gallery/${data.slug}`] : []),
+    ...(collectionSlug ? [`/gallery/collection/${collectionSlug}`] : []),
+  );
+  return { ok: true, message: collectionSlug ? "Added to series" : "Removed from series" };
+}
+
+/**
+ * Persist the hang order of a series. `sort_order` is global, so the panel
+ * sends back the works it owns with the positions it wants; the relative
+ * order within the series is what the gallery reads.
+ */
+export async function reorderSeriesWorks(
+  collectionSlug: string,
+  order: { id: string; sortOrder: number }[],
+): Promise<ActionResult> {
+  const supabase = await db();
+  for (const o of order) {
+    const { error } = await supabase
+      .from("works")
+      .update({ sort_order: o.sortOrder, updated_at: new Date().toISOString() } as never)
+      .eq("id", o.id);
+    if (error) return { ok: false, error: error.message };
+  }
+  revalidateSite(`/gallery/collection/${collectionSlug}`);
+  return { ok: true, message: "Order saved" };
+}
+
 export async function deleteCollection(id: string): Promise<ActionResult> {
   const supabase = await db();
   const { error } = await supabase.from("collections").delete().eq("id", id);

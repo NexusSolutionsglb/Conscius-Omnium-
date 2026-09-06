@@ -23,6 +23,7 @@ import {
   FOOTER_OWNER_DEFAULT,
 } from "@/lib/content/defaults/footer";
 import { newSocial } from "@/lib/editor/new-entities";
+import { SocialGlyph } from "./social-icons";
 
 export function Footer({
   settings: base,
@@ -74,7 +75,7 @@ export function Footer({
 
   return (
     <footer className="u-no-print border-t border-line bg-paper">
-      <div className="u-container py-16 md:py-20">
+      <div className="u-container py-20 md:py-28">
         <Reveal className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr]">
           <div>
             <EditableImage bind="@settings.logo" folder="branding">
@@ -93,11 +94,44 @@ export function Footer({
               )}
             </EditableImage>
             <p className="u-eyebrow mt-2">{settings.brandLine}</p>
+            <p className="mt-3 text-[0.78rem] leading-relaxed text-ink-mute">
+              <EditableText bind="@settings.footerCredit">{credit}</EditableText>
+            </p>
             <p className="mt-5 max-w-xs text-[0.82rem] leading-relaxed text-ink-mute">
               <EditableText bind="@settings.footerNote" multiline>
                 {settings.footerNote}
               </EditableText>
             </p>
+
+            {/* Follow — Instagram, YouTube and anything else the studio adds.
+                The list is the same editable `@profile.social` array the
+                contact column used to print as plain text. */}
+            <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-3">
+              <RepeatableList
+                slug="about"
+                path="social"
+                items={profile.social}
+                makeItem={newSocial}
+                addLabel="Add social link"
+                addClassName="py-1"
+                listBind="@profile.social"
+                kind="social"
+                itemLabel={(s) => s.label || "Social link"}
+              >
+                {(s) => (
+                  <a
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    title={s.label}
+                    className="flex h-11 w-11 items-center justify-center -ml-2.5 text-ink-mute transition-colors hover:text-ink"
+                  >
+                    <SocialGlyph label={s.label} href={s.href} className="h-[18px] w-[18px]" />
+                  </a>
+                )}
+              </RepeatableList>
+            </div>
           </div>
 
           <nav aria-label="Footer" className="flex flex-col gap-2.5">
@@ -129,28 +163,6 @@ export function Footer({
             >
               Message the studio
             </a>
-            <RepeatableList
-              slug="about"
-              path="social"
-              items={profile.social}
-              makeItem={newSocial}
-              addLabel="Add social link"
-              addClassName="py-1"
-              listBind="@profile.social"
-              kind="social"
-              itemLabel={(s) => s.label || "Social link"}
-            >
-              {(s, i) => (
-                <a
-                  href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="u-tap w-fit text-[0.82rem] text-ink-soft transition-colors hover:text-ink"
-                >
-                  <EditableText bind={`@profile.social.${i}.label`}>{s.label}</EditableText>
-                </a>
-              )}
-            </RepeatableList>
             <p className="mt-1 text-[0.82rem] text-ink-mute">
               <EditableText bind="@profile.location">{profile.location}</EditableText>
             </p>
@@ -160,7 +172,7 @@ export function Footer({
         {/* The studio letter — general correspondence, so it sends as info@. */}
         <Reveal className="mt-14 border-t border-line pt-10 md:grid md:grid-cols-[1.4fr_1fr_1fr] md:gap-12">
           <div className="md:col-span-1">
-            <p className="font-display text-[1.05rem] font-light leading-snug text-ink">
+            <p className="font-display text-[1.05rem] leading-snug text-ink">
               Notes from the studio.
             </p>
             <p className="mt-2 max-w-xs text-[0.8rem] leading-relaxed text-ink-mute">
@@ -204,9 +216,9 @@ export function Footer({
             href="https://nexusolutions.in/"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex shrink-0 items-center gap-4 rounded-xl border-2 border-line-strong bg-white px-5 py-3 shadow-sm transition-all duration-200 hover:border-ink/30 hover:shadow-md"
+            className="group flex shrink-0 items-center gap-4 rounded-lg border border-line px-4 py-2.5 transition-colors duration-300 hover:border-line-strong"
           >
-            <span className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-ink-soft">
+            <span className="text-[0.65rem] uppercase tracking-[0.2em] text-ink-soft">
               Developed by
             </span>
             <div className="h-6 w-px bg-line-strong" />
@@ -215,7 +227,7 @@ export function Footer({
               alt="Nexus Solutions"
               width={1166}
               height={300}
-              className="h-10 w-auto object-contain transition-opacity group-hover:opacity-90"
+              className="h-8 w-auto object-contain opacity-80 transition-opacity group-hover:opacity-100"
               unoptimized
             />
           </a>
@@ -231,7 +243,7 @@ export function Footer({
               </p>
             )}
             {(settings.footerOwner || editing) && (
-              <p className="mt-2 text-[0.72rem] font-bold tracking-[0.1em] text-ink">
+              <p className="mt-2 text-[0.72rem] tracking-[0.1em] text-ink">
                 <EditableText bind="@settings.footerOwner">
                   {settings.footerOwner ?? ""}
                 </EditableText>

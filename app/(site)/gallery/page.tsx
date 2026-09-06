@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
+import { getSeriesWithWorks, getUnassignedWorks } from "@/lib/queries/collections";
 import { getPublishedWorks } from "@/lib/queries/works";
-import { getCollections } from "@/lib/queries/collections";
 import { getWorkIndexContent } from "@/lib/queries/pages";
 import { buildMetadata, breadcrumbJsonLd } from "@/lib/seo";
 import { WorkIndexHeader } from "@/components/work/work-index-header";
-import { ArtGallery } from "@/components/work/art-gallery";
-import { CollectionsRail } from "@/components/home/sections";
+import { SeriesGallery } from "@/components/work/series-gallery";
 import { JsonLd } from "@/components/site/json-ld";
 
 export const revalidate = 3600;
@@ -13,14 +12,15 @@ export const revalidate = 3600;
 export const metadata: Metadata = buildMetadata({
   title: "Gallery",
   description:
-    "The gallery of Shivjeet Potdar — paintings from Black Canvas, Duality, States of Attention and States of Awareness.",
+    "The gallery of Shivjeet Potdar — paintings gathered into series: Black Canvas, Duality, States of Attention and States of Awareness.",
   path: "/gallery",
 });
 
-export default async function WorkPage() {
-  const [works, collections, content] = await Promise.all([
+export default async function GalleryPage() {
+  const [series, unassigned, works, content] = await Promise.all([
+    getSeriesWithWorks(),
+    getUnassignedWorks(),
     getPublishedWorks(),
-    getCollections(),
     getWorkIndexContent(),
   ]);
 
@@ -35,19 +35,17 @@ export default async function WorkPage() {
 
       <WorkIndexHeader serverContent={content} total={works.length} />
 
-      <div className="u-container pb-24 md:pb-32">
-        {works.length ? (
-          <ArtGallery works={works} />
+      {/* Double the breathing room the gallery used to sit in — the wall
+          needs the wall around it. */}
+      <div className="u-container pb-48 pt-8 md:pb-64 md:pt-16">
+        {series.length || unassigned.length ? (
+          <SeriesGallery series={series} unassigned={unassigned} />
         ) : (
           <div className="py-24 text-center">
-            <p className="font-display text-[1.5rem] font-light text-ink">
-              Nothing here yet.
-            </p>
+            <p className="font-display text-[1.5rem] text-ink">Nothing here yet.</p>
           </div>
         )}
       </div>
-
-      <CollectionsRail collections={collections} />
     </>
   );
 }

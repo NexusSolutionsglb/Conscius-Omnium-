@@ -71,22 +71,19 @@ export function Header({
           // `draft-banner.tsx` — the two heights must match).
           "u-no-print fixed inset-x-0 z-[120] transition-colors duration-500",
           IS_DRAFT_REVIEW ? "top-9" : "top-0",
+          // No border, no divider, no shadow — the bar meets the page
+          // edge-to-edge and the only thing that changes on scroll is the
+          // ground it sits on.
           solid
-            ? "bg-paper/88 text-ink backdrop-blur-md"
+            ? "bg-paper text-ink"
             : "bg-transparent text-paper",
         )}
       >
-        <div
-          className={cn(
-            "pointer-events-none absolute inset-x-0 bottom-0 h-px origin-left bg-line transition-transform duration-500",
-            solid ? "scale-x-100" : "scale-x-0",
-          )}
-        />
         <div className="u-container">
           <div className="grid h-20 grid-cols-[1fr_auto_1fr] items-center gap-6 md:h-24">
             {/* Left half of the nav */}
             <nav
-              className="hidden items-center gap-9 md:flex"
+              className="hidden items-center gap-10 md:flex lg:gap-16"
               aria-label="Primary"
             >
               {leftNav.map(({ item, i }) => (
@@ -118,7 +115,7 @@ export function Header({
                       className="h-12 w-auto object-contain md:h-12"
                     />
                   ) : (
-                    <span className="font-display text-[0.95rem] font-medium uppercase tracking-[0.2em] text-ink">
+                    <span className="font-display text-[0.95rem] font-normal uppercase tracking-[0.24em] text-ink">
                       <EditableText bind="@settings.brand">{settings.brand}</EditableText>
                     </span>
                   )}
@@ -135,7 +132,7 @@ export function Header({
                       className="h-12 w-auto object-contain md:h-12"
                     />
                   ) : (
-                    <span className="font-display text-[0.95rem] font-medium uppercase tracking-[0.2em] text-paper">
+                    <span className="font-display text-[0.95rem] font-normal uppercase tracking-[0.24em] text-paper">
                       <EditableText bind="@settings.brand">{settings.brand}</EditableText>
                     </span>
                   )}
@@ -145,7 +142,7 @@ export function Header({
 
             {/* Right half of the nav */}
             <nav
-              className="hidden items-center justify-end gap-9 md:flex"
+              className="hidden items-center justify-end gap-10 md:flex lg:gap-16"
               aria-label="Primary"
             >
               {rightNav.map(({ item, i }) => (
@@ -201,7 +198,7 @@ function NavLink({
     <Link
       href={item.href}
       aria-current={active ? "page" : undefined}
-      className="group relative py-1 text-sm font-bold uppercase tracking-[0.22em]"
+      className="group relative py-1 text-[0.72rem] font-normal uppercase tracking-[0.24em] transition-opacity duration-300 hover:opacity-100 aria-[current=page]:opacity-100 opacity-80"
     >
       <EditableText bind={`@settings.nav.${index}.label`}>{item.label}</EditableText>
       <span

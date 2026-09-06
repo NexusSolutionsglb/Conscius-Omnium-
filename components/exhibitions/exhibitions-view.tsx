@@ -96,7 +96,7 @@ export function ExhibitionsView({
       </section>
 
       {(onScreen.length > 0 || editing) && (
-        <section className="border-y border-line bg-paper-dim/50 py-20 md:py-28">
+        <section className="py-24 md:py-36">
           <div className="u-container">
             <Reveal className="max-w-2xl">
               <Eyebrow>

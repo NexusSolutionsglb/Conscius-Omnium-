@@ -35,7 +35,7 @@ export function PageSkeleton({
           <div className="mt-14 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i}>
-                <div className="aspect-[4/5] w-full bg-paper-deep" />
+                <div className="aspect-square w-full bg-paper-deep" />
                 <div className="mt-4 h-3 w-2/3 bg-paper-dim" />
                 <div className="mt-2 h-2.5 w-1/3 bg-paper-dim" />
               </div>

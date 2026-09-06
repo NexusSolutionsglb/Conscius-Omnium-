@@ -47,7 +47,7 @@ export function StudioView({
 
   return (
     <>
-      <header className="u-container pb-16 pt-36 md:pb-24 md:pt-44">
+      <header className="u-container pb-24 pt-36 md:pb-36 md:pt-44">
         <Eyebrow>
           <EditableText bind="studio.hero.eyebrow">{hero.eyebrow}</EditableText>
         </Eyebrow>
@@ -75,7 +75,7 @@ export function StudioView({
           {(section, i) => {
             const imageLeft = section.layout === "image-left";
             return (
-              <section className="u-container border-t border-line py-16 md:py-24">
+              <section className="u-container border-t border-line py-24 md:py-36">
                 <div className="grid items-center gap-10 md:grid-cols-2 md:gap-16">
                   <Reveal className={cn(imageLeft ? "md:order-2" : "md:order-1")}>
                     <Eyebrow>
@@ -139,7 +139,7 @@ export function StudioView({
         </RepeatableList>
       </div>
 
-      <section className="u-container border-t border-line py-20 text-center md:py-28">
+      <section className="u-container border-t border-line py-28 text-center md:py-40">
         <Reveal>
           <Eyebrow>
             <EditableText bind="studio.endCta.eyebrow">{endCta.eyebrow}</EditableText>

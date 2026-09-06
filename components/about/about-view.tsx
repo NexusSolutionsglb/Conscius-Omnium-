@@ -60,7 +60,7 @@ export function AboutView({
   return (
     <>
       {/* Hero */}
-      <section className="u-container grid gap-12 pb-16 pt-36 md:grid-cols-12 md:pb-24 md:pt-44">
+      <section className="u-container grid gap-12 pb-24 pt-36 md:grid-cols-12 md:pb-36 md:pt-44">
         <div className="md:col-span-7">
           <Eyebrow>
             <EditableText bind="about.heroEyebrow">{heroEyebrow}</EditableText>
@@ -126,7 +126,7 @@ export function AboutView({
       </section>
 
       {/* Statement */}
-      <section className="border-y border-line bg-paper-dim/50 py-20 md:py-28">
+      <section className="py-24 md:py-36">
         <div className="u-container">
           <Reveal className="max-w-4xl">
             <p
@@ -145,7 +145,7 @@ export function AboutView({
       </section>
 
       {/* Bio sections */}
-      <section className="u-container py-20 md:py-28">
+      <section className="u-container py-24 md:py-36">
         <RepeatableList
           slug="about"
           path="body"
@@ -183,7 +183,7 @@ export function AboutView({
       </section>
 
       {/* Education */}
-      <section className="u-container pb-20 md:pb-28">
+      <section className="u-container pb-24 md:pb-36">
         <Reveal>
           <Eyebrow>
             <EditableText bind="about.educationEyebrow">{educationEyebrow}</EditableText>
@@ -239,7 +239,7 @@ export function AboutView({
       </section>
 
       {/* Timeline */}
-      <section id="timeline" className="scroll-mt-24 border-t border-line py-16 md:py-24">
+      <section id="timeline" className="scroll-mt-24 border-t border-line py-24 md:py-36">
         <div className="u-container">
           <Reveal className="max-w-2xl">
             <Eyebrow>
@@ -272,7 +272,7 @@ export function AboutView({
         </div>
       </section>
 
-      <section className="u-container py-20 text-center md:py-28">
+      <section className="u-container py-28 text-center md:py-40">
         <Reveal>
           <Eyebrow>
             <EditableText bind="about.nextCta.eyebrow">{nextCta.eyebrow}</EditableText>

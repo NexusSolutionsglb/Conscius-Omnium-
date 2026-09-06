@@ -51,7 +51,7 @@ export function Hero({ hero }: { hero: HeroConfig }) {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: EASE.outExpo, delay: 0.15 }}
-          className="font-sans text-[clamp(1.5rem,0.9rem+2.6vw,3rem)] font-bold uppercase leading-tight tracking-[0.04em] text-paper"
+          className="font-sans text-[clamp(1.5rem,0.9rem+2.6vw,3rem)] font-normal uppercase leading-tight tracking-[0.14em] text-paper"
         >
           <EditableText bind="@settings.hero.heading">{hero.heading}</EditableText>
         </motion.h1>
@@ -59,7 +59,7 @@ export function Hero({ hero }: { hero: HeroConfig }) {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: EASE.outExpo, delay: 0.3 }}
-          className="mt-2 font-sans text-[clamp(1.5rem,0.9rem+2.6vw,3rem)] italic leading-tight text-paper"
+          className="mt-3 font-sans text-[clamp(1.25rem,0.8rem+2vw,2.3rem)] italic leading-tight tracking-[0.04em] text-paper/90"
         >
           <EditableText bind="@settings.hero.supporting">{hero.supporting}</EditableText>
         </motion.p>
@@ -75,7 +75,7 @@ export function Hero({ hero }: { hero: HeroConfig }) {
               href={hero.ctaHref}
               onPointerEnter={() => setCursor("view", "Enter")}
               onPointerLeave={reset}
-              className="inline-flex items-center gap-3 border border-paper px-10 py-3.5 text-[0.75rem] font-medium uppercase tracking-[0.24em] text-paper transition-colors hover:bg-paper hover:text-[#c81e1e]"
+              className="inline-flex items-center gap-3 border border-paper/70 px-10 py-3.5 text-[0.72rem] uppercase tracking-[0.28em] text-paper transition-colors hover:border-paper hover:bg-paper hover:text-[#c81e1e]"
             >
               <EditableText bind="@settings.hero.ctaLabel">{hero.ctaLabel}</EditableText>
             </Link>

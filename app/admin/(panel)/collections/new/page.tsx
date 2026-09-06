@@ -4,7 +4,7 @@ import { CollectionForm } from "@/components/admin/collection-form";
 export default function NewCollectionPage() {
   return (
     <>
-      <PageHeader title="New collection" back={{ href: "/admin/collections", label: "Collections" }} />
+      <PageHeader title="New series" back={{ href: "/admin/collections", label: "Series" }} />
       <CollectionForm collection={null} />
     </>
   );

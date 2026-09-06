@@ -16,8 +16,8 @@ const NAV: { group: string; items: { label: string; href: string }[] }[] = [
     group: "Content",
     items: [
       { label: "Edit site ✦", href: "/admin/edit/home" },
-      { label: "Works", href: "/admin/works" },
-      { label: "Collections", href: "/admin/collections" },
+      { label: "Series", href: "/admin/collections" },
+      { label: "Artworks", href: "/admin/works" },
       { label: "Exhibitions", href: "/admin/exhibitions" },
       { label: "Timeline", href: "/admin/timeline" },
       { label: "Media", href: "/admin/media" },

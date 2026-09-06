@@ -124,10 +124,8 @@ export function WorkImageViewer({ images }: { images: WorkImage[] }) {
               aria-label={`Show ${KIND_LABELS[image.kind].toLowerCase()}: ${image.alt}`}
               aria-current={i === index ? "true" : undefined}
               className={cn(
-                "u-artframe--sm block p-1.5 outline-offset-4 transition-opacity",
-                i === index
-                  ? "ring-1 ring-ink"
-                  : "opacity-65 hover:opacity-100",
+                "u-plate u-artframe--sm block h-14 w-14 outline-offset-4 transition-opacity md:h-[4.5rem] md:w-[4.5rem]",
+                i === index ? "opacity-100" : "opacity-45 hover:opacity-90",
               )}
             >
               <ArtImage
@@ -135,12 +133,12 @@ export function WorkImageViewer({ images }: { images: WorkImage[] }) {
                 alt=""
                 width={image.width ?? 2200}
                 height={image.height ?? 1500}
-                fit="contain"
+                fit="cover"
                 noReveal
                 sizes="88px"
                 placeholder={blurFor(image.url) ? "blur" : "empty"}
                 blurDataURL={blurFor(image.url)}
-                wrapperClassName="h-14 w-14 md:h-[4.5rem] md:w-[4.5rem]"
+                wrapperClassName="h-full w-full"
               />
             </button>
           ))}
@@ -164,15 +162,17 @@ function ArrowButton({
       onClick={onClick}
       aria-label={prev ? "Previous image" : "Next image"}
       className={cn(
-        "absolute top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center border border-line-strong bg-paper text-ink shadow-[0_2px_10px_-3px_rgba(0,0,0,0.3)] transition-colors hover:bg-paper-dim",
-        prev ? "left-2 md:-left-6" : "right-2 md:-right-6",
+        // The arrow is a hint, not a control panel: no plate, no border,
+        // no shadow — just the glyph, mostly transparent until it's wanted.
+        "absolute top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center text-ink opacity-25 transition-opacity duration-500 hover:opacity-70",
+        prev ? "left-0 md:-left-8" : "right-0 md:-right-8",
       )}
     >
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
         <path
           d={prev ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7"}
           stroke="currentColor"
-          strokeWidth="1.2"
+          strokeWidth="1"
           strokeLinecap="round"
           strokeLinejoin="round"
         />

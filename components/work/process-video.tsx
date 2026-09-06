@@ -8,7 +8,11 @@ function extractYouTubeId(text: string): string | null {
   if (short) return short[1];
   const long = text.match(/[?&]v=([a-zA-Z0-9_-]{6,})/);
   if (long) return long[1];
-  return null;
+  // Bare /embed/<id> and /shorts/<id> links, and a pasted id on its own.
+  const embed = text.match(/(?:embed|shorts|live)\/([a-zA-Z0-9_-]{6,})/);
+  if (embed) return embed[1];
+  const bare = text.trim().match(/^[a-zA-Z0-9_-]{11}$/);
+  return bare ? bare[0] : null;
 }
 
 /** Embedded "watch the process" player — real client-supplied video only. */
@@ -17,7 +21,7 @@ export function ProcessVideo({ process, title }: { process: string; title: strin
   if (!id) return null;
 
   return (
-    <div className="aspect-square w-full overflow-hidden bg-obsidian">
+    <div className="aspect-video w-full overflow-hidden bg-obsidian">
       <iframe
         src={`https://www.youtube.com/embed/${id}`}
         title={`${title} — the process, on YouTube`}

@@ -32,7 +32,7 @@ export function Hero({ hero }: { hero: HeroConfig }) {
   return (
     <section
       {...nodeProps}
-      className="u-invert relative flex h-[100svh] min-h-[560px] flex-col items-center justify-center overflow-hidden bg-[#c81e1e]"
+      className="u-invert relative flex h-[100svh] min-h-[560px] flex-col items-center justify-center overflow-hidden bg-[#160c0b]"
     >
       <HeroVideo override={hero.video} />
 

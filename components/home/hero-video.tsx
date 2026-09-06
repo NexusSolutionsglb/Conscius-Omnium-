@@ -8,19 +8,23 @@ import { getLenis } from "@/components/site/smooth-scroll";
 /**
  * The hero's full-bleed background film.
  *
- * Intent — it should read as part of the page, not a clip dropped onto it:
- *  · plays the instant the section paints (a poster frame bridges the first
- *    few hundred ms while the video buffers, then the video fades in over it);
- *  · loops seamlessly (the encode crossfades its own tail into its head — see
- *    scripts/encode notes) so there is never a visible cut;
- *  · carries the site's language on top — a brand-red wash, a legibility
- *    scrim and a faint film grain, the same treatment the immersive panels use.
+ * It has to read as part of the page, not a clip dropped onto it:
+ *  · it plays the instant the section paints — `autoPlay muted loop` needs no
+ *    JS, and the `poster` (the clip's own first frame) covers the moment
+ *    before the first video frame decodes, so there is never a blank flash;
+ *  · it loops seamlessly — the encode crossfades its tail into its head
+ *    (see /public/hero-media), so there is no visible cut;
+ *  · the site's language sits on top — a brand-red wash, a legibility scrim
+ *    and a faint film grain, the treatment the immersive panels use.
  *
  * Sound — browsers forbid audible autoplay until the visitor interacts, so the
  * film starts muted and is allowed to come up on the first pointer / key /
  * touch / scroll gesture anywhere on the page (or the corner control). As the
  * hero scrolls out of view the audio rides down to silence with it, and back
  * up if the visitor returns. A deliberate mute from the control is remembered.
+ *
+ * Everything past "it plays" is progressive enhancement: if this component's
+ * JS never runs, you still get a muted, looping, poster-bridged background.
  */
 
 /**
@@ -50,7 +54,6 @@ export function HeroVideo({ override }: { override?: string | null }) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const [audible, setAudible] = useState(false);
 
@@ -115,7 +118,7 @@ export function HeroVideo({ override }: { override?: string | null }) {
     rafRef.current = requestAnimationFrame(tick);
   }, [tick]);
 
-  // Mount: attempt playback, arm the first-gesture unmute.
+  // Mount: keep it playing, arm the first-gesture unmute, wire scroll + audio.
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -212,47 +215,39 @@ export function HeroVideo({ override }: { override?: string | null }) {
 
   return (
     <>
+      {/* z-0 (not a negative z-index) so the layer sits above the section's
+          own background but below the z-10 copy — negative z can render
+          *behind* a non-stacking-context parent's background. */}
       <div
         ref={hostRef}
         aria-hidden
-        className="absolute inset-0 -z-10 overflow-hidden bg-[#1c0f0d]"
+        className="absolute inset-0 z-0 overflow-hidden bg-[#160c0b]"
       >
-        {/* Poster: paints immediately, then dissolves as the video takes over.
-            A plain <img> on purpose — next/image can't optimise here
-            (images.unoptimized) and this frame is gone within a second. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={poster}
-          alt=""
-          aria-hidden
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
-            ready ? "opacity-0" : "opacity-100"
-          }`}
-        />
-
-        {!failed && (
+        {!failed ? (
           <video
             ref={videoRef}
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out ${
-              ready ? "opacity-100" : "opacity-0"
-            }`}
+            className="absolute inset-0 h-full w-full object-cover"
             autoPlay
             muted
             loop
             playsInline
             preload="auto"
             poster={poster}
-            onLoadedData={() => setReady(true)}
-            onPlaying={() => setReady(true)}
-            onError={() => setFailed(true)}
+            onError={(e) => {
+              // A failed <source> can fire an error while another source is
+              // still viable — only give up once the element itself has
+              // exhausted them.
+              const el = e.currentTarget;
+              if (el.networkState === el.NETWORK_NO_SOURCE || el.error) {
+                setFailed(true);
+              }
+            }}
           >
             {webm && <source src={webm} type="video/webm" />}
             <source src={mp4} type="video/mp4" />
           </video>
-        )}
-
-        {/* Ultimate fallback — the plain deep-red field, if nothing will play. */}
-        {failed && (
+        ) : (
+          /* Ultimate fallback — the plain deep-red field, if nothing will play. */
           <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_18%,#e2372b_0%,#c81e1e_46%,#9c1414_100%)]" />
         )}
 
@@ -314,7 +309,7 @@ function SoundGlyph({ on }: { on: boolean }) {
       <path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor" stroke="none" />
       {on ? (
         <>
-          <path d="M16.5 8.5a5 5 0 0 1 0 7" className="origin-center transition-opacity" />
+          <path d="M16.5 8.5a5 5 0 0 1 0 7" />
           <path d="M19 6a8.5 8.5 0 0 1 0 12" className="opacity-70" />
         </>
       ) : (

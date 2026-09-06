@@ -223,6 +223,18 @@ export function HeroVideo({ override }: { override?: string | null }) {
         aria-hidden
         className="absolute inset-0 z-0 overflow-hidden bg-[#160c0b]"
       >
+        {/* Poster as a real <img> with object-cover — the <video>'s own
+            `poster` attribute is drawn letterboxed (ignores object-fit) in
+            several mobile browsers, which is what puts a black band above and
+            below the clip. This layer always fills; the video sits on top. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={poster}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+
         {!failed ? (
           <video
             ref={(el) => {
@@ -244,7 +256,6 @@ export function HeroVideo({ override }: { override?: string | null }) {
             loop
             playsInline
             preload="auto"
-            poster={poster}
             onError={(e) => {
               // A failed <source> can fire an error while another source is
               // still viable — only give up once the element itself has

@@ -7,44 +7,34 @@ import { EASE } from "@/lib/motion";
 import { Magnetic } from "@/components/motion/magnetic";
 import { useCursor } from "@/components/site/cursor";
 import { EditableText } from "@/components/editor/editable-text";
-import { EditableImage } from "@/components/editor/editable-image";
 import { useNodeProps } from "@/components/editor/use-editable";
+import { HeroVideo } from "./hero-video";
 
 /**
- * The full-bleed red hero — matches the client's reference sketch: a
- * saturated red field, centred "AWARENESS THROUGH ART" (bold) / "BY
- * SHIVJEET POTDAR" (italic, same size), and a single "Seek" CTA into the
- * enquiry form. Built video-ready: `hero.video` fills the background the
- * instant a real clip is supplied; until then it's a plain deep-red field
- * (no stock footage, no invented photography).
+ * The full-bleed hero — a cinematic loop of the studio and the work, carrying
+ * centred "AWARENESS THROUGH ART" / "by SHIVJEET POTDAR" and a single "Seek"
+ * CTA into the enquiry form. The film (see `hero-video.tsx`, encode in
+ * /public/hero-media) starts the instant the section paints, blends into the
+ * page's red / grain language, and falls back to a plain deep-red field if it
+ * can't load. `hero.video`, when set in Admin, overrides the default clip.
  */
 export function Hero({ hero }: { hero: HeroConfig }) {
   const { setCursor, reset } = useCursor();
   const nodeProps = useNodeProps("home", "@settings.hero", "hero", "Hero");
+
+  // The client asked for the name to read in capitals under the mixed-case
+  // line — do it at render so it holds whatever the stored copy says.
+  const supporting = hero.supporting.replace(
+    /shivjeet potdar/gi,
+    "SHIVJEET POTDAR",
+  );
 
   return (
     <section
       {...nodeProps}
       className="u-invert relative flex h-[100svh] min-h-[560px] flex-col items-center justify-center overflow-hidden bg-[#c81e1e]"
     >
-      {hero.video ? (
-        <EditableImage bind="@settings.hero.video" folder="hero">
-          <video
-            src={hero.video}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="absolute inset-0 -z-20 h-full w-full object-cover"
-          />
-        </EditableImage>
-      ) : (
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-20 bg-[radial-gradient(120%_90%_at_50%_18%,#e2372b_0%,#c81e1e_46%,#9c1414_100%)]"
-        />
-      )}
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(80%_60%_at_50%_100%,rgba(0,0,0,0.32)_0%,transparent_70%)]" />
+      <HeroVideo override={hero.video} />
 
       <div className="u-container relative z-10 flex flex-col items-center px-6 text-center">
         <motion.h1
@@ -61,7 +51,7 @@ export function Hero({ hero }: { hero: HeroConfig }) {
           transition={{ duration: 0.9, ease: EASE.outExpo, delay: 0.3 }}
           className="mt-3 font-sans text-[clamp(1.25rem,0.8rem+2vw,2.3rem)] italic leading-tight tracking-[0.04em] text-paper/90"
         >
-          <EditableText bind="@settings.hero.supporting">{hero.supporting}</EditableText>
+          <EditableText bind="@settings.hero.supporting">{supporting}</EditableText>
         </motion.p>
 
         <motion.div

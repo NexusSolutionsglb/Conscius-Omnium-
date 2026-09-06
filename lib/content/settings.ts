@@ -15,7 +15,7 @@ export const settingsSeed: SiteSettings = {
   hero: {
     eyebrow: "Conscius Omnium™ — Shivjeet Potdar",
     heading: "Awareness through art",
-    supporting: "by Shivjeet Potdar",
+    supporting: "by SHIVJEET POTDAR",
     ctaLabel: "Seek",
     ctaHref: "/contact#enquiry-form",
     workSlug: null,

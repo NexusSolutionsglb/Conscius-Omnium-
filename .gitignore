@@ -52,3 +52,9 @@ cloudflare-env.d.ts
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# the raw camera master (37 MB) — keep it locally, never commit it.
+# The web-encoded clip + poster in /public/hero-media ARE committed (they
+# ship with the Cloudflare deploy as static assets — ~12 MB / ~8.5 MB, both
+# under the 25 MiB per-file limit).
+/hero video.mp4
